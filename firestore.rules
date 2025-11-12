@@ -11,7 +11,7 @@
  * - /workers/{workerId}: Worker profiles, accessible only to the worker themselves.
  * - /services/{serviceId}: Service definitions, publicly readable, writeable by admins only.
  * - /users/{userId}/bookings/{bookingId}: Bookings made by a user, accessible only to that user.
- * - /workers/{workerId}/bookings/{bookingId}: Bookings associated with a worker, accessible only to that worker.
+ * - /workers/{workerId}/bookings/{bookingId}: Bookings associated with a worker, accessible by both the worker and the user who made the booking.
  * - /faqs/{faqId}: Frequently asked questions, publicly readable, writeable by admins only.
  * - /roles_admin/{uid}: Documents the UIDs which have admin roles, only accessible by backend functions.
  *
@@ -19,7 +19,7 @@
  * - Users and Workers can only access their own profile data.
  * - Service and FAQ data are publicly readable, but write access is restricted to admins.
  * - Bookings are scoped to both users and workers, granting both parties access.
- * - Listing of users and workers is not permitted to prevent data scraping.
+ * - Listing of users is not permitted to prevent data scraping.
  * - Admin role management is handled via a separate collection, accessible only by backend functions.
  *
  * Denormalization for Authorization:
@@ -69,11 +69,10 @@ service cloud.firestore {
      * @description Controls access to worker profile data.
      * @path /workers/{workerId}
      * @allow (create) Worker with ID 'worker123' creates their profile. (request.auth.uid == 'worker123')
-     * @allow (get) Worker with ID 'worker123' reads their profile. (request.auth.uid == 'worker123')
+     * @allow (get) Any user can read a worker's profile.
      * @allow (update) Worker with ID 'worker123' updates their profile. (request.auth.uid == 'worker123')
      * @allow (delete) Worker with ID 'worker123' deletes their profile. (request.auth.uid == 'worker123')
      * @deny (create) User with ID 'user456' attempts to create a worker profile with ID 'worker123'.
-     * @deny (get) User with ID 'user456' attempts to read worker profile 'worker123'.
      * @deny (update) User with ID 'user456' attempts to update worker profile 'worker123'.
      * @deny (delete) User with ID 'user456' attempts to delete worker profile 'worker123'.
      * @principle Enforces document ownership for writes.
@@ -151,32 +150,29 @@ service cloud.firestore {
     /**
      * @description Controls access to bookings associated with a specific worker.
      * @path /workers/{workerId}/bookings/{bookingId}
-     * @allow (create) Worker with ID 'worker123' creates a booking under their ID. (request.auth.uid == 'worker123')
      * @allow (get) Worker with ID 'worker123' reads a booking under their ID. (request.auth.uid == 'worker123')
-     * @allow (update) Worker with ID 'worker123' updates a booking under their ID. (request.auth.uid == 'worker123')
-     * @allow (delete) Worker with ID 'worker123' deletes a booking under their ID. (request.auth.uid == 'worker123')
-     * @deny (create) User with ID 'user456' attempts to create a booking under worker 'worker123'.
-     * @deny (get) User with ID 'user456' attempts to read a booking under worker 'worker123'.
-     * @deny (update) User with ID 'user456' attempts to update a booking under worker 'worker123'.
-     * @deny (delete) User with ID 'user456' attempts to delete a booking under worker 'worker123'.
+     * @allow (list) Worker with ID 'worker123' lists bookings under their ID. (request.auth.uid == 'worker123')
+     * @allow (create) A customer creates a booking for the worker.
+     * @allow (update) The worker updates the status of a booking.
+     * @allow (delete) The worker deletes a booking.
      */
     match /workers/{workerId}/bookings/{bookingId} {
-      // Helper function to check if the user is signed in and owns the document.
-
-      function isOwner(workerId) {
+      // Helper function to check if the user is the worker.
+      function isWorkerOwner(workerId) {
         return request.auth.uid == workerId;
       }
-
-      function isExistingOwner(workerId) {
-        return isOwner(workerId) && resource != null;
+      
+      // Helper function to check if the user is the customer who made the booking.
+      function isCustomerOwner() {
+        return request.auth.uid == resource.data.userId;
       }
 
-      allow get: if isOwner(workerId);
-      allow list: if isOwner(workerId);
+      allow get: if isWorkerOwner(workerId) || isCustomerOwner();
+      allow list: if isWorkerOwner(workerId);
       // Allow any authenticated user to create a booking, as long as they are the user in the booking.
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow update: if isExistingOwner(workerId) && request.resource.data.workerId == workerId;
-      allow delete: if isExistingOwner(workerId);
+      allow update: if isWorkerOwner(workerId);
+      allow delete: if isWorkerOwner(workerId);
     }
 
     /**
@@ -220,3 +216,5 @@ service cloud.firestore {
         }
   }
 }
+
+    
