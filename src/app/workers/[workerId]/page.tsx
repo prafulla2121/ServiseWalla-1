@@ -1,6 +1,6 @@
 'use client';
 
-import { notFound, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Star, MapPin, CheckCircle, Loader2 } from 'lucide-react';
 import { services } from '@/lib/data';
+import { notFound } from 'next/navigation';
 
 export default function WorkerProfilePage() {
   const params = useParams();
@@ -32,6 +33,9 @@ export default function WorkerProfilePage() {
   }
   
   const workerService = services.find(s => worker.serviceIds.includes(s.id));
+  const fullName = `${worker.firstName} ${worker.lastName}`;
+  const avatarUrl = worker.avatarUrl || `https://picsum.photos/seed/${worker.id}/200/200`;
+  const coverImageUrl = worker.coverImageUrl || `https://picsum.photos/seed/cover-${worker.id}/800/300`;
 
   return (
     <div className="bg-gray-50">
@@ -41,10 +45,9 @@ export default function WorkerProfilePage() {
           <div className="lg:col-span-2">
             <Card className="overflow-hidden">
               <div className="relative h-64 w-full">
-                {/* Add a cover image property to your worker data model */}
                 <Image
-                  src={'https://picsum.photos/seed/cover/800/300'}
-                  alt={`Cover image for ${worker.firstName}`}
+                  src={coverImageUrl}
+                  alt={`Cover image for ${fullName}`}
                   fill
                   className="object-cover"
                 />
@@ -52,12 +55,11 @@ export default function WorkerProfilePage() {
               </div>
               <div className="relative -mt-16 flex items-end gap-6 px-6">
                 <Avatar className="h-32 w-32 border-4 border-white">
-                  {/* Add an avatar property to your worker data model */}
-                  <AvatarImage src={'https://picsum.photos/seed/avatar/200/200'} alt={`${worker.firstName} ${worker.lastName}`} />
+                  <AvatarImage src={avatarUrl} alt={fullName} />
                   <AvatarFallback>{worker.firstName?.[0]}{worker.lastName?.[0]}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <h1 className="font-headline text-3xl font-bold">{worker.firstName} {worker.lastName}</h1>
+                  <h1 className="font-headline text-3xl font-bold">{fullName}</h1>
                   {workerService && <p className="text-lg font-medium text-primary">{workerService.name}</p>}
                 </div>
               </div>
@@ -70,21 +72,22 @@ export default function WorkerProfilePage() {
                   </div>
                   <div className="flex items-center">
                     <MapPin className="mr-1.5 h-4 w-4" />
-                    <span>{worker.city || 'Location not set'}</span>
+                    <span>{worker.city || 'Location not set'}, {worker.state || ''}</span>
                   </div>
                 </div>
 
                 <div className="mt-8">
                   <h2 className="font-headline text-xl font-semibold">About Me</h2>
-                  <p className="mt-2 text-muted-foreground">{worker.bio || 'No biography provided.'}</p>
+                  <p className="mt-2 text-muted-foreground whitespace-pre-wrap">{worker.bio || 'No biography provided.'}</p>
                 </div>
 
                 {workerService && (
                     <div className="mt-8">
                     <h2 className="font-headline text-xl font-semibold">Skills</h2>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      {/* You might want to add a skills field to your worker data */}
                         <Badge variant="secondary" className="text-sm">{workerService.name}</Badge>
+                        <Badge variant="secondary" className="text-sm">Residential</Badge>
+                        <Badge variant="secondary" className="text-sm">Commercial</Badge>
                     </div>
                   </div>
                 )}
@@ -97,6 +100,7 @@ export default function WorkerProfilePage() {
             <Card className="sticky top-24">
               <CardHeader>
                 <CardTitle className="font-headline text-2xl">Book {worker.firstName}</CardTitle>
+                 <Badge className="w-fit bg-green-100 text-green-800">Available for booking</Badge>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">Ready to get the job done? Schedule a service with {worker.firstName} today.</p>
