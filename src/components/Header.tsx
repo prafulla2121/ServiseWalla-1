@@ -24,20 +24,26 @@ import { useUser } from "@/firebase";
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-  const { user, isUserLoading } = useUser();
+  const { user, isUserLoading, isWorker } = useUser();
 
   const handleLogout = () => {
     const auth = getAuth();
     signOut(auth);
   };
 
-  const navLinks = [
+  const generalNavLinks = [
     { href: "/", label: "Home" },
     { href: "/services", label: "Services" },
     { href: "/workers", label: "Workers" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
   ];
+
+  const workerNavLinks = [
+      { href: "/profile", label: "Dashboard" }
+  ];
+
+  const navLinks = isWorker ? workerNavLinks : generalNavLinks;
 
   const NavLink = ({
     href,
