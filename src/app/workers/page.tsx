@@ -1,5 +1,5 @@
 import { WorkerCard } from "@/components/WorkerCard";
-import { workers } from "@/lib/data.tsx";
+import { workers } from "@/lib/data";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 

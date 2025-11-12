@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { Service } from "@/lib/data.tsx";
+import type { Service } from "@/lib/data";
 import { ArrowRight } from "lucide-react";
 
 type ServiceCardProps = {

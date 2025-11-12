@@ -1,5 +1,5 @@
 import { ServiceCard } from "@/components/ServiceCard";
-import { services } from "@/lib/data.tsx";
+import { services } from "@/lib/data";
 
 export default function ServicesPage() {
   return (

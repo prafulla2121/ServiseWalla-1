@@ -31,7 +31,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { services } from "@/lib/data.tsx";
+import { services } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 
 const bookingSchema = z.object({

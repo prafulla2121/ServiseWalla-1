@@ -1,5 +1,5 @@
 import { WorkerCard } from "@/components/WorkerCard";
-import { workers, services } from "@/lib/data.tsx";
+import { workers, services } from "@/lib/data";
 import { notFound } from "next/navigation";
 
 export default function WorkersListPage({ params }: { params: { serviceId: string } }) {
