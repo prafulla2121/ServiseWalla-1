@@ -93,6 +93,10 @@ service cloud.firestore {
       allow create: if isOwner(workerId) && request.resource.data.id == workerId;
       allow update: if isExistingOwner(workerId);
       allow delete: if isExistingOwner(workerId);
+      // This rule allows a user to write to the 'bookings' subcollection of a worker,
+      // which is necessary for a customer to create a booking for that worker.
+      // The specific rules for the /bookings/{bookingId} path will handle the fine-grained permissions.
+      allow write: if request.path[4] == 'bookings';
     }
 
     /**

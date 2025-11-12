@@ -33,8 +33,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { services, workers } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { useSearchParams } from 'next/navigation';
-import { useUser, useFirestore, setDocumentNonBlocking } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
+import { useUser, useFirestore, setDocumentNonBlocking, FirestorePermissionError, errorEmitter } from '@/firebase';
+import { collection, doc, setDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import 'react-phone-number-input/style.css'
 
@@ -63,8 +63,8 @@ export default function BookPage() {
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
-      serviceId: serviceIdParam ?? undefined,
-      workerId: workerIdParam ?? undefined,
+      serviceId: serviceIdParam ?? '',
+      workerId: workerIdParam ?? '',
       name: user?.displayName ?? '',
       email: user?.email ?? '',
       phone: '',
@@ -74,7 +74,7 @@ export default function BookPage() {
     },
   });
 
-  const onSubmit: SubmitHandler<BookingFormValues> = (data) => {
+  const onSubmit: SubmitHandler<BookingFormValues> = async (data) => {
     if (!user || !firestore) {
       toast({
         variant: 'destructive',
@@ -102,18 +102,35 @@ export default function BookPage() {
       address: data.address,
     };
     
-    // Non-blocking writes with contextual error handling
     const userBookingRef = doc(firestore, `users/${user.uid}/bookings`, bookingId);
-    setDocumentNonBlocking(userBookingRef, bookingData, { merge: false });
-
     const workerBookingRef = doc(firestore, `workers/${data.workerId}/bookings`, bookingId);
-    setDocumentNonBlocking(workerBookingRef, bookingData, { merge: false });
 
-    toast({
-      title: 'Booking Submitted!',
-      description: "We've received your request. We'll be in touch shortly to confirm.",
-    });
-    form.reset();
+    try {
+      // Use awaited setDoc for atomicity and error handling
+      await setDoc(userBookingRef, bookingData);
+      await setDoc(workerBookingRef, bookingData);
+
+      toast({
+        title: 'Booking Submitted!',
+        description: "We've received your request. We'll be in touch shortly to confirm.",
+      });
+      form.reset();
+    } catch (error) {
+       console.error("Booking creation failed:", error);
+       // Create and emit a contextual error for better debugging
+       const permissionError = new FirestorePermissionError({
+          path: userBookingRef.path, // We can use either path, the context is what matters
+          operation: 'create',
+          requestResourceData: bookingData,
+       });
+       errorEmitter.emit('permission-error', permissionError);
+
+       toast({
+        variant: 'destructive',
+        title: 'Booking Failed',
+        description: "Could not save your booking. Please check your connection and try again.",
+      });
+    }
   };
 
 
