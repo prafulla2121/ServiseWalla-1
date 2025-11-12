@@ -1,26 +1,26 @@
-"use client";
+'use client';
 
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Input } from '@/components/ui/input';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Form,
   FormControl,
@@ -28,39 +28,91 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { services } from "@/lib/data";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/form';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { services, workers } from '@/lib/data';
+import { useToast } from '@/hooks/use-toast';
+import { useSearchParams } from 'next/navigation';
+import { useUser, useFirestore, addDocumentNonBlocking } from '@/firebase';
+import { collection, doc, setDoc } from 'firebase/firestore';
+import { v4 as uuidv4 } from 'uuid';
+import 'react-phone-number-input/style.css'
 
 const bookingSchema = z.object({
-  serviceId: z.string({ required_error: "Please select a service." }),
-  date: z.date({ required_error: "A date is required." }),
-  time: z.string({ required_error: "Please select a time." }),
-  name: z.string().min(2, "Name must be at least 2 characters."),
-  email: z.string().email("Invalid email address."),
-  phone: z.string().min(10, "Phone number seems too short."),
-  address: z.string().min(5, "Please enter a valid address."),
+  serviceId: z.string({ required_error: 'Please select a service.' }),
+  workerId: z.string({ required_error: 'Please select a worker.' }),
+  date: z.date({ required_error: 'A date is required.' }),
+  time: z.string({ required_error: 'Please select a time.' }),
+  name: z.string().min(2, 'Name must be at least 2 characters.'),
+  email: z.string().email('Invalid email address.'),
+  phone: z.string().min(10, 'Phone number seems too short.'),
+  address: z.string().min(5, 'Please enter a valid address.'),
 });
 
 type BookingFormValues = z.infer<typeof bookingSchema>;
 
 export default function BookPage() {
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const { user } = useUser();
+  const firestore = useFirestore();
+
+  const serviceIdParam = searchParams.get('serviceId');
+  const workerIdParam = searchParams.get('workerId');
+
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingSchema),
+    defaultValues: {
+      serviceId: serviceIdParam ?? undefined,
+      workerId: workerIdParam ?? undefined,
+      name: user?.displayName ?? '',
+      email: user?.email ?? '',
+    },
   });
 
   const onSubmit: SubmitHandler<BookingFormValues> = (data) => {
-    console.log(data);
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication Error',
+        description: 'You must be logged in to book a service.',
+      });
+      return;
+    }
+
+    const bookingId = uuidv4();
+    const bookingDateTime = new Date(data.date);
+    const [hours, minutes] = data.time.split(':').map(Number);
+    bookingDateTime.setHours(hours, minutes);
+
+    const bookingData = {
+      id: bookingId,
+      userId: user.uid,
+      workerId: data.workerId,
+      serviceId: data.serviceId,
+      bookingDate: bookingDateTime.toISOString(),
+      status: 'pending' as const,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      address: data.address,
+    };
+    
+    // Non-blocking writes
+    const userBookingRef = doc(firestore, `users/${user.uid}/bookings`, bookingId);
+    setDoc(userBookingRef, bookingData);
+
+    const workerBookingRef = doc(firestore, `workers/${data.workerId}/bookings`, bookingId);
+    setDoc(workerBookingRef, bookingData);
+
     toast({
-      title: "Booking Submitted!",
+      title: 'Booking Submitted!',
       description: "We've received your request. We'll be in touch shortly to confirm.",
     });
     form.reset();
   };
 
-  const timeSlots = ["09:00 AM", "11:00 AM", "01:00 PM", "03:00 PM", "05:00 PM"];
+  const timeSlots = ['09:00', '11:00', '13:00', '15:00', '17:00'];
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-12">
@@ -81,15 +133,49 @@ export default function BookPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Service</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a service you need" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {services.map(service => (
-                            <SelectItem key={service.id} value={service.id}>{service.name}</SelectItem>
+                          {services.map((service) => (
+                            <SelectItem key={service.id} value={service.id}>
+                              {service.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="workerId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Professional</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a professional" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {workers
+                            .filter(w => form.watch('serviceId') ? w.serviceId === form.watch('serviceId') : true)
+                            .map((worker) => (
+                            <SelectItem key={worker.id} value={worker.id}>
+                              {worker.name} - {worker.service}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -108,13 +194,17 @@ export default function BookPage() {
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
-                                variant={"outline"}
+                                variant={'outline'}
                                 className={cn(
-                                  "w-full pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
+                                  'w-full pl-3 text-left font-normal',
+                                  !field.value && 'text-muted-foreground'
                                 )}
                               >
-                                {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                {field.value ? (
+                                  format(field.value, 'PPP')
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                               </Button>
                             </FormControl>
@@ -124,7 +214,9 @@ export default function BookPage() {
                               mode="single"
                               selected={field.value}
                               onSelect={field.onChange}
-                              disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
+                              disabled={(date) =>
+                                date < new Date() || date < new Date('1900-01-01')
+                              }
                               initialFocus
                             />
                           </PopoverContent>
@@ -139,15 +231,20 @@ export default function BookPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Time</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a time slot" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {timeSlots.map(time => (
-                              <SelectItem key={time} value={time}>{time}</SelectItem>
+                            {timeSlots.map((time) => (
+                              <SelectItem key={time} value={time}>
+                                {format(new Date(`1970-01-01T${time}:00`), 'h:mm a')}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -182,7 +279,10 @@ export default function BookPage() {
                       <FormItem>
                         <FormLabel>Email Address</FormLabel>
                         <FormControl>
-                          <Input placeholder="john.doe@example.com" {...field} />
+                          <Input
+                            placeholder="john.doe@example.com"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -217,7 +317,9 @@ export default function BookPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full" size="lg">Submit Booking</Button>
+              <Button type="submit" className="w-full" size="lg" disabled={!user}>
+                {user ? 'Submit Booking' : 'Please log in to book'}
+              </Button>
             </form>
           </Form>
         </CardContent>
