@@ -173,7 +173,8 @@ service cloud.firestore {
 
       allow get: if isOwner(workerId);
       allow list: if isOwner(workerId);
-      allow create: if isOwner(workerId) && request.resource.data.workerId == workerId;
+      // Allow any authenticated user to create a booking, as long as they are the user in the booking.
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
       allow update: if isExistingOwner(workerId) && request.resource.data.workerId == workerId;
       allow delete: if isExistingOwner(workerId);
     }
