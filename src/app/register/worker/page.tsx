@@ -28,10 +28,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/Logo";
 import { services } from "@/lib/data";
-import { initiateEmailSignUp, useAuth } from "@/firebase";
+import { initiateEmailSignUp, useAuth, useUser } from "@/firebase";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const registerSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters."),
@@ -43,8 +44,10 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterWorkerPage() {
-  const { toast } = useToast();
   const auth = useAuth();
+  const { user } = useUser();
+  const router = useRouter();
+  
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -54,12 +57,14 @@ export default function RegisterWorkerPage() {
     },
   });
 
+  useEffect(() => {
+    if (user) {
+      router.push('/profile');
+    }
+  }, [user, router]);
+
   const onSubmit: SubmitHandler<RegisterFormValues> = (data) => {
     initiateEmailSignUp(auth, data.email, data.password, data.fullName, "worker", data.serviceId);
-    toast({
-      title: "Account Created!",
-      description: "Welcome to ServiceWalla! You can now log in.",
-    });
   };
 
   return (

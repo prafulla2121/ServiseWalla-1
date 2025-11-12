@@ -24,7 +24,9 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/Logo";
-import { initiateEmailSignIn, useAuth } from "@/firebase";
+import { initiateEmailSignIn, useAuth, useUser } from "@/firebase";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 
 const loginSchema = z.object({
@@ -37,6 +39,9 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const { toast } = useToast();
   const auth = useAuth();
+  const { user } = useUser();
+  const router = useRouter();
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -45,12 +50,14 @@ export default function LoginPage() {
     },
   });
 
+  useEffect(() => {
+    if (user) {
+      router.push('/profile');
+    }
+  }, [user, router]);
+
   const onSubmit: SubmitHandler<LoginFormValues> = (data) => {
     initiateEmailSignIn(auth, data.email, data.password);
-    toast({
-      title: "Login Successful",
-      description: "Welcome back!",
-    });
   };
 
   return (
