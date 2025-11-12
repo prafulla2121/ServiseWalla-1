@@ -4,9 +4,10 @@ import { WorkerCard } from "@/components/WorkerCard";
 import { services } from "@/lib/data";
 import { notFound, useSearchParams, useParams } from "next/navigation";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query, where } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 import { Worker } from "@/lib/types";
+import { useEffect, useState } from "react";
 
 
 export default function WorkersListPage() {
@@ -18,16 +19,70 @@ export default function WorkersListPage() {
   
   const service = services.find((s) => s.id === serviceId);
 
-  const workersQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    const workersCollection = collection(firestore, 'workers');
-    
-    // For now, we will filter by service. Location filtering will be added next.
-    return query(workersCollection, where('serviceIds', 'array-contains', serviceId));
+  const [workers, setWorkers] = useState<Worker[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  }, [firestore, serviceId]);
+  useEffect(() => {
+    const fetchWorkers = async () => {
+      if (!firestore || !serviceId || !location) {
+        setIsLoading(false);
+        return;
+      }
+      setIsLoading(true);
 
-  const { data: workers, isLoading } = useCollection<Worker>(workersQuery);
+      const workersCollection = collection(firestore, 'workers');
+      const locationQuery = location.toLowerCase();
+
+      // Create multiple queries for different location fields
+      const queries = [
+        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('zipCode', '==', locationQuery)),
+        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('city', '==', locationQuery)),
+        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('state', '==', locationQuery)),
+        // A simple "starts-with" search emulation for city
+        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('city', '>=', locationQuery), where('city', '<=', locationQuery + '\uf8ff')),
+      ];
+
+      try {
+        const querySnapshots = await Promise.all(queries.map(q => getDocs(q)));
+        
+        const workersMap = new Map<string, Worker>();
+        
+        querySnapshots.forEach(snapshot => {
+          snapshot.forEach(doc => {
+            if (!workersMap.has(doc.id)) {
+              workersMap.set(doc.id, { id: doc.id, ...doc.data() } as Worker);
+            }
+          });
+        });
+
+        setWorkers(Array.from(workersMap.values()));
+      } catch (error) {
+        console.error("Error fetching workers:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // If there is a location, perform the advanced search
+    if (location) {
+      fetchWorkers();
+    } else {
+        // Fallback for no location - just get by service
+        const getWorkersByService = async () => {
+             if (!firestore || !serviceId) {
+                setIsLoading(false);
+                return;
+            }
+            setIsLoading(true);
+            const q = query(collection(firestore, 'workers'), where('serviceIds', 'array-contains', serviceId));
+            const snapshot = await getDocs(q);
+            const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Worker));
+            setWorkers(results);
+            setIsLoading(false);
+        }
+        getWorkersByService();
+    }
+  }, [firestore, serviceId, location]);
 
   if (!service) {
     notFound();
@@ -58,7 +113,7 @@ export default function WorkersListPage() {
         ) : (
           <div className="mt-16 text-center">
             <p className="text-lg text-muted-foreground">
-              No workers found for this service yet. Please check back later.
+              No workers found for this service in the specified location. Please try a different location.
             </p>
           </div>
         )}
