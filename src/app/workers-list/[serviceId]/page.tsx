@@ -24,22 +24,48 @@ export default function WorkersListPage() {
 
   useEffect(() => {
     const fetchWorkers = async () => {
-      if (!firestore || !serviceId || !location) {
+      if (!firestore || !serviceId) {
         setIsLoading(false);
         return;
       }
       setIsLoading(true);
 
-      const workersCollection = collection(firestore, 'workers');
-      const locationQuery = location.toLowerCase();
+      // If no location, fetch all for the service
+      if (!location) {
+        const q = query(collection(firestore, 'workers'), where('serviceIds', 'array-contains', serviceId));
+        try {
+          const snapshot = await getDocs(q);
+          const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Worker));
+          setWorkers(results);
+        } catch (error) {
+          console.error("Error fetching workers by service:", error);
+        } finally {
+          setIsLoading(false);
+        }
+        return;
+      }
 
-      // Create multiple queries for different location fields
+      // If there is a location, perform the advanced search
+      const workersCollection = collection(firestore, 'workers');
+      const locationLower = location.toLowerCase();
+      const locationCapitalized = location.charAt(0).toUpperCase() + location.slice(1).toLowerCase();
+
+      // Create multiple queries for different location fields and cases
       const queries = [
-        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('zipCode', '==', locationQuery)),
-        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('city', '==', locationQuery)),
-        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('state', '==', locationQuery)),
-        // A simple "starts-with" search emulation for city
-        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('city', '>=', locationQuery), where('city', '<=', locationQuery + '\uf8ff')),
+        // Exact matches (case-sensitive)
+        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('zipCode', '==', location)),
+        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('city', '==', location)),
+        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('state', '==', location)),
+        // Lowercase matches
+        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('city', '==', locationLower)),
+        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('state', '==', locationLower)),
+        // Capitalized matches (common for cities/states)
+        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('city', '==', locationCapitalized)),
+        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('state', '==', locationCapitalized)),
+        // "Starts-with" search for broader city matching
+        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('city', '>=', location), where('city', '<=', location + '\uf8ff')),
+        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('city', '>=', locationLower), where('city', '<=', locationLower + '\uf8ff')),
+        query(workersCollection, where('serviceIds', 'array-contains', serviceId), where('city', '>=', locationCapitalized), where('city', '<=', locationCapitalized + '\uf8ff')),
       ];
 
       try {
@@ -63,25 +89,7 @@ export default function WorkersListPage() {
       }
     };
 
-    // If there is a location, perform the advanced search
-    if (location) {
-      fetchWorkers();
-    } else {
-        // Fallback for no location - just get by service
-        const getWorkersByService = async () => {
-             if (!firestore || !serviceId) {
-                setIsLoading(false);
-                return;
-            }
-            setIsLoading(true);
-            const q = query(collection(firestore, 'workers'), where('serviceIds', 'array-contains', serviceId));
-            const snapshot = await getDocs(q);
-            const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Worker));
-            setWorkers(results);
-            setIsLoading(false);
-        }
-        getWorkersByService();
-    }
+    fetchWorkers();
   }, [firestore, serviceId, location]);
 
   if (!service) {
@@ -113,7 +121,7 @@ export default function WorkersListPage() {
         ) : (
           <div className="mt-16 text-center">
             <p className="text-lg text-muted-foreground">
-              No workers found for this service in the specified location. Please try a different location.
+              No workers found for this service {location ? `in '${location}'` : ''}. Please try a different location.
             </p>
           </div>
         )}
