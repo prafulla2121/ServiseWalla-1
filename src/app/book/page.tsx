@@ -75,7 +75,7 @@ export default function BookPage() {
   });
 
   const onSubmit: SubmitHandler<BookingFormValues> = (data) => {
-    if (!user) {
+    if (!user || !firestore) {
       toast({
         variant: 'destructive',
         title: 'Authentication Error',
@@ -96,8 +96,8 @@ export default function BookPage() {
       serviceId: data.serviceId,
       bookingDate: bookingDateTime.toISOString(),
       status: 'pending' as const,
-      name: data.name,
-      email: data.email,
+      name: data.name, // Customer's name from form
+      email: data.email, // Customer's email from form
       phone: data.phone,
       address: data.address,
     };
@@ -115,6 +115,7 @@ export default function BookPage() {
     });
     form.reset();
   };
+
 
   const timeSlots = ['09:00', '11:00', '13:00', '15:00', '17:00'];
 

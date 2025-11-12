@@ -1,5 +1,5 @@
 'use client';
-import { Firestore, doc } from "firebase/firestore";
+import { Firestore, doc, getDoc } from "firebase/firestore";
 import { updateDocumentNonBlocking } from "@/firebase";
 
 export function updateBookingStatus(
@@ -8,22 +8,27 @@ export function updateBookingStatus(
     bookingId: string, 
     status: 'confirmed' | 'completed' | 'cancelled'
 ) {
-    const bookingRef = doc(firestore, `workers/${workerId}/bookings`, bookingId);
-    updateDocumentNonBlocking(bookingRef, { status });
+    const workerBookingRef = doc(firestore, `workers/${workerId}/bookings`, bookingId);
+    updateDocumentNonBlocking(workerBookingRef, { status });
 
-    // Also update the user's booking document
-    // We need to fetch the booking to get the userId
-    // This is not ideal, but necessary with this structure
-    // A better structure might involve a single top-level 'bookings' collection
-    // with both workerId and userId for easier querying and updating.
-    const getBooking = async () => {
-        const { getDoc } = await import('firebase/firestore');
-        const bookingSnap = await getDoc(bookingRef);
-        if (bookingSnap.exists()) {
-            const bookingData = bookingSnap.data();
-            const userBookingRef = doc(firestore, `users/${bookingData.userId}/bookings`, bookingId);
-            updateDocumentNonBlocking(userBookingRef, { status });
+    // Also update the user's copy of the booking document to keep them in sync.
+    // This requires reading the document first to find the associated userId.
+    const updateUserBooking = async () => {
+        try {
+            const bookingSnap = await getDoc(workerBookingRef);
+            if (bookingSnap.exists()) {
+                const bookingData = bookingSnap.data();
+                if (bookingData.userId) {
+                    const userBookingRef = doc(firestore, `users/${bookingData.userId}/bookings`, bookingId);
+                    updateDocumentNonBlocking(userBookingRef, { status });
+                }
+            }
+        } catch (error) {
+            console.error("Error updating user's booking document:", error);
+            // Optionally, you could add more robust error handling here,
+            // like queuing the update to retry later.
         }
-    }
-    getBooking();
+    };
+    
+    updateUserBooking();
 }

@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useUser, useFirestore } from '@/firebase';
-import { Booking } from '@/lib/types';
+import type { Booking } from '@/lib/types';
 import { services } from '@/lib/data';
 import { format } from 'date-fns';
 import { Button } from '../ui/button';
@@ -20,6 +20,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Clock, CheckCircle, History } from 'lucide-react';
 import { Badge } from '../ui/badge';
+
+interface WorkerProfileProps {
+  worker: any;
+  bookings: Booking[];
+}
 
 interface BookingItemProps {
   booking: Booking;
@@ -69,7 +74,7 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
   }, [initialBookings]);
 
   const handleUpdateStatus = (bookingToUpdate: Booking, status: 'confirmed' | 'completed' | 'cancelled') => {
-    if (!user) return;
+    if (!user || !firestore) return;
     updateBookingStatus(firestore, user.uid, bookingToUpdate.id, status);
     
     // Optimistically update the UI
