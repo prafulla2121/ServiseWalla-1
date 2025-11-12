@@ -9,8 +9,7 @@ import { Loader2 } from "lucide-react";
 import { Worker } from "@/lib/types";
 
 
-export default function WorkersListPage({ params }: { params: { serviceId: string } }) {
-  const { serviceId } = params;
+export default function WorkersListPage({ params: { serviceId } }: { params: { serviceId: string } }) {
   const firestore = useFirestore();
   const searchParams = useSearchParams();
   const location = searchParams.get('location');
