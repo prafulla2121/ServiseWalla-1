@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Star, MapPin, CheckCircle, Loader2 } from 'lucide-react';
 import { services } from '@/lib/data';
-import { notFound } from 'next/navigation';
 
 export default function WorkerProfilePage() {
   const params = useParams();
@@ -29,7 +28,11 @@ export default function WorkerProfilePage() {
   }
 
   if (!worker) {
-    notFound();
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p>Worker profile not found.</p>
+      </div>
+    );
   }
   
   const workerService = services.find(s => worker.serviceIds.includes(s.id));
