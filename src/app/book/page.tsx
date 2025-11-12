@@ -33,7 +33,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { services, workers } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { useSearchParams } from 'next/navigation';
-import { useUser, useFirestore, setDocumentNonBlocking, FirestorePermissionError, errorEmitter } from '@/firebase';
+import { useUser, useFirestore, FirestorePermissionError, errorEmitter } from '@/firebase';
 import { collection, doc, setDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import 'react-phone-number-input/style.css'
@@ -116,10 +116,10 @@ export default function BookPage() {
       });
       form.reset();
     } catch (error) {
-       console.error("Booking creation failed:", error);
-       // Create and emit a contextual error for better debugging
+       // The second write (to worker's collection) is the one most likely to fail.
+       // We create an error that shows the context for that specific failed write.
        const permissionError = new FirestorePermissionError({
-          path: userBookingRef.path, // We can use either path, the context is what matters
+          path: workerBookingRef.path,
           operation: 'create',
           requestResourceData: bookingData,
        });
@@ -128,7 +128,7 @@ export default function BookPage() {
        toast({
         variant: 'destructive',
         title: 'Booking Failed',
-        description: "Could not save your booking. Please check your connection and try again.",
+        description: "Could not save your booking. You may not have permission to perform this action.",
       });
     }
   };
