@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Star, MapPin } from "lucide-react";
+import { Star } from "lucide-react";
 
 import {
   Card,
@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import type { Worker } from "@/lib/data";
 
 type WorkerCardProps = {

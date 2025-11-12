@@ -19,7 +19,6 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { ServiceCard } from "@/components/ServiceCard";
 import { WorkerCard } from "@/components/WorkerCard";
 import { services, workers, testimonials } from "@/lib/data";
