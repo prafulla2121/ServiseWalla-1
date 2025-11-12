@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useUser, useFirestore } from '@/firebase';
@@ -7,8 +8,15 @@ import { Booking } from '@/lib/types';
 import { services } from '@/lib/data';
 import { format } from 'date-fns';
 import { Button } from '../ui/button';
-import { doc } from 'firebase/firestore';
 import { updateBookingStatus } from '@/lib/bookings';
+import { EditWorkerProfileForm } from './EditWorkerProfileForm';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface WorkerProfileProps {
   worker: any;
@@ -18,6 +26,7 @@ interface WorkerProfileProps {
 export function WorkerProfile({ worker: profileWorker, bookings }: WorkerProfileProps) {
   const { user } = useUser();
   const firestore = useFirestore();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const getServiceName = (serviceId: string) => {
     return services.find(s => s.id === serviceId)?.name || 'Unknown Service';
@@ -27,18 +36,32 @@ export function WorkerProfile({ worker: profileWorker, bookings }: WorkerProfile
     if(!user) return;
     updateBookingStatus(firestore, user.uid, booking.id, status);
   };
+  
+  const workerService = services.find(s => profileWorker.serviceIds?.includes(s.id));
 
   return (
     <div className="container mx-auto max-w-4xl py-12">
-       <div className="flex items-center gap-6">
+       <div className="flex flex-col sm:flex-row items-start gap-6">
         <Avatar className="h-24 w-24">
           <AvatarImage src={user?.photoURL ?? ''} />
           <AvatarFallback>{profileWorker.firstName?.[0]}{profileWorker.lastName?.[0]}</AvatarFallback>
         </Avatar>
-        <div>
+        <div className="flex-grow">
           <h1 className="font-headline text-3xl font-bold">{profileWorker.firstName} {profileWorker.lastName}</h1>
           <p className="text-muted-foreground">{profileWorker.email}</p>
+          {workerService && <p className="text-primary font-semibold">{workerService.name}</p>}
         </div>
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline">Edit Profile</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Your Profile</DialogTitle>
+            </DialogHeader>
+            <EditWorkerProfileForm worker={profileWorker} onSave={() => setIsEditDialogOpen(false)}/>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="mt-12">
