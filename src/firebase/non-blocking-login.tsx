@@ -1,29 +1,74 @@
 'use client';
 import {
-  Auth, // Import Auth type for type hinting
+  Auth,
   signInAnonymously,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  // Assume getAuth and app are initialized elsewhere
+  updateProfile,
 } from 'firebase/auth';
+import {
+  setDocumentNonBlocking
+} from './non-blocking-updates';
+import {
+  doc,
+  getFirestore
+} from 'firebase/firestore';
 
 /** Initiate anonymous sign-in (non-blocking). */
 export function initiateAnonymousSignIn(authInstance: Auth): void {
-  // CRITICAL: Call signInAnonymously directly. Do NOT use 'await signInAnonymously(...)'.
-  signInAnonymously(authInstance);
-  // Code continues immediately. Auth state change is handled by onAuthStateChanged listener.
+  signInAnonymously(authInstance).catch((error) => {
+    console.error("Anonymous sign-in error", error);
+    alert(`Error: ${error.message}`);
+  });
 }
 
 /** Initiate email/password sign-up (non-blocking). */
-export function initiateEmailSignUp(authInstance: Auth, email: string, password: string): void {
-  // CRITICAL: Call createUserWithEmailAndPassword directly. Do NOT use 'await createUserWithEmailAndPassword(...)'.
-  createUserWithEmailAndPassword(authInstance, email, password);
-  // Code continues immediately. Auth state change is handled by onAuthStateChanged listener.
+export function initiateEmailSignUp(authInstance: Auth, email: string, password: string, fullName: string, role: 'user' | 'worker', serviceId?: string): void {
+  createUserWithEmailAndPassword(authInstance, email, password)
+    .then((userCredential) => {
+      // After user is created, update their profile and save to Firestore
+      const user = userCredential.user;
+      if (user) {
+        updateProfile(user, {
+          displayName: fullName,
+        });
+
+        const [firstName, ...lastNameParts] = fullName.split(' ');
+        const lastName = lastNameParts.join(' ');
+
+        if (role === 'user') {
+          const userDocRef = doc(getFirestore(authInstance.app), 'users', user.uid);
+          const userData = {
+            id: user.uid,
+            firstName,
+            lastName,
+            email: user.email,
+          };
+          setDocumentNonBlocking(userDocRef, userData, { merge: false });
+        } else if (role === 'worker') {
+          const workerDocRef = doc(getFirestore(authInstance.app), 'workers', user.uid);
+          const workerData = {
+            id: user.uid,
+            firstName,
+            lastName,
+            email: user.email,
+            serviceIds: serviceId ? [serviceId] : [],
+            bio: '',
+          };
+          setDocumentNonBlocking(workerDocRef, workerData, { merge: false });
+        }
+      }
+    })
+    .catch((error) => {
+      console.error("Email sign-up error", error);
+      alert(`Error: ${error.message}`);
+    });
 }
 
 /** Initiate email/password sign-in (non-blocking). */
 export function initiateEmailSignIn(authInstance: Auth, email: string, password: string): void {
-  // CRITICAL: Call signInWithEmailAndPassword directly. Do NOT use 'await signInWithEmailAndPassword(...)'.
-  signInWithEmailAndPassword(authInstance, email, password);
-  // Code continues immediately. Auth state change is handled by onAuthStateChanged listener.
+  signInWithEmailAndPassword(authInstance, email, password).catch((error) => {
+    console.error("Email sign-in error", error);
+    alert(`Error: ${error.message}`);
+  });
 }

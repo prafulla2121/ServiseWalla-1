@@ -16,7 +16,6 @@ import {
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -56,8 +55,7 @@ export default function RegisterWorkerPage() {
   });
 
   const onSubmit: SubmitHandler<RegisterFormValues> = (data) => {
-    initiateEmailSignUp(auth, data.email, data.password);
-    console.log(data); // In a real app, you'd save this data to a 'workers' collection in Firestore
+    initiateEmailSignUp(auth, data.email, data.password, data.fullName, "worker", data.serviceId);
     toast({
       title: "Account Created!",
       description: "Welcome to ServiceWalla! You can now log in.",
