@@ -2,14 +2,16 @@
 
 import { WorkerCard } from "@/components/WorkerCard";
 import { services } from "@/lib/data";
-import { notFound, useSearchParams } from "next/navigation";
+import { notFound, useSearchParams, useParams } from "next/navigation";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query, where } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 import { Worker } from "@/lib/types";
 
 
-export default function WorkersListPage({ params: { serviceId } }: { params: { serviceId: string } }) {
+export default function WorkersListPage() {
+  const params = useParams();
+  const serviceId = params.serviceId as string;
   const firestore = useFirestore();
   const searchParams = useSearchParams();
   const location = searchParams.get('location');
