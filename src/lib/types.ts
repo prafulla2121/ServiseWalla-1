@@ -11,3 +11,23 @@ export interface Booking {
   phone: string;
   address: string;
 }
+
+
+export interface Worker {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  bio?: string;
+  serviceIds: string[];
+  // These are not in firestore yet, but needed for card
+  rating?: number;
+  reviews?: number;
+  avatarUrl?: string;
+  coverImageUrl?: string;
+}
