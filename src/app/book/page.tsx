@@ -67,6 +67,10 @@ export default function BookPage() {
       workerId: workerIdParam ?? undefined,
       name: user?.displayName ?? '',
       email: user?.email ?? '',
+      phone: '',
+      address: '',
+      date: undefined,
+      time: undefined,
     },
   });
 
