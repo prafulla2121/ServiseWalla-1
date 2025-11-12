@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, useFirestore, useUser, useDoc, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirestore, useUser, useDoc, useCollection, useMemoFirebase } from '@/firebase';
 import { doc, collection } from 'firebase/firestore';
 
 import { UserProfile } from '@/components/profile/UserProfile';
@@ -15,11 +15,11 @@ export default function ProfilePage() {
   const firestore = useFirestore();
 
   // Memoize Firestore references
-  const userDocRef = useMemoFirebase(() => user ? doc(firestore, 'users', user.uid) : null, [firestore, user]);
-  const workerDocRef = useMemoFirebase(() => user ? doc(firestore, 'workers', user.uid) : null, [firestore, user]);
+  const userDocRef = useMemoFirebase(() => (user ? doc(firestore, 'users', user.uid) : null), [firestore, user]);
+  const workerDocRef = useMemoFirebase(() => (user ? doc(firestore, 'workers', user.uid) : null), [firestore, user]);
   
-  const userBookingsColRef = useMemoFirebase(() => user ? collection(firestore, `users/${user.uid}/bookings`) : null, [firestore, user]);
-  const workerBookingsColRef = useMemoFirebase(() => user ? collection(firestore, `workers/${user.uid}/bookings`) : null, [firestore, user]);
+  const userBookingsColRef = useMemoFirebase(() => (user && !isWorker ? collection(firestore, `users/${user.uid}/bookings`) : null), [firestore, user, isWorker]);
+  const workerBookingsColRef = useMemoFirebase(() => (user && isWorker ? collection(firestore, 'workers', user.uid, 'bookings') : null), [firestore, user, isWorker]);
 
   // Fetch data using hooks
   const { data: userData, isLoading: isUserLoadingData } = useDoc(userDocRef);
