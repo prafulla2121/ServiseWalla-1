@@ -89,8 +89,8 @@ service cloud.firestore {
         return isOwner(workerId) && resource != null;
       }
 
-      allow get: if isOwner(workerId);
-      allow list: if false; // Prevent listing of all workers.
+      allow get: if true;
+      allow list: if request.auth != null; // Allow listing only for authenticated users.
       allow create: if isOwner(workerId) && request.resource.data.id == workerId;
       allow update: if isExistingOwner(workerId);
       allow delete: if isExistingOwner(workerId);
