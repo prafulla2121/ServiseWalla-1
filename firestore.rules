@@ -92,7 +92,7 @@ service cloud.firestore {
       allow get: if isOwner(workerId);
       allow list: if false; // Prevent listing of all workers.
       allow create: if isOwner(workerId) && request.resource.data.id == workerId;
-      allow update: if isExistingOwner(workerId) && request.resource.data.id == resource.data.id;
+      allow update: if isExistingOwner(workerId);
       allow delete: if isExistingOwner(workerId);
     }
 
