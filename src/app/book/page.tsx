@@ -33,8 +33,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { services, workers } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { useSearchParams } from 'next/navigation';
-import { useUser, useFirestore, addDocumentNonBlocking } from '@/firebase';
-import { collection, doc, setDoc } from 'firebase/firestore';
+import { useUser, useFirestore, setDocumentNonBlocking } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import 'react-phone-number-input/style.css'
 
@@ -98,12 +98,12 @@ export default function BookPage() {
       address: data.address,
     };
     
-    // Non-blocking writes
+    // Non-blocking writes with contextual error handling
     const userBookingRef = doc(firestore, `users/${user.uid}/bookings`, bookingId);
-    setDoc(userBookingRef, bookingData);
+    setDocumentNonBlocking(userBookingRef, bookingData, { merge: false });
 
     const workerBookingRef = doc(firestore, `workers/${data.workerId}/bookings`, bookingId);
-    setDoc(workerBookingRef, bookingData);
+    setDocumentNonBlocking(workerBookingRef, bookingData, { merge: false });
 
     toast({
       title: 'Booking Submitted!',
