@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useUser, useFirestore } from '@/firebase';
@@ -18,15 +18,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, CheckCircle, History, List, XCircle, BadgeDollarSign } from 'lucide-react';
+import { Clock, CheckCircle, History } from 'lucide-react';
 import { Badge } from '../ui/badge';
 
-interface WorkerProfileProps {
-  worker: any;
-  bookings: Booking[];
+interface BookingItemProps {
+  booking: Booking;
+  onUpdateStatus: (booking: Booking, status: 'confirmed' | 'completed' | 'cancelled') => void;
 }
 
-function BookingItem({ booking, onUpdateStatus }: { booking: Booking, onUpdateStatus: (booking: Booking, status: 'confirmed' | 'completed' | 'cancelled') => void }) {
+function BookingItem({ booking, onUpdateStatus }: BookingItemProps) {
   const getServiceName = (serviceId: string) => {
     return services.find(s => s.id === serviceId)?.name || 'Unknown Service';
   };
@@ -58,14 +58,26 @@ function BookingItem({ booking, onUpdateStatus }: { booking: Booking, onUpdateSt
   );
 }
 
-export function WorkerProfile({ worker: profileWorker, bookings }: WorkerProfileProps) {
+export function WorkerProfile({ worker: profileWorker, bookings: initialBookings }: WorkerProfileProps) {
   const { user } = useUser();
   const firestore = useFirestore();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [bookings, setBookings] = useState<Booking[]>(initialBookings);
 
-  const handleUpdateStatus = (booking: Booking, status: 'confirmed' | 'completed' | 'cancelled') => {
+  useEffect(() => {
+    setBookings(initialBookings);
+  }, [initialBookings]);
+
+  const handleUpdateStatus = (bookingToUpdate: Booking, status: 'confirmed' | 'completed' | 'cancelled') => {
     if (!user) return;
-    updateBookingStatus(firestore, user.uid, booking.id, status);
+    updateBookingStatus(firestore, user.uid, bookingToUpdate.id, status);
+    
+    // Optimistically update the UI
+    setBookings(currentBookings => 
+      currentBookings.map(b => 
+        b.id === bookingToUpdate.id ? { ...b, status: status } : b
+      )
+    );
   };
   
   const workerService = services.find(s => profileWorker.serviceIds?.includes(s.id));
