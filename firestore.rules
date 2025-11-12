@@ -1,0 +1,221 @@
+/**
+ * @fileoverview Firestore Security Rules for ServiceWalla.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user and worker ownership model for profile data and bookings,
+ * combined with public read access for service definitions and FAQs.  Admin roles are supported through a separate collection.
+ * The rules are designed to prevent unauthorized data access and modification, ensuring data privacy and integrity.
+ *
+ * Data Structure:
+ * - /users/{userId}: User profiles, accessible only to the user themselves.
+ * - /workers/{workerId}: Worker profiles, accessible only to the worker themselves.
+ * - /services/{serviceId}: Service definitions, publicly readable, writeable by admins only.
+ * - /users/{userId}/bookings/{bookingId}: Bookings made by a user, accessible only to that user.
+ * - /workers/{workerId}/bookings/{bookingId}: Bookings associated with a worker, accessible only to that worker.
+ * - /faqs/{faqId}: Frequently asked questions, publicly readable, writeable by admins only.
+ * - /roles_admin/{uid}: Documents the UIDs which have admin roles, only accessible by backend functions.
+ *
+ * Key Security Decisions:
+ * - Users and Workers can only access their own profile data.
+ * - Service and FAQ data are publicly readable, but write access is restricted to admins.
+ * - Bookings are scoped to both users and workers, granting both parties access.
+ * - Listing of users and workers is not permitted to prevent data scraping.
+ * - Admin role management is handled via a separate collection, accessible only by backend functions.
+ *
+ * Denormalization for Authorization:
+ * The Booking documents include both `userId` and `workerId` to avoid costly `get()` calls
+ * when validating access. This denormalization enables efficient and secure authorization
+ * without requiring additional reads.
+ *
+ * Structural Segregation:
+ * Publicly readable data (Services, FAQs) is stored in top-level collections with open read access, while
+ * private data (User, Worker, Bookings) is stored in user/worker-specific subcollections with restricted access.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Controls access to user profile data.
+     * @path /users/{userId}
+     * @allow (create) User with ID 'user123' creates their profile. (request.auth.uid == 'user123')
+     * @allow (get) User with ID 'user123' reads their profile. (request.auth.uid == 'user123')
+     * @allow (update) User with ID 'user123' updates their profile. (request.auth.uid == 'user123')
+     * @allow (delete) User with ID 'user123' deletes their profile. (request.auth.uid == 'user123')
+     * @deny (create) User with ID 'user456' attempts to create a profile with ID 'user123'.
+     * @deny (get) User with ID 'user456' attempts to read profile 'user123'.
+     * @deny (update) User with ID 'user456' attempts to update profile 'user123'.
+     * @deny (delete) User with ID 'user456' attempts to delete profile 'user123'.
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId} {
+      // Helper function to check if the user is signed in and owns the document.
+
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+      allow get: if isOwner(userId);
+      allow list: if false; // Prevent listing of all users.
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Controls access to worker profile data.
+     * @path /workers/{workerId}
+     * @allow (create) Worker with ID 'worker123' creates their profile. (request.auth.uid == 'worker123')
+     * @allow (get) Worker with ID 'worker123' reads their profile. (request.auth.uid == 'worker123')
+     * @allow (update) Worker with ID 'worker123' updates their profile. (request.auth.uid == 'worker123')
+     * @allow (delete) Worker with ID 'worker123' deletes their profile. (request.auth.uid == 'worker123')
+     * @deny (create) User with ID 'user456' attempts to create a worker profile with ID 'worker123'.
+     * @deny (get) User with ID 'user456' attempts to read worker profile 'worker123'.
+     * @deny (update) User with ID 'user456' attempts to update worker profile 'worker123'.
+     * @deny (delete) User with ID 'user456' attempts to delete worker profile 'worker123'.
+     * @principle Enforces document ownership for writes.
+     */
+    match /workers/{workerId} {
+       // Helper function to check if the user is signed in and owns the document.
+
+      function isOwner(workerId) {
+        return request.auth.uid == workerId;
+      }
+
+      function isExistingOwner(workerId) {
+        return isOwner(workerId) && resource != null;
+      }
+
+      allow get: if isOwner(workerId);
+      allow list: if false; // Prevent listing of all workers.
+      allow create: if isOwner(workerId) && request.resource.data.id == workerId;
+      allow update: if isExistingOwner(workerId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(workerId);
+    }
+
+    /**
+     * @description Controls access to service definitions.
+     * @path /services/{serviceId}
+     * @allow (get) Any user can read a service definition.
+     * @allow (list) Any user can list service definitions.
+     * @deny (create) Non-admin user attempts to create a service.
+     * @deny (update) Non-admin user attempts to update a service.
+     * @deny (delete) Non-admin user attempts to delete a service.
+     * @principle Public read access, admin-only writes.
+     */
+    match /services/{serviceId} {
+      allow get: if true;
+      allow list: if true;
+
+      function isAdmin() {
+          return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      }
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Controls access to bookings made by a specific user.
+     * @path /users/{userId}/bookings/{bookingId}
+     * @allow (create) User with ID 'user123' creates a booking under their ID. (request.auth.uid == 'user123')
+     * @allow (get) User with ID 'user123' reads a booking under their ID. (request.auth.uid == 'user123')
+     * @allow (update) User with ID 'user123' updates a booking under their ID. (request.auth.uid == 'user123')
+     * @allow (delete) User with ID 'user123' deletes a booking under their ID. (request.auth.uid == 'user123')
+     * @deny (create) User with ID 'user456' attempts to create a booking under user 'user123'.
+     * @deny (get) User with ID 'user456' attempts to read a booking under user 'user123'.
+     * @deny (update) User with ID 'user456' attempts to update a booking under user 'user123'.
+     * @deny (delete) User with ID 'user456' attempts to delete a booking under user 'user123'.
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId}/bookings/{bookingId} {
+      // Helper function to check if the user is signed in and owns the document.
+
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Controls access to bookings associated with a specific worker.
+     * @path /workers/{workerId}/bookings/{bookingId}
+     * @allow (create) Worker with ID 'worker123' creates a booking under their ID. (request.auth.uid == 'worker123')
+     * @allow (get) Worker with ID 'worker123' reads a booking under their ID. (request.auth.uid == 'worker123')
+     * @allow (update) Worker with ID 'worker123' updates a booking under their ID. (request.auth.uid == 'worker123')
+     * @allow (delete) Worker with ID 'worker123' deletes a booking under their ID. (request.auth.uid == 'worker123')
+     * @deny (create) User with ID 'user456' attempts to create a booking under worker 'worker123'.
+     * @deny (get) User with ID 'user456' attempts to read a booking under worker 'worker123'.
+     * @deny (update) User with ID 'user456' attempts to update a booking under worker 'worker123'.
+     * @deny (delete) User with ID 'user456' attempts to delete a booking under worker 'worker123'.
+     */
+    match /workers/{workerId}/bookings/{bookingId} {
+      // Helper function to check if the user is signed in and owns the document.
+
+      function isOwner(workerId) {
+        return request.auth.uid == workerId;
+      }
+
+      function isExistingOwner(workerId) {
+        return isOwner(workerId) && resource != null;
+      }
+
+      allow get: if isOwner(workerId);
+      allow list: if isOwner(workerId);
+      allow create: if isOwner(workerId) && request.resource.data.workerId == workerId;
+      allow update: if isExistingOwner(workerId) && request.resource.data.workerId == workerId;
+      allow delete: if isExistingOwner(workerId);
+    }
+
+    /**
+     * @description Controls access to frequently asked questions.
+     * @path /faqs/{faqId}
+     * @allow (get) Any user can read an FAQ.
+     * @allow (list) Any user can list FAQs.
+     * @deny (create) Non-admin user attempts to create an FAQ.
+     * @deny (update) Non-admin user attempts to update an FAQ.
+     * @deny (delete) Non-admin user attempts to delete an FAQ.
+     * @principle Public read access, admin-only writes.
+     */
+    match /faqs/{faqId} {
+      allow get: if true;
+      allow list: if true;
+
+      function isAdmin() {
+          return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      }
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+        /**
+         * @description Controls access to the admin roles document.
+         * @path /roles_admin/{uid}
+         * @allow (get) Always denied. This collection is designed for backend use, not client access.
+         * @allow (list) Always denied. This collection is designed for backend use, not client access.
+         * @deny (create) Always denied. This collection is designed for backend use, not client access.
+         * @deny (update) Always denied. This collection is designed for backend use, not client access.
+         * @deny (delete) Always denied. This collection is designed for backend use, not client access.
+         * @principle Restricts access to a user's own data tree.
+         */
+        match /roles_admin/{uid} {
+            allow get: if false;
+            allow list: if false;
+            allow create: if false;
+            allow update: if false;
+            allow delete: if false;
+        }
+  }
+}
