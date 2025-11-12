@@ -1,6 +1,6 @@
 'use client';
 
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
@@ -12,13 +12,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Star, MapPin, CheckCircle, Loader2 } from 'lucide-react';
 import { services } from '@/lib/data';
 
-export default function WorkerProfilePage({
-  params,
-}: {
-  params: { workerId: string };
-}) {
+export default function WorkerProfilePage() {
+  const params = useParams();
+  const workerId = params.workerId as string;
   const firestore = useFirestore();
-  const workerDocRef = useMemoFirebase(() => doc(firestore, 'workers', params.workerId), [firestore, params.workerId]);
+  const workerDocRef = useMemoFirebase(() => doc(firestore, 'workers', workerId), [firestore, workerId]);
   const { data: worker, isLoading } = useDoc(workerDocRef);
 
   if (isLoading) {
