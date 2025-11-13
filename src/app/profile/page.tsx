@@ -9,25 +9,57 @@ import { UserProfile } from '@/components/profile/UserProfile';
 import { WorkerProfile } from '@/components/profile/WorkerProfile';
 import { Loader2 } from 'lucide-react';
 
+function UserProfileLoader({ uid }: { uid: string }) {
+  const firestore = useFirestore();
+  const userDocRef = useMemoFirebase(() => doc(firestore, 'users', uid), [firestore, uid]);
+  const userBookingsColRef = useMemoFirebase(() => collection(firestore, `users/${uid}/bookings`), [firestore, uid]);
+  
+  const { data: userData, isLoading: isUserLoadingData } = useDoc(userDocRef);
+  const { data: userBookings, isLoading: isUserBookingsLoading } = useCollection(userBookingsColRef);
+
+  if (isUserLoadingData || isUserBookingsLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (userData) {
+    return <UserProfile user={userData} bookings={userBookings || []} />;
+  }
+  
+  return null;
+}
+
+function WorkerProfileLoader({ uid }: { uid: string }) {
+  const firestore = useFirestore();
+  const workerDocRef = useMemoFirebase(() => doc(firestore, 'workers', uid), [firestore, uid]);
+  const workerBookingsColRef = useMemoFirebase(() => collection(firestore, `workers/${uid}/bookings`), [firestore, uid]);
+
+  const { data: workerData, isLoading: isWorkerLoadingData } = useDoc(workerDocRef);
+  const { data: workerBookings, isLoading: isWorkerBookingsLoading } = useCollection(workerBookingsColRef);
+
+  if (isWorkerLoadingData || isWorkerBookingsLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (workerData) {
+    return <WorkerProfile worker={workerData} bookings={workerBookings || []} />;
+  }
+
+  return null;
+}
+
+
 export default function ProfilePage() {
   const { user, isUserLoading, isWorker } = useUser();
   const router = useRouter();
-  const firestore = useFirestore();
-
-  // Memoize Firestore references
-  const userDocRef = useMemoFirebase(() => (user ? doc(firestore, 'users', user.uid) : null), [firestore, user]);
-  const workerDocRef = useMemoFirebase(() => (user ? doc(firestore, 'workers', user.uid) : null), [firestore, user]);
   
-  const userBookingsColRef = useMemoFirebase(() => (user && !isWorker ? collection(firestore, `users/${user.uid}/bookings`) : null), [firestore, user, isWorker]);
-  const workerBookingsColRef = useMemoFirebase(() => (user && isWorker ? collection(firestore, 'workers', user.uid, 'bookings') : null), [firestore, user, isWorker]);
-
-  // Fetch data using hooks
-  const { data: userData, isLoading: isUserLoadingData } = useDoc(userDocRef);
-  const { data: workerData, isLoading: isWorkerLoadingData } = useDoc(workerDocRef);
-  const { data: userBookings, isLoading: isUserBookingsLoading } = useCollection(userBookingsColRef);
-  const { data: workerBookings, isLoading: isWorkerBookingsLoading } = useCollection(workerBookingsColRef);
-
-
   useEffect(() => {
     // If auth is done loading and there's no user, redirect to login.
     if (!isUserLoading && !user) {
@@ -35,9 +67,7 @@ export default function ProfilePage() {
     }
   }, [isUserLoading, user, router]);
 
-  const isLoading = isUserLoading || isUserLoadingData || isWorkerLoadingData || isUserBookingsLoading || isWorkerBookingsLoading;
-
-  if (isLoading) {
+  if (isUserLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -46,14 +76,10 @@ export default function ProfilePage() {
   }
 
   if (user) {
-    // Render worker profile if worker data exists
-    if (isWorker && workerData) {
-      return <WorkerProfile worker={workerData} bookings={workerBookings || []} />;
-    }
-    
-    // Render user profile if user data exists
-    if (!isWorker && userData) {
-      return <UserProfile user={userData} bookings={userBookings || []} />;
+    if (isWorker) {
+      return <WorkerProfileLoader uid={user.uid} />;
+    } else {
+      return <UserProfileLoader uid={user.uid} />;
     }
   }
 
