@@ -44,6 +44,18 @@ service cloud.firestore {
       allow list: if true; // Allow listing workers for a service.
       allow write: if isOwner(workerId);
     }
+    
+    /**
+     * @description Controls access to worker reviews.
+     * @path /workers/{workerId}/reviews/{reviewId}
+     * @principle Anyone can read reviews for a worker. Only authenticated users can
+     *            create reviews, and they can only edit or delete their own reviews.
+     */
+    match /workers/{workerId}/reviews/{reviewId} {
+      allow get, list: if true;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
 
     /**
      * @description Controls access to service definitions.
@@ -62,11 +74,8 @@ service cloud.firestore {
      * A worker assigned to the booking can update its status.
      */
     match /users/{userId}/bookings/{bookingId} {
-        // The user who owns the subcollection can read/write their booking.
-        allow read, create, delete: if isOwner(userId);
-        
-        // A worker can update a user's booking if they are the assigned worker for that booking.
-        allow update: if isOwner(userId) || (request.auth != null && request.auth.uid == resource.data.workerId);
+        // The user who owns the subcollection can manage their booking.
+        allow read, create, delete, update: if isOwner(userId);
     }
     
     /**
@@ -107,3 +116,4 @@ service cloud.firestore {
     }
   }
 }
+    
