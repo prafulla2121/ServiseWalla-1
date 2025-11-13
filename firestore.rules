@@ -52,9 +52,12 @@ service cloud.firestore {
         return changedKeys.hasOnly(['status', 'completionCode']) || changedKeys.hasOnly(['status']) || changedKeys.hasOnly(['completionCode']);
     }
     
+    // Updated function: Checks participation by looking for a booking doc.
     function isChatParticipant(bookingId) {
-      let chatInfo = get(/databases/$(database)/documents/chats/$(bookingId)).data;
-      return request.auth.uid == chatInfo.userId || request.auth.uid == chatInfo.workerId;
+      let uid = request.auth.uid;
+      // User is a participant if a booking document exists for them as either a customer or a worker.
+      return exists(/databases/$(database)/documents/users/$(uid)/bookings/$(bookingId)) ||
+             exists(/databases/$(database)/documents/workers/$(uid)/bookings/$(bookingId));
     }
 
     /**
