@@ -25,6 +25,8 @@ export default function BookingDetailsPage() {
 
     const bookingDocRef = useMemoFirebase(() => {
         if (!user || !bookingId) return null;
+        // This path needs to be determined based on whether the user is a worker or customer
+        // For now, assuming user is customer. A more robust solution might be needed.
         return doc(firestore, `users/${user.uid}/bookings`, bookingId);
     }, [firestore, user, bookingId]);
 
@@ -39,13 +41,6 @@ export default function BookingDetailsPage() {
 
     const isLoading = isUserLoading || isBookingLoading || isWorkerLoading;
     
-    const handleChatClick = () => {
-        toast({
-            title: "Feature Coming Soon!",
-            description: "In-app chat between customers and professionals will be available in a future update."
-        })
-    }
-
     if (isLoading) {
         return (
             <div className="flex h-[calc(100vh-80px)] items-center justify-center">
@@ -81,6 +76,7 @@ export default function BookingDetailsPage() {
     
     let currentStepIndex = statusSteps.findIndex(step => step.status === booking.status);
     if(booking.status === 'cancelled') currentStepIndex = -1;
+    const canChat = ['confirmed', 'en-route', 'in-progress'].includes(booking.status);
 
     return (
         <div className="container mx-auto max-w-4xl py-12">
@@ -151,9 +147,11 @@ export default function BookingDetailsPage() {
                                         <p className="text-primary">{service?.name}</p>
                                     </div>
                                  </Link>
-                                <Button onClick={handleChatClick} variant="outline">
-                                    <MessageSquare className="mr-2 h-4 w-4" />
-                                    Chat with Professional
+                                <Button asChild variant="outline" disabled={!canChat}>
+                                    <Link href={`/chat/${booking.id}`}>
+                                        <MessageSquare className="mr-2 h-4 w-4" />
+                                        Chat with Professional
+                                    </Link>
                                 </Button>
                              </div>
                         </div>

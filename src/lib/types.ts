@@ -1,4 +1,5 @@
 
+
 export interface Booking {
   id: string;
   userId: string;
@@ -64,4 +65,21 @@ export interface User {
   state?: string;
   zipCode?: string;
   photoURL?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  text: string;
+  senderId: string;
+  createdAt: string; // ISO string
+}
+
+export interface Chat {
+  id: string; // Same as bookingId
+  userId: string;
+  workerId: string;
+  lastMessage?: {
+    text: string;
+    timestamp: string;
+  };
 }

@@ -51,6 +51,11 @@ service cloud.firestore {
         // The set of changed keys must be a subset of {'status', 'completionCode'}
         return changedKeys.hasOnly(['status', 'completionCode']) || changedKeys.hasOnly(['status']) || changedKeys.hasOnly(['completionCode']);
     }
+    
+    function isChatParticipant(bookingId) {
+      let chatInfo = get(/databases/$(database)/documents/chats/$(bookingId)).data;
+      return request.auth.uid == chatInfo.userId || request.auth.uid == chatInfo.workerId;
+    }
 
     /**
      * @description Controls access to user profile data.
@@ -150,6 +155,27 @@ service cloud.firestore {
      */
     match /roles_admin/{uid} {
         allow read, write: if false;
+    }
+    
+     /**
+     * @description Controls access to chat metadata and messages.
+     * @path /chats/{bookingId}
+     * @principle Only participants of a booking can access the associated chat.
+     */
+    match /chats/{bookingId} {
+      allow get: if isChatParticipant(bookingId);
+      // Allow creation of a chat document only if the creator is one of the participants in the booking
+      // This is usually done when the first message is sent.
+      allow create: if request.auth.uid == request.resource.data.userId || request.auth.uid == request.resource.data.workerId;
+      // Allow participants to update lastMessage field
+      allow update: if isChatParticipant(bookingId) && request.resource.data.keys().hasOnly(['lastMessage']);
+
+      match /messages/{messageId} {
+        allow read, list: if isChatParticipant(bookingId);
+        // Allow a participant to create a message, ensuring the senderId is their own UID.
+        allow create: if isChatParticipant(bookingId) && request.resource.data.senderId == request.auth.uid;
+        allow update, delete: if false; // Messages are immutable
+      }
     }
   }
 }
