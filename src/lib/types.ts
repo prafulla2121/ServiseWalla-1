@@ -10,6 +10,9 @@ export interface Booking {
   email: string;
   phone: string;
   address: string;
+  city: string;
+  state: string;
+  zipCode: string;
 }
 
 

@@ -52,6 +52,9 @@ const bookingSchema = z.object({
   email: z.string().email('Invalid email address.'),
   phone: z.string().min(10, 'A valid phone number is required.'),
   address: z.string().min(5, 'Please enter a valid address.'),
+  city: z.string().min(2, 'City is required.'),
+  state: z.string().min(2, 'State is required.'),
+  zipCode: z.string().min(5, 'Zip code is required.'),
 });
 
 type BookingFormValues = z.infer<typeof bookingSchema>;
@@ -76,10 +79,6 @@ export default function BookPage() {
       workerId: workerIdParam ?? '',
       name: user?.displayName ?? '',
       email: user?.email ?? '',
-      phone: '',
-      address: '',
-      date: undefined,
-      time: undefined,
     },
   });
 
@@ -116,10 +115,13 @@ export default function BookPage() {
       serviceId: data.serviceId,
       bookingDate: bookingDateTime.toISOString(),
       status: 'pending' as const,
-      name: data.name, // Customer's name from form
-      email: data.email, // Customer's email from form
+      name: data.name,
+      email: data.email,
       phone: data.phone,
       address: data.address,
+      city: data.city,
+      state: data.state,
+      zipCode: data.zipCode,
     };
     
     const userBookingRef = doc(firestore, `users/${user.uid}/bookings`, bookingId);
@@ -151,7 +153,8 @@ export default function BookPage() {
   const timeSlots = ['09:00', '11:00', '13:00', '15:00', '17:00'];
   
   const handleUseCurrentLocation = () => {
-    // Placeholder for future implementation with Geolocation API
+    // This is a placeholder. Full implementation requires a Geolocation API call
+    // and potentially a Geocoding service to convert coords to an address.
     toast({
       title: "Feature Coming Soon!",
       description: "Automatic location detection will be available in a future update.",
@@ -353,12 +356,8 @@ export default function BookPage() {
                     )}
                   />
                 </div>
-                 <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex justify-between items-center">
+                 <div className="space-y-4">
+                    <div className="flex justify-between items-center">
                         <FormLabel>Service Address</FormLabel>
                         <Button
                           type="button"
@@ -369,13 +368,57 @@ export default function BookPage() {
                           <MapPin className="mr-1 h-3 w-3" /> Use my location
                         </Button>
                       </div>
-                      <FormControl>
-                        <Input placeholder="123 Main St, Anytown, USA" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormControl>
+                            <Input placeholder="Street Address" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
+                        <FormField
+                            control={form.control}
+                            name="city"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormControl>
+                                    <Input placeholder="City" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="state"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormControl>
+                                    <Input placeholder="State" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="zipCode"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormControl>
+                                    <Input placeholder="Zip Code" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                 </div>
               </div>
 
               <Button type="submit" className="w-full" size="lg" disabled={!user || isSubmitting}>
