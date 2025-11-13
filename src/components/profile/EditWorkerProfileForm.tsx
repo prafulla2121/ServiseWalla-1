@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { generateBio } from '@/ai/flows/bio-generator';
+import { services } from '@/lib/data';
 
 const profileSchema = z.object({
   firstName: z.string().min(2, 'First name is required.'),
@@ -61,6 +62,8 @@ export function EditWorkerProfileForm({ worker, onSave }: EditWorkerProfileFormP
     },
   });
 
+  const workerService = services.find(s => worker.serviceIds?.includes(s.id));
+
   const handleGenerateBio = async () => {
     const keywords = form.watch('bioKeywords');
     if (!keywords || keywords.trim().length < 3) {
@@ -75,7 +78,7 @@ export function EditWorkerProfileForm({ worker, onSave }: EditWorkerProfileFormP
     setIsGenerating(true);
     try {
       const result = await generateBio({
-        profession: worker.service, // Assuming service name is on worker object
+        profession: workerService?.name || 'Professional',
         keywords: keywords,
       });
       if (result.bio) {
@@ -98,7 +101,7 @@ export function EditWorkerProfileForm({ worker, onSave }: EditWorkerProfileFormP
   };
 
   const onSubmit: SubmitHandler<ProfileFormValues> = (data) => {
-    if (!user) return;
+    if (!user || !firestore) return;
 
     const workerDocRef = doc(firestore, 'workers', user.uid);
     // We only update the fields from the form
