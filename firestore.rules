@@ -89,7 +89,7 @@ service cloud.firestore {
       }
 
       allow get: if true;
-      allow list: if request.auth != null; // Allow listing only for authenticated users.
+      allow list: if true;
       allow create: if isOwner(workerId) && request.resource.data.id == workerId;
       allow update: if isExistingOwner(workerId);
       allow delete: if isExistingOwner(workerId);
