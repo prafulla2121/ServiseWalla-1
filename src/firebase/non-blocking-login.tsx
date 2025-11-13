@@ -83,7 +83,6 @@ export function initiateEmailSignUp(authInstance: Auth, email: string, password:
             title: "Registration Failed",
             description,
         });
-        console.error("Email sign-up error", error);
     });
 }
 
@@ -101,6 +100,5 @@ export function initiateEmailSignIn(authInstance: Auth, email: string, password:
             title: "Sign-in Failed",
             description,
         });
-        console.error("Email sign-in error", error);
   });
 }
