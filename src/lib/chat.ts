@@ -13,7 +13,7 @@ import {
   where,
   getDocs,
 } from 'firebase/firestore';
-import { useCollection, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import type { ChatMessage, Booking, Chat } from './types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
