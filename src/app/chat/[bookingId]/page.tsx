@@ -61,23 +61,14 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!messageText.trim() || !user || !booking) return;
 
-    setIsSending(true);
-    try {
-      await sendMessage(firestore, booking, user.uid, messageText);
-      setMessageText('');
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Error Sending Message',
-        description: error.message || 'Could not send your message.',
-      });
-    } finally {
-      setIsSending(false);
-    }
+    // The UI should feel instant. Don't block on send.
+    // The `sendMessage` function will handle optimistic updates and error reporting.
+    sendMessage(firestore, booking, user.uid, messageText);
+    setMessageText('');
   };
   
   const isLoading = isUserLoading || isBookingLoading || isMessagesLoading || isOtherUserLoading;

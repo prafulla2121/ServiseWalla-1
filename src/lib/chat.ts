@@ -12,6 +12,7 @@ import {
   getDoc,
   where,
   getDocs,
+  writeBatch,
 } from 'firebase/firestore';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import type { ChatMessage, Booking, Chat } from './types';
@@ -38,59 +39,54 @@ export function useChatMessages(bookingId: string) {
 
 /**
  * Sends a message in a chat associated with a booking.
- * It also creates the chat metadata document if it doesn't exist.
+ * This function is non-blocking and uses a batch write.
  */
-export async function sendMessage(
+export function sendMessage(
   firestore: Firestore,
   booking: Booking,
   senderId: string,
   text: string
 ) {
   if (!text.trim()) {
-    throw new Error('Message text cannot be empty.');
+    // Silently fail for empty messages, or throw if you want to notify the user.
+    return;
   }
 
   const chatRef = doc(firestore, 'chats', booking.id);
-  const messagesColRef = collection(firestore, `chats/${booking.id}/messages`);
+  const newMessageRef = doc(collection(firestore, `chats/${booking.id}/messages`));
 
   const messageData = {
+    id: newMessageRef.id,
     text,
     senderId,
     createdAt: new Date().toISOString(),
   };
 
-  try {
-    // Check if chat metadata exists, create if not
-    const chatSnap = await getDoc(chatRef);
-    if (!chatSnap.exists()) {
-      const chatMetadata: Chat = {
-        id: booking.id,
-        userId: booking.userId,
-        workerId: booking.workerId,
-      };
-      await setDoc(chatRef, chatMetadata);
-    }
-    
-    // Add the new message
-    const messagePromise = addDoc(messagesColRef, messageData);
-    
-    // Optimistically update the last message summary
-    const lastMessageUpdatePromise = setDoc(chatRef, {
-        lastMessage: {
-            text: text,
-            timestamp: messageData.createdAt
-        }
-    }, { merge: true });
+  const chatMetadata: Chat = {
+    id: booking.id,
+    userId: booking.userId,
+    workerId: booking.workerId,
+    lastMessage: {
+      text: text,
+      timestamp: messageData.createdAt,
+    },
+  };
+  
+  const batch = writeBatch(firestore);
 
-    await Promise.all([messagePromise, lastMessageUpdatePromise]);
+  // 1. Set the new message document
+  batch.set(newMessageRef, messageData);
+  // 2. Create or update the chat metadata document with the last message
+  batch.set(chatRef, chatMetadata, { merge: true });
 
-  } catch (error) {
+  // Commit the batch and handle potential permission errors without crashing
+  batch.commit().catch(error => {
      const permissionError = new FirestorePermissionError({
-        path: messagesColRef.path, // Path for creating a message
+        path: newMessageRef.path, // The path for creating a message
         operation: 'create',
         requestResourceData: messageData,
      });
      errorEmitter.emit('permission-error', permissionError);
-     throw new Error("Failed to send message. You may not have permission.");
-  }
+     // Optional: You could also use a toast here to inform the user the message failed to send.
+  });
 }
