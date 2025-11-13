@@ -187,6 +187,7 @@ export default function BookPage() {
                             form.setValue('workerId', ''); // Reset worker when service changes
                         }}
                         defaultValue={field.value}
+                        disabled={!!serviceIdParam}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -214,7 +215,7 @@ export default function BookPage() {
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
-                        disabled={!selectedServiceId || isLoadingWorkers}
+                        disabled={!selectedServiceId || isLoadingWorkers || !!workerIdParam}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -442,14 +443,13 @@ export default function BookPage() {
             <AlertDialogTitle className="text-center font-headline text-2xl">Congratulations!</AlertDialogTitle>
             <AlertDialogDescription className="text-center">
                 Your booking request has been sent successfully. The professional will confirm the appointment shortly.
-            </AlertDialogDescription>
+            </Aler tDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
                 <AlertDialogAction onClick={() => router.push('/profile')}>View My Bookings</AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>
-
     </>
   );
 }
