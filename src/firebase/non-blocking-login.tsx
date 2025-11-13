@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Auth,
@@ -54,6 +55,7 @@ export function initiateEmailSignUp(authInstance: Auth, email: string, password:
             firstName,
             lastName,
             email: user.email,
+            photoURL: user.photoURL,
           };
           setDocumentNonBlocking(userDocRef, userData, { merge: false });
         } else if (role === 'worker') {
@@ -63,6 +65,7 @@ export function initiateEmailSignUp(authInstance: Auth, email: string, password:
             firstName,
             lastName,
             email: user.email,
+            photoURL: user.photoURL,
             serviceIds: serviceId ? [serviceId] : [],
             bio: '',
           };

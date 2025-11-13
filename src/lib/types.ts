@@ -1,3 +1,4 @@
+
 export interface Booking {
   id: string;
   userId: string;
@@ -36,7 +37,8 @@ export interface Worker {
   // These are not in firestore yet, but needed for card
   rating?: number;
   reviews?: number;
-  avatarUrl?: string;
+  avatarUrl?: string; // Legacy
+  photoURL?: string; // New from auth
   coverImageUrl?: string;
 }
 
@@ -50,4 +52,16 @@ export interface Review {
     comment: string;
     createdAt: string; // ISO string
 }
-    
+
+export interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  photoURL?: string;
+}

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -22,7 +23,7 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, CheckCircle, History, Phone, User as UserIcon, MapPin, Truck, PlayCircle, Star, Loader2 } from 'lucide-react';
+import { Clock, CheckCircle, History, Phone, User as UserIcon, MapPin, Truck, PlayCircle, Star, Loader2, Pencil } from 'lucide-react';
 import { Badge } from '../ui/badge';
 
 interface WorkerProfileProps {
@@ -86,37 +87,36 @@ function BookingItem({ booking, onUpdateStatus, onCompleteBooking, isUpdating }:
 
   return (
     <>
-      <div className="p-4 border rounded-lg">
-        <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center'>
-          <div className="mb-4 sm:mb-0 flex-grow">
-            <div className="flex items-center gap-4">
-              <h3 className="font-semibold">{getServiceName(booking.serviceId)}</h3>
-              <Badge variant="outline" className="capitalize">{formatStatus(booking.status)}</Badge>
+      <div className="p-4 border rounded-lg flex flex-col sm:flex-row gap-4 justify-between sm:items-center">
+        <div className="flex-grow">
+            <div className="flex items-center gap-4 mb-2">
+                <h3 className="font-semibold">{getServiceName(booking.serviceId)}</h3>
+                <Badge variant={booking.status === 'completed' || booking.status === 'confirmed' ? 'secondary' : booking.status === 'cancelled' ? 'destructive' : 'default'} className="capitalize">{formatStatus(booking.status)}</Badge>
             </div>
             <p className="text-sm text-muted-foreground">
-              {format(new Date(booking.bookingDate), "MMMM d, yyyy 'at' h:mm a")}
+            {format(new Date(booking.bookingDate), "MMMM d, yyyy 'at' h:mm a")}
             </p>
-            <div className="mt-2 text-sm space-y-1">
-              <div className="flex items-center text-muted-foreground">
-                <UserIcon className="mr-2 h-4 w-4" />
-                <span>{booking.name}</span>
-              </div>
-              {isConfirmed && (
-                <>
-                  <div className="flex items-center text-muted-foreground">
-                    <Phone className="mr-2 h-4 w-4" />
-                    <a href={`tel:${booking.phone}`} className="hover:text-primary">{booking.phone}</a>
-                  </div>
-                  <div className="flex items-center text-muted-foreground">
-                    <MapPin className="mr-2 h-4 w-4" />
-                    <span>{booking.address}</span>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2 self-start sm:self-center">
-             {isUpdating && <Loader2 className="h-5 w-5 animate-spin" />}
+            {isConfirmed && (
+                <Card className="mt-3 bg-muted/50">
+                    <CardContent className="p-3 text-sm space-y-2">
+                        <div className="flex items-center text-muted-foreground">
+                            <UserIcon className="mr-2 h-4 w-4" />
+                            <span>{booking.name}</span>
+                        </div>
+                        <div className="flex items-center text-muted-foreground">
+                            <Phone className="mr-2 h-4 w-4" />
+                            <a href={`tel:${booking.phone}`} className="hover:text-primary">{booking.phone}</a>
+                        </div>
+                        <div className="flex items-start text-muted-foreground">
+                            <MapPin className="mr-2 h-4 w-4 mt-0.5 flex-shrink-0" />
+                            <span>{booking.address}, {booking.city}, {booking.state}</span>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+        </div>
+        <div className="flex flex-wrap gap-2 self-start sm:self-center shrink-0">
+             {isUpdating && <Loader2 className="h-8 w-8 animate-spin" />}
              {!isUpdating && (
                 <>
                     {booking.status === 'pending' && (
@@ -143,11 +143,13 @@ function BookingItem({ booking, onUpdateStatus, onCompleteBooking, isUpdating }:
                             Mark as Completed
                         </Button>
                     )}
+                    {(booking.status === 'completed' || booking.status === 'cancelled') && (
+                        <span className="text-sm text-muted-foreground h-9 flex items-center px-3">No actions</span>
+                    )}
                 </>
              )}
           </div>
         </div>
-      </div>
 
       <Dialog open={showCompleteDialog} onOpenChange={setShowCompleteDialog}>
         <DialogContent>
@@ -253,7 +255,7 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
       <header className="flex flex-col sm:flex-row items-start justify-between gap-6">
         <div className="flex items-center gap-6">
           <Avatar className="h-24 w-24">
-            <AvatarImage src={user?.photoURL ?? ''} />
+            <AvatarImage src={profileWorker.photoURL ?? ''} />
             <AvatarFallback>{profileWorker.firstName?.[0]}{profileWorker.lastName?.[0]}</AvatarFallback>
           </Avatar>
           <div>
@@ -263,7 +265,7 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
         </div>
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline">Edit Profile</Button>
+             <Button variant="outline" size="sm"><Pencil className="mr-2 h-4 w-4" /> Edit Profile</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-2xl">
             <DialogHeader>

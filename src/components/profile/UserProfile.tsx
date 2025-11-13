@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -11,7 +12,7 @@ import { Button } from '../ui/button';
 import { useState } from 'react';
 import { cancelBookingAsUser } from '@/lib/bookings';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, KeyRound, ChevronRight, Star } from 'lucide-react';
+import { Loader2, KeyRound, ChevronRight, Star, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import {
   Dialog,
@@ -21,6 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ReviewForm } from './ReviewForm';
+import { EditUserProfileForm } from './EditUserProfileForm';
 
 
 interface UserProfileProps {
@@ -34,6 +36,7 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
   const { toast } = useToast();
   const [bookings, setBookings] = useState(initialBookings);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const getServiceName = (serviceId: string) => {
     return services.find(s => s.id === serviceId)?.name || 'Unknown Service';
@@ -90,15 +93,30 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
 
   return (
     <div className="container mx-auto max-w-4xl py-12">
-      <div className="flex items-center gap-6">
-        <Avatar className="h-24 w-24">
-          <AvatarImage src={user?.photoURL ?? ''} />
-          <AvatarFallback>{profileUser.firstName?.[0]}{profileUser.lastName?.[0]}</AvatarFallback>
-        </Avatar>
-        <div>
-          <h1 className="font-headline text-3xl font-bold">{profileUser.firstName} {profileUser.lastName}</h1>
-          <p className="text-muted-foreground">{profileUser.email}</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-6">
+            <div className="relative">
+                <Avatar className="h-24 w-24">
+                    <AvatarImage src={profileUser.photoURL ?? ''} />
+                    <AvatarFallback>{profileUser.firstName?.[0]}{profileUser.lastName?.[0]}</AvatarFallback>
+                </Avatar>
+            </div>
+            <div>
+                <h1 className="font-headline text-3xl font-bold">{profileUser.firstName} {profileUser.lastName}</h1>
+                <p className="text-muted-foreground">{profileUser.email}</p>
+            </div>
         </div>
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm"><Pencil className="mr-2 h-4 w-4" /> Edit Profile</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Your Profile</DialogTitle>
+            </DialogHeader>
+            <EditUserProfileForm user={profileUser} onSave={() => setIsEditDialogOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="mt-12">
