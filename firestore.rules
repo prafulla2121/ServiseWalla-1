@@ -10,7 +10,7 @@
  * - /users/{userId}: User profiles, accessible only to the user themselves.
  * - /workers/{workerId}: Worker profiles, accessible only to the worker themselves.
  * - /services/{serviceId}: Service definitions, publicly readable, writeable by admins only.
- * - /users/{userId}/bookings/{bookingId}: Bookings made by a user, accessible only to that user.
+ * - /users/{userId}/bookings/{bookingId}: Bookings made by a user, accessible only to that user and the assigned worker for status updates.
  * - /workers/{workerId}/bookings/{bookingId}: Bookings associated with a worker, accessible by both the worker and the user who made the booking.
  * - /faqs/{faqId}: Frequently asked questions, publicly readable, writeable by admins only.
  * - /roles_admin/{uid}: Documents the UIDs which have admin roles, only accessible by backend functions.
@@ -146,11 +146,18 @@ service cloud.firestore {
       function isWorkerOnBooking() {
           return exists(/databases/$(database)/documents/workers/$(request.auth.uid)) && request.auth.uid == resource.data.workerId;
       }
+      
+      // A worker can update the status and completion code.
+      function isWorkerUpdatingAllowedFields() {
+        let allowedKeys = ['status', 'completionCode'];
+        let incomingKeys = request.resource.data.keys();
+        return isWorkerOnBooking() && incomingKeys.hasAll(allowedKeys) && incomingKeys.size() <= allowedKeys.size();
+      }
 
       allow get: if isOwner(userId);
       allow list: if isOwner(userId);
       allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if (isExistingOwner(userId) && request.resource.data.userId == userId) || isWorkerOnBooking();
+      allow update: if (isExistingOwner(userId) && request.resource.data.userId == userId) || isWorkerUpdatingAllowedFields();
       allow delete: if isExistingOwner(userId);
     }
 
