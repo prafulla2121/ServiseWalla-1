@@ -443,7 +443,7 @@ export default function BookPage() {
             <AlertDialogTitle className="text-center font-headline text-2xl">Congratulations!</AlertDialogTitle>
             <AlertDialogDescription className="text-center">
                 Your booking request has been sent successfully. The professional will confirm the appointment shortly.
-            </Aler tDialogDescription>
+            </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
                 <AlertDialogAction onClick={() => router.push('/profile')}>View My Bookings</AlertDialogAction>
