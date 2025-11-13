@@ -32,11 +32,12 @@ interface WorkerProfileProps {
 
 interface BookingItemProps {
   booking: Booking;
-  onUpdateStatus: (booking: Booking, status: Booking['status']) => void;
+  onUpdateStatus: (booking: Booking, status: Booking['status']) => Promise<void>;
   onCompleteBooking: (booking: Booking, code: string) => Promise<void>;
+  isUpdating: boolean;
 }
 
-function BookingItem({ booking, onUpdateStatus, onCompleteBooking }: BookingItemProps) {
+function BookingItem({ booking, onUpdateStatus, onCompleteBooking, isUpdating }: BookingItemProps) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [completionCode, setCompletionCode] = useState('');
@@ -69,6 +70,19 @@ function BookingItem({ booking, onUpdateStatus, onCompleteBooking }: BookingItem
   const formatStatus = (status: string) => {
     return status.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   }
+  
+  const createUpdateHandler = (status: Booking['status']) => async () => {
+    try {
+      await onUpdateStatus(booking, status);
+    } catch (error: any) {
+       toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: error.message || `Could not update status to ${status}.`,
+      });
+    }
+  };
+
 
   return (
     <>
@@ -102,30 +116,35 @@ function BookingItem({ booking, onUpdateStatus, onCompleteBooking }: BookingItem
             </div>
           </div>
           <div className="flex flex-wrap gap-2 self-start sm:self-center">
-            {booking.status === 'pending' && (
-              <>
-                <Button size="sm" onClick={() => onUpdateStatus(booking, 'confirmed')}>Accept</Button>
-                <Button size="sm" variant="destructive" onClick={() => onUpdateStatus(booking, 'cancelled')}>Decline</Button>
-              </>
-            )}
-            {booking.status === 'confirmed' && (
-              <Button size="sm" onClick={() => onUpdateStatus(booking, 'en-route')}>
-                  <Truck className="mr-2 h-4 w-4" />
-                  On the Way
-              </Button>
-            )}
-            {booking.status === 'en-route' && (
-              <Button size="sm" onClick={() => onUpdateStatus(booking, 'in-progress')}>
-                  <PlayCircle className="mr-2 h-4 w-4" />
-                  Start Service
-              </Button>
-            )}
-            {booking.status === 'in-progress' && (
-              <Button size="sm" onClick={() => setShowCompleteDialog(true)}>
-                  <Star className="mr-2 h-4 w-4" />
-                  Mark as Completed
-              </Button>
-            )}
+             {isUpdating && <Loader2 className="h-5 w-5 animate-spin" />}
+             {!isUpdating && (
+                <>
+                    {booking.status === 'pending' && (
+                        <>
+                            <Button size="sm" onClick={createUpdateHandler('confirmed')}>Accept</Button>
+                            <Button size="sm" variant="destructive" onClick={createUpdateHandler('cancelled')}>Decline</Button>
+                        </>
+                    )}
+                    {booking.status === 'confirmed' && (
+                        <Button size="sm" onClick={createUpdateHandler('en-route')}>
+                            <Truck className="mr-2 h-4 w-4" />
+                            On the Way
+                        </Button>
+                    )}
+                    {booking.status === 'en-route' && (
+                        <Button size="sm" onClick={createUpdateHandler('in-progress')}>
+                            <PlayCircle className="mr-2 h-4 w-4" />
+                            Start Service
+                        </Button>
+                    )}
+                    {booking.status === 'in-progress' && (
+                        <Button size="sm" onClick={() => setShowCompleteDialog(true)}>
+                            <Star className="mr-2 h-4 w-4" />
+                            Mark as Completed
+                        </Button>
+                    )}
+                </>
+             )}
           </div>
         </div>
       </div>
@@ -168,35 +187,52 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
   const { toast } = useToast();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
+  const [updatingBookingId, setUpdatingBookingId] = useState<string | null>(null);
 
   useEffect(() => {
     setBookings(initialBookings);
   }, [initialBookings]);
 
-  const handleUpdateStatus = (bookingToUpdate: Booking, status: Booking['status']) => {
+  const handleUpdateStatus = async (bookingToUpdate: Booking, status: Booking['status']) => {
     if (!user || !firestore) return;
-    updateBookingStatus(firestore, user.uid, bookingToUpdate.id, status);
-    
-    // Optimistically update UI
-    setBookings(currentBookings => 
-      currentBookings.map(b => 
-        b.id === bookingToUpdate.id ? { ...b, status: status, completionCode: status === 'confirmed' ? '----' : b.completionCode } : b
-      )
-    );
-     toast({
-      title: "Booking Updated",
-      description: `The booking has been marked as ${status}.`,
-    });
+    setUpdatingBookingId(bookingToUpdate.id);
+    try {
+        await updateBookingStatus(firestore, user.uid, bookingToUpdate.id, status);
+        
+        // Optimistically update UI
+        setBookings(currentBookings => 
+          currentBookings.map(b => 
+            b.id === bookingToUpdate.id ? { ...b, status: status, completionCode: status === 'confirmed' ? '----' : b.completionCode } : b
+          )
+        );
+         toast({
+          title: "Booking Updated",
+          description: `The booking has been marked as ${status}.`,
+        });
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Update Failed",
+            description: error.message || `Could not update booking status.`
+        });
+    } finally {
+        setUpdatingBookingId(null);
+    }
   };
 
   const handleCompleteBooking = async (bookingToUpdate: Booking, code: string) => {
     if (!user || !firestore) return;
-    await completeBookingWithCode(firestore, user.uid, bookingToUpdate.id, code);
-    setBookings(currentBookings => 
-      currentBookings.map(b => 
-        b.id === bookingToUpdate.id ? { ...b, status: 'completed' } : b
-      )
-    );
+    setUpdatingBookingId(bookingToUpdate.id);
+    try {
+        await completeBookingWithCode(firestore, user.uid, bookingToUpdate.id, code);
+        setBookings(currentBookings => 
+          currentBookings.map(b => 
+            b.id === bookingToUpdate.id ? { ...b, status: 'completed' } : b
+          )
+        );
+    } finally {
+        setUpdatingBookingId(null);
+    }
   };
   
   const workerService = services.find(s => profileWorker.serviceIds?.includes(s.id));
@@ -288,7 +324,7 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {pendingBookings.length > 0 ? (
-                        pendingBookings.map(booking => <BookingItem key={booking.id} booking={booking} onUpdateStatus={handleUpdateStatus} onCompleteBooking={handleCompleteBooking} />)
+                        pendingBookings.map(booking => <BookingItem key={booking.id} booking={booking} onUpdateStatus={handleUpdateStatus} onCompleteBooking={handleCompleteBooking} isUpdating={updatingBookingId === booking.id} />)
                     ) : (
                         <p className="text-muted-foreground text-center py-8">No pending requests.</p>
                     )}
@@ -303,7 +339,7 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {upcomingBookings.length > 0 ? (
-                        upcomingBookings.map(booking => <BookingItem key={booking.id} booking={booking} onUpdateStatus={handleUpdateStatus} onCompleteBooking={handleCompleteBooking} />)
+                        upcomingBookings.map(booking => <BookingItem key={booking.id} booking={booking} onUpdateStatus={handleUpdateStatus} onCompleteBooking={handleCompleteBooking} isUpdating={updatingBookingId === booking.id} />)
                     ) : (
                         <p className="text-muted-foreground text-center py-8">No upcoming jobs.</p>
                     )}
@@ -318,7 +354,7 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {historicalBookings.length > 0 ? (
-                        historicalBookings.map(booking => <BookingItem key={booking.id} booking={booking} onUpdateStatus={handleUpdateStatus} onCompleteBooking={handleCompleteBooking} />)
+                        historicalBookings.map(booking => <BookingItem key={booking.id} booking={booking} onUpdateStatus={handleUpdateStatus} onCompleteBooking={handleCompleteBooking} isUpdating={updatingBookingId === booking.id} />)
                     ) : (
                         <p className="text-muted-foreground text-center py-8">No jobs in your history yet.</p>
                     )}
@@ -330,5 +366,3 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
     </div>
   );
 }
-
-    

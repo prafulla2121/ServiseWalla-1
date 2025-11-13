@@ -1,7 +1,5 @@
 'use client';
-import { Firestore, doc, getDoc } from "firebase/firestore";
-import { updateDocumentNonBlocking } from "@/firebase";
-import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { Firestore, doc, getDoc, writeBatch } from "firebase/firestore";
 import { Booking } from "./types";
 
 /**
@@ -17,7 +15,7 @@ function generateCompletionCode(): string {
 }
 
 
-export function updateBookingStatus(
+export async function updateBookingStatus(
     firestore: Firestore, 
     workerId: string,
     bookingId: string, 
@@ -25,34 +23,37 @@ export function updateBookingStatus(
 ) {
     const workerBookingRef = doc(firestore, `workers/${workerId}/bookings`, bookingId);
     
-    let updateData: Partial<Booking> = { status };
-
-    // If the booking is being confirmed, generate and add the completion code.
-    if (status === 'confirmed') {
-        updateData.completionCode = generateCompletionCode();
-    }
-
-    // Update the worker's booking document
-    updateDocumentNonBlocking(workerBookingRef, updateData);
-
-    // Also update the user's copy of the booking document to keep them in sync.
-    const updateUserBooking = async () => {
-        try {
-            const bookingSnap = await getDoc(workerBookingRef);
-            if (bookingSnap.exists()) {
-                const bookingData = bookingSnap.data();
-                if (bookingData.userId) {
-                    const userBookingRef = doc(firestore, `users/${bookingData.userId}/bookings`, bookingId);
-                     // Use the same updateData object which includes the completionCode if generated
-                     updateDocumentNonBlocking(userBookingRef, updateData);
-                }
-            }
-        } catch (error) {
-            console.error("Error getting user's booking document for status update:", error);
+    try {
+        const bookingSnap = await getDoc(workerBookingRef);
+        if (!bookingSnap.exists()) {
+            throw new Error("Booking not found for this worker.");
         }
-    };
-    
-    updateUserBooking();
+
+        const bookingData = bookingSnap.data() as Booking;
+        const userId = bookingData.userId;
+        if (!userId) {
+            throw new Error("Customer ID not found on booking.");
+        }
+
+        const userBookingRef = doc(firestore, `users/${userId}/bookings`, bookingId);
+
+        let updateData: Partial<Booking> = { status };
+
+        if (status === 'confirmed' && !bookingData.completionCode) {
+            updateData.completionCode = generateCompletionCode();
+        }
+
+        // Use a batch to update both documents atomically
+        const batch = writeBatch(firestore);
+        batch.update(workerBookingRef, updateData);
+        batch.update(userBookingRef, updateData);
+
+        await batch.commit();
+
+    } catch (error) {
+        console.error("Error updating booking status:", error);
+        throw error; // Re-throw to be caught in the component
+    }
 }
 
 /**
@@ -78,8 +79,8 @@ export async function completeBookingWithCode(
     throw new Error("Invalid completion code.");
   }
   
-  // If code is valid, update status to 'completed'
-  updateBookingStatus(firestore, workerId, bookingId, 'completed');
+  // If code is valid, update status to 'completed' for both worker and user
+  await updateBookingStatus(firestore, workerId, bookingId, 'completed');
 }
 
 
@@ -93,23 +94,26 @@ export async function cancelBookingAsUser(
     try {
         const bookingSnap = await getDoc(userBookingRef);
         if (bookingSnap.exists()) {
-            const bookingData = bookingSnap.data();
+            const bookingData = bookingSnap.data() as Booking;
+
             if (bookingData.status !== 'pending') {
                 throw new Error("Booking cannot be cancelled as it's already been actioned.");
             }
             if (bookingData.workerId) {
                 const workerBookingRef = doc(firestore, `workers/${bookingData.workerId}/bookings`, bookingId);
-                // Atomically update both
-                setDocumentNonBlocking(userBookingRef, { status: 'cancelled' }, { merge: true });
-                setDocumentNonBlocking(workerBookingRef, { status: 'cancelled' }, { merge: true });
+                const batch = writeBatch(firestore);
+                batch.update(userBookingRef, { status: 'cancelled' });
+                batch.update(workerBookingRef, { status: 'cancelled' });
+                await batch.commit();
             } else {
-                 setDocumentNonBlocking(userBookingRef, { status: 'cancelled' }, { merge: true });
+                 // Should not happen, but as a fallback
+                 await updateDoc(userBookingRef, { status: 'cancelled' });
             }
+        } else {
+            throw new Error("Booking not found.");
         }
     } catch (error) {
         console.error("Error cancelling booking:", error);
         throw error; // re-throw to be caught in the component
     }
 }
-
-    

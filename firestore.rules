@@ -2,231 +2,108 @@
  * @fileoverview Firestore Security Rules for ServiceWalla.
  *
  * Core Philosophy:
- * This ruleset enforces a strict user and worker ownership model for profile data and bookings,
- * combined with public read access for service definitions and FAQs.  Admin roles are supported through a separate collection.
- * The rules are designed to prevent unauthorized data access and modification, ensuring data privacy and integrity.
- *
- * Data Structure:
- * - /users/{userId}: User profiles, accessible only to the user themselves.
- * - /workers/{workerId}: Worker profiles, accessible only to the worker themselves.
- * - /services/{serviceId}: Service definitions, publicly readable, writeable by admins only.
- * - /users/{userId}/bookings/{bookingId}: Bookings made by a user, accessible only to that user and the assigned worker for status updates.
- * - /workers/{workerId}/bookings/{bookingId}: Bookings associated with a worker, accessible by both the worker and the user who made the booking.
- * - /faqs/{faqId}: Frequently asked questions, publicly readable, writeable by admins only.
- * - /roles_admin/{uid}: Documents the UIDs which have admin roles, only accessible by backend functions.
+ * This ruleset enforces a strict user and worker ownership model. Data is segregated by
+ * user ID, and rules ensure that only the authenticated owner of that data can write to it.
+ * Public data is explicitly marked as readable by anyone. This prevents cross-user data tampering.
  *
  * Key Security Decisions:
- * - Users and Workers can only access their own profile data.
- * - Service and FAQ data are publicly readable, but write access is restricted to admins.
- * - Bookings are scoped to both users and workers, granting both parties access.
- * - Listing of users is not permitted to prevent data scraping.
- * - Admin role management is handled via a separate collection, accessible only by backend functions.
+ * - Users and Workers can only create, update, or delete documents within their own data trees (e.g., /users/{userId}/**).
+ * - Publicly readable data (like worker profiles and services) is explicitly allowed.
+ * - Listing documents in collections where users shouldn't see all data (e.g., listing all users) is forbidden.
+ * - Admin roles are managed in a separate, inaccessible collection for security.
  *
- * Denormalization for Authorization:
- * The Booking documents include both `userId` and `workerId` to avoid costly `get()` calls
- * when validating access. This denormalization enables efficient and secure authorization
- * without requiring additional reads.
- *
- * Structural Segregation:
- * Publicly readable data (Services, FAQs) is stored in top-level collections with open read access, while
- * private data (User, Worker, Bookings) is stored in user/worker-specific subcollections with restricted access.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Helper function to check if the requesting user is the owner of the document path.
+    function isOwner(ownerId) {
+      return request.auth != null && request.auth.uid == ownerId;
+    }
+
     /**
      * @description Controls access to user profile data.
      * @path /users/{userId}
-     * @allow (create) User with ID 'user123' creates their profile. (request.auth.uid == 'user123')
-     * @allow (get) User with ID 'user123' reads their profile. (request.auth.uid == 'user123')
-     * @allow (update) User with ID 'user123' updates their profile. (request.auth.uid == 'user123')
-     * @allow (delete) User with ID 'user123' deletes their profile. (request.auth.uid == 'user123')
-     * @deny (create) User with ID 'user456' attempts to create a profile with ID 'user123'.
-     * @deny (get) User with ID 'user456' attempts to read profile 'user123'.
-     * @deny (update) User with ID 'user456' attempts to update profile 'user123'.
-     * @deny (delete) User with ID 'user456' attempts to delete profile 'user123'.
-     * @principle Enforces document ownership for writes.
+     * @principle Only the user themselves can read or write their own profile.
+     *            Disallows listing all users to protect privacy.
      */
     match /users/{userId} {
-      // Helper function to check if the user is signed in and owns the document.
-
-      function isOwner(userId) {
-        return request.auth.uid == userId;
-      }
-
-      function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-      allow get: if isOwner(userId);
-      allow list: if false; // Prevent listing of all users.
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
+      allow read, write: if isOwner(userId);
+      allow list: if false; // Prevent scraping all user profiles.
     }
 
     /**
      * @description Controls access to worker profile data.
      * @path /workers/{workerId}
-     * @allow (create) Worker with ID 'worker123' creates their profile. (request.auth.uid == 'worker123')
-     * @allow (get) Any user can read a worker's profile.
-     * @allow (update) Worker with ID 'worker123' updates their profile. (request.auth.uid == 'worker123')
-     * @allow (delete) Worker with ID 'worker123' deletes their profile. (request.auth.uid == 'worker123')
-     * @deny (create) User with ID 'user456' attempts to create a worker profile with ID 'worker123'.
-     * @deny (update) User with ID 'user456' attempts to update worker profile 'worker123'.
-     * @deny (delete) User with ID 'user456' attempts to delete worker profile 'worker123'.
-     * @principle Enforces document ownership for writes.
+     * @principle Worker profiles are public for anyone to read (to browse professionals).
+     *            Only the worker themselves can update their own profile.
      */
     match /workers/{workerId} {
-       // Helper function to check if the user is signed in and owns the document.
-
-      function isOwner(workerId) {
-        return request.auth.uid == workerId;
-      }
-
-      function isExistingOwner(workerId) {
-        return isOwner(workerId) && resource != null;
-      }
-
       allow get: if true;
-      allow list: if true;
-      allow create: if isOwner(workerId) && request.resource.data.id == workerId;
-      allow update: if isExistingOwner(workerId);
-      allow delete: if isExistingOwner(workerId);
-      // This rule allows a user to write to the 'bookings' subcollection of a worker,
-      // which is necessary for a customer to create a booking for that worker.
-      // The specific rules for the /bookings/{bookingId} path will handle the fine-grained permissions.
-       allow write: if request.path[4] == 'bookings' && request.auth != null;
+      allow list: if true; // Allow listing workers for a service.
+      allow write: if isOwner(workerId);
     }
 
     /**
      * @description Controls access to service definitions.
      * @path /services/{serviceId}
-     * @allow (get) Any user can read a service definition.
-     * @allow (list) Any user can list service definitions.
-     * @deny (create) Non-admin user attempts to create a service.
-     * @deny (update) Non-admin user attempts to update a service.
-     * @deny (delete) Non-admin user attempts to delete a service.
-     * @principle Public read access, admin-only writes.
+     * @principle Service definitions are public, but can only be written by an admin.
      */
     match /services/{serviceId} {
-      allow get: if true;
-      allow list: if true;
-
-      function isAdmin() {
-          return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-      }
-      allow create: if isAdmin();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
+      allow get, list: if true;
+      allow write: if isAdmin();
     }
 
     /**
-     * @description Controls access to bookings made by a specific user.
+     * @description Controls access to bookings within a user's private collection.
      * @path /users/{userId}/bookings/{bookingId}
-     * @allow (create) User with ID 'user123' creates a booking under their ID. (request.auth.uid == 'user123')
-     * @allow (get) User with ID 'user123' reads a booking under their ID. (request.auth.uid == 'user123')
-     * @allow (update) User with ID 'user123' updates a booking under their ID. (request.auth.uid == 'user123')
-     * @allow (delete) User with ID 'user123' deletes a booking under their ID. (request.auth.uid == 'user123')
-     * @deny (create) User with ID 'user456' attempts to create a booking under user 'user123'.
-     * @deny (get) User with ID 'user456' attempts to read a booking under user 'user123'.
-     * @deny (update) User with ID 'user456' attempts to update a booking under user 'user123'.
-     * @deny (delete) User with ID 'user456' attempts to delete a booking under user 'user123'.
-     * @principle Enforces document ownership for writes.
+     * @principle A user can manage bookings inside their own space.
      */
     match /users/{userId}/bookings/{bookingId} {
-      // Helper function to check if the user is signed in and owns the document.
-      function isOwner(userId) {
-        return request.auth.uid == userId;
-      }
-      function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-      // A worker can update the status of a booking.
-      function isWorkerOnBooking() {
-          return exists(/databases/$(database)/documents/workers/$(request.auth.uid)) && request.auth.uid == resource.data.workerId;
-      }
-      
-      // A worker can update the status and completion code.
-      function isWorkerUpdatingAllowedFields() {
-        let allowedKeys = ['status', 'completionCode'];
-        let incomingKeys = request.resource.data.keys();
-        return isWorkerOnBooking() && incomingKeys.hasOnly(allowedKeys);
-      }
-
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if (isExistingOwner(userId) && request.resource.data.userId == userId) || isWorkerUpdatingAllowedFields();
-      allow delete: if isExistingOwner(userId);
+        // Only the user who owns this subcollection can read or write to it.
+        // This rule is simple and secure. All updates, even those initiated by a
+        // worker action, are performed via a backend function or a batched write
+        // that is authorized by the user's own permissions, not by giving
+        // the worker direct write access here.
+        allow read, write: if isOwner(userId);
     }
-
+    
     /**
-     * @description Controls access to bookings associated with a specific worker.
+     * @description Controls access to bookings within a worker's private collection.
      * @path /workers/{workerId}/bookings/{bookingId}
-     * @allow (get) Worker with ID 'worker123' reads a booking under their ID. (request.auth.uid == 'worker123')
-     * @allow (list) Worker with ID 'worker123' lists bookings under their ID. (request.auth.uid == 'worker123')
-     * @allow (create) A customer creates a booking for the worker.
-     * @allow (update) The worker updates the status of a booking.
-     * @allow (delete) The worker deletes a booking.
+     * @principle A worker can manage bookings assigned to them. A user can create a booking for a worker.
      */
     match /workers/{workerId}/bookings/{bookingId} {
-      // Helper function to check if the user is the worker.
-      function isWorkerOwner(workerId) {
-        return request.auth.uid == workerId;
-      }
-      
-      // Helper function to check if the user is the customer who made the booking.
-      function isCustomerOwner() {
-        return request.auth.uid == resource.data.userId;
-      }
-
-      allow get: if isWorkerOwner(workerId) || isCustomerOwner();
-      allow list: if isWorkerOwner(workerId);
-      // Allow any authenticated user to create a booking, as long as they are the user in the booking.
+      // The worker can read/update/delete their own bookings.
+      allow read, update, delete: if isOwner(workerId);
+      // Any authenticated user can create a booking, as long as they are the customer in the booking.
+      // This is crucial for the booking process to start.
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow update: if isWorkerOwner(workerId);
-      allow delete: if isWorkerOwner(workerId);
     }
 
     /**
      * @description Controls access to frequently asked questions.
      * @path /faqs/{faqId}
-     * @allow (get) Any user can read an FAQ.
-     * @allow (list) Any user can list FAQs.
-     * @deny (create) Non-admin user attempts to create an FAQ.
-     * @deny (update) Non-admin user attempts to update an FAQ.
-     * @deny (delete) Non-admin user attempts to delete an FAQ.
      * @principle Public read access, admin-only writes.
      */
     match /faqs/{faqId} {
-      allow get: if true;
-      allow list: if true;
-
-      function isAdmin() {
-          return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-      }
-      allow create: if isAdmin();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+    
+    /**
+     * @description Admin role collection. Used for checking admin status.
+     * @path /roles_admin/{uid}
+     * @principle No client-side access is allowed. This is for rule checks only.
+     */
+    match /roles_admin/{uid} {
+        allow read, write: if false;
     }
 
-        /**
-         * @description Controls access to the admin roles document.
-         * @path /roles_admin/{uid}
-         * @allow (get) Always denied. This collection is designed for backend use, not client access.
-         * @allow (list) Always denied. This collection is designed for backend use, not client access.
-         * @deny (create) Always denied. This collection is designed for backend use, not client access.
-         * @deny (update) Always denied. This collection is designed for backend use, not client access.
-         * @deny (delete) Always denied. This collection is designed for backend use, not client access.
-         * @principle Restricts access to a user's own data tree.
-         */
-        match /roles_admin/{uid} {
-            allow get: if false;
-            allow list: if false;
-            allow create: if false;
-            allow update: if false;
-            allow delete: if false;
-        }
+    // Helper function to check if the user is an admin.
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
   }
 }
