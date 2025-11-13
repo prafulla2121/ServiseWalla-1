@@ -3,7 +3,7 @@
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -30,17 +30,21 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { services, workers } from '@/lib/data';
+import { services } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { useSearchParams } from 'next/navigation';
-import { useUser, useFirestore, FirestorePermissionError, errorEmitter } from '@/firebase';
-import { collection, doc, setDoc } from 'firebase/firestore';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useUser, useFirestore, useCollection, useMemoFirebase, FirestorePermissionError, errorEmitter } from '@/firebase';
+import { collection, doc, setDoc, query, where } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import 'react-phone-number-input/style.css'
+import { useState } from 'react';
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import type { Worker } from '@/lib/types';
+
 
 const bookingSchema = z.object({
   serviceId: z.string({ required_error: 'Please select a service.' }),
-  workerId: z.string({ required_error: 'Please select a worker.' }),
+  workerId: z.string({ required_error: 'Please select a professional.' }),
   date: z.date({ required_error: 'A date is required.' }),
   time: z.string({ required_error: 'Please select a time.' }),
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -54,8 +58,12 @@ type BookingFormValues = z.infer<typeof bookingSchema>;
 export default function BookPage() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { user } = useUser();
   const firestore = useFirestore();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isBookingConfirmed, setIsBookingConfirmed] = useState(false);
 
   const serviceIdParam = searchParams.get('serviceId');
   const workerIdParam = searchParams.get('workerId');
@@ -74,6 +82,15 @@ export default function BookPage() {
     },
   });
 
+  const selectedServiceId = form.watch('serviceId');
+  
+  const workersQuery = useMemoFirebase(() => {
+    if (!firestore || !selectedServiceId) return null;
+    return query(collection(firestore, 'workers'), where('serviceIds', 'array-contains', selectedServiceId));
+  }, [firestore, selectedServiceId]);
+  
+  const { data: availableWorkers, isLoading: isLoadingWorkers } = useCollection<Worker>(workersQuery);
+
   const onSubmit: SubmitHandler<BookingFormValues> = async (data) => {
     if (!user || !firestore) {
       toast({
@@ -83,6 +100,8 @@ export default function BookPage() {
       });
       return;
     }
+
+    setIsSubmitting(true);
 
     const bookingId = uuidv4();
     const bookingDateTime = new Date(data.date);
@@ -106,18 +125,10 @@ export default function BookPage() {
     const workerBookingRef = doc(firestore, `workers/${data.workerId}/bookings`, bookingId);
 
     try {
-      // Use awaited setDoc for atomicity and error handling
       await setDoc(userBookingRef, bookingData);
       await setDoc(workerBookingRef, bookingData);
-
-      toast({
-        title: 'Booking Submitted!',
-        description: "We've received your request. We'll be in touch shortly to confirm.",
-      });
-      form.reset();
+      setIsBookingConfirmed(true);
     } catch (error) {
-       // The second write (to worker's collection) is the one most likely to fail.
-       // We create an error that shows the context for that specific failed write.
        const permissionError = new FirestorePermissionError({
           path: workerBookingRef.path,
           operation: 'create',
@@ -130,6 +141,8 @@ export default function BookPage() {
         title: 'Booking Failed',
         description: "Could not save your booking. You may not have permission to perform this action.",
       });
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -137,6 +150,7 @@ export default function BookPage() {
   const timeSlots = ['09:00', '11:00', '13:00', '15:00', '17:00'];
 
   return (
+    <>
     <div className="container mx-auto max-w-3xl px-4 py-12">
       <Card className="shadow-lg">
         <CardHeader className="text-center">
@@ -185,18 +199,17 @@ export default function BookPage() {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        disabled={!selectedServiceId || isLoadingWorkers}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a professional" />
+                            <SelectValue placeholder={isLoadingWorkers ? "Loading professionals..." : "Select a professional"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {workers
-                            .filter(w => form.watch('serviceId') ? w.serviceId === form.watch('serviceId') : true)
-                            .map((worker) => (
+                          {availableWorkers?.map((worker) => (
                             <SelectItem key={worker.id} value={worker.id}>
-                              {worker.name} - {worker.service}
+                              {worker.firstName} {worker.lastName}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -339,13 +352,34 @@ export default function BookPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={!user}>
-                {user ? 'Submit Booking' : 'Please log in to book'}
+              <Button type="submit" className="w-full" size="lg" disabled={!user || isSubmitting}>
+                {isSubmitting ? 'Submitting...' : user ? 'Submit Booking' : 'Please log in to book'}
               </Button>
             </form>
           </Form>
         </CardContent>
       </Card>
     </div>
+
+    <AlertDialog open={isBookingConfirmed} onOpenChange={setIsBookingConfirmed}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <div className="flex justify-center">
+                <CheckCircle className="h-16 w-16 text-green-500" />
+            </div>
+            <AlertDialogTitle className="text-center font-headline text-2xl">Congratulations!</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+                Your booking request has been sent successfully. The professional will confirm the appointment shortly.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogAction onClick={() => router.push('/profile')} className="w-full">
+                View My Bookings
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+
+    </>
   );
 }
