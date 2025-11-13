@@ -40,14 +40,19 @@ export async function updateBookingStatus(
 
     let updateData: Partial<Booking> = { status };
 
+    // Generate completion code only when moving to 'confirmed' status
     if (status === 'confirmed' && !bookingData.completionCode) {
         updateData.completionCode = generateCompletionCode();
     }
 
     const batch = writeBatch(firestore);
-    batch.update(workerBookingRef, updateData);
-    batch.update(userBookingRef, updateData);
 
+    // Update the worker's copy of the booking.
+    batch.update(workerBookingRef, updateData);
+
+    // Separately, update the user's copy. The rules will allow this if the worker is the assigned worker.
+    batch.update(userBookingRef, updateData);
+    
     // This replaces the generic try/catch
     return batch.commit().catch(error => {
         // Create and emit the detailed, contextual error

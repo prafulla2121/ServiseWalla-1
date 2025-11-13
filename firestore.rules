@@ -59,14 +59,14 @@ service cloud.firestore {
      * @description Controls access to bookings within a user's private collection.
      * @path /users/{userId}/bookings/{bookingId}
      * @principle A user can manage bookings inside their own space.
+     * A worker assigned to the booking can update its status.
      */
     match /users/{userId}/bookings/{bookingId} {
-        // Only the user who owns this subcollection can read or write to it.
-        // This rule is simple and secure. All updates, even those initiated by a
-        // worker action, are performed via a backend function or a batched write
-        // that is authorized by the user's own permissions, not by giving
-        // the worker direct write access here.
-        allow read, write: if isOwner(userId);
+        // The user who owns the subcollection can read/write their booking.
+        allow read, create, delete: if isOwner(userId);
+        
+        // A worker can update a user's booking if they are the assigned worker for that booking.
+        allow update: if isOwner(userId) || (request.auth != null && request.auth.uid == resource.data.workerId);
     }
     
     /**
