@@ -34,7 +34,6 @@ export function Header() {
   const generalNavLinks = [
     { href: "/", label: "Home" },
     { href: "/services", label: "Find Services" },
-    { href: "/workers", label: "For Workers" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
   ];

@@ -27,8 +27,7 @@ import {
 } from "@/components/ui/carousel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ServiceCard } from "@/components/ServiceCard";
-import { WorkerCard } from "@/components/WorkerCard";
-import { services, workers, testimonials } from "@/lib/data";
+import { testimonials, services } from "@/lib/data";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Input } from "@/components/ui/input";
 
@@ -200,32 +199,6 @@ export default function Home() {
           <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {services.slice(0, 4).map((service) => (
               <ServiceCard key={service.id} service={service} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Workers Section */}
-      <section className="py-16 sm:py-24">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
-            <div>
-              <h2 className="font-headline text-3xl font-bold sm:text-4xl">
-                Meet Our Top Professionals
-              </h2>
-              <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-                Highly-rated, skilled, and ready to help.
-              </p>
-            </div>
-            <Button asChild variant="outline">
-              <Link href="/workers">
-                View All Workers <ChevronRight className="ml-2" />
-              </Link>
-            </Button>
-          </div>
-          <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {workers.slice(0, 4).map((worker) => (
-              <WorkerCard key={worker.id} worker={worker} />
             ))}
           </div>
         </div>

@@ -1,5 +1,7 @@
 import { ServiceCard } from "@/components/ServiceCard";
 import { services } from "@/lib/data";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 export default function ServicesPage() {
   return (
@@ -14,6 +16,16 @@ export default function ServicesPage() {
             professional for every task. Explore our wide range of services.
           </p>
         </div>
+
+        <div className="relative mx-auto mt-8 w-full max-w-lg">
+          <Input
+            type="search"
+            placeholder="Search by service, e.g., 'plumbing'..."
+            className="h-12 pl-10"
+          />
+          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+        </div>
+
 
         <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {services.map((service) => (
