@@ -5,7 +5,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useUser, useFirestore } from '@/firebase';
-import type { Booking } from '@/lib/types';
+import type { Booking, User } from '@/lib/types';
 import { services } from '@/lib/data';
 import { format } from 'date-fns';
 import { Button } from '../ui/button';
@@ -23,8 +23,10 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, CheckCircle, History, Phone, User as UserIcon, MapPin, Truck, PlayCircle, Star, Loader2, Pencil } from 'lucide-react';
+import { Clock, CheckCircle, History, Phone, User as UserIcon, MapPin, Truck, PlayCircle, Star, Loader2, Pencil, MessageSquare } from 'lucide-react';
 import { Badge } from '../ui/badge';
+import Link from 'next/link';
+import { doc, getDoc } from 'firebase/firestore';
 
 interface WorkerProfileProps {
   worker: any;
@@ -67,6 +69,7 @@ function BookingItem({ booking, onUpdateStatus, onCompleteBooking, isUpdating }:
   };
 
   const isConfirmed = ['confirmed', 'en-route', 'in-progress', 'completed'].includes(booking.status);
+  const canChat = ['confirmed', 'en-route', 'in-progress'].includes(booking.status);
   
   const formatStatus = (status: string) => {
     return status.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -99,9 +102,11 @@ function BookingItem({ booking, onUpdateStatus, onCompleteBooking, isUpdating }:
             {isConfirmed && (
                 <Card className="mt-3 bg-muted/50">
                     <CardContent className="p-3 text-sm space-y-2">
-                        <div className="flex items-center text-muted-foreground">
+                         <div className="flex items-center text-muted-foreground">
                             <UserIcon className="mr-2 h-4 w-4" />
-                            <span>{booking.name}</span>
+                             <Link href={`/users/${booking.userId}`} className="text-primary hover:underline font-medium">
+                                <span>{booking.name}</span>
+                            </Link>
                         </div>
                         <div className="flex items-center text-muted-foreground">
                             <Phone className="mr-2 h-4 w-4" />
@@ -110,6 +115,13 @@ function BookingItem({ booking, onUpdateStatus, onCompleteBooking, isUpdating }:
                         <div className="flex items-start text-muted-foreground">
                             <MapPin className="mr-2 h-4 w-4 mt-0.5 flex-shrink-0" />
                             <span>{booking.address}, {booking.city}, {booking.state}</span>
+                        </div>
+                         <div className="pt-2">
+                            <Button size="sm" variant="outline" asChild disabled={!canChat}>
+                                <Link href={`/chat/${booking.id}`}>
+                                    <MessageSquare className="mr-2 h-4 w-4" /> Chat with Customer
+                                </Link>
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>
@@ -368,3 +380,5 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
     </div>
   );
 }
+
+    
