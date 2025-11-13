@@ -2,13 +2,23 @@
 'use client';
 
 import { useState } from "react";
+import Image from "next/image";
 import { ServiceCard } from "@/components/ServiceCard";
 import { services, Service } from "@/lib/data";
 import { Input } from "@/components/ui/input";
 import { Search, Sparkles } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
+
 
 export default function ServicesPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const heroImages = PlaceHolderImages.filter(img => img.id.startsWith('hero-'));
 
   const filteredServices = services.filter((service) =>
     service.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -16,12 +26,37 @@ export default function ServicesPage() {
 
   return (
     <div className="bg-background">
-      <section className="relative w-full overflow-hidden bg-primary/5 py-16 md:py-24">
-        <div className="container relative z-10 mx-auto text-center">
+      <section className="relative w-full overflow-hidden">
+        <Carousel
+            opts={{ loop: true }}
+            plugins={[Autoplay({ delay: 5000, stopOnInteraction: false })]}
+            className="absolute inset-0 h-full w-full"
+        >
+            <CarouselContent>
+            {heroImages.map((image) => (
+                <CarouselItem key={image.id}>
+                <div className="relative h-full w-full">
+                    <Image
+                    src={image.imageUrl}
+                    alt={image.description}
+                    fill
+                    className="object-cover"
+                    priority={heroImages.indexOf(image) === 0}
+                    data-ai-hint={image.imageHint}
+                    />
+                </div>
+                </CarouselItem>
+            ))}
+            </CarouselContent>
+        </Carousel>
+
+        <div className="absolute inset-0 bg-black/50" />
+
+        <div className="container relative z-10 mx-auto py-16 text-center text-white md:py-24">
           <h1 className="font-headline text-4xl font-extrabold tracking-tight sm:text-5xl">
             Explore All Services
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-white/90">
             From home maintenance to personal wellness, find a qualified
             professional for every task.
           </p>
@@ -32,14 +67,14 @@ export default function ServicesPage() {
               <Input
                 type="search"
                 placeholder="Search by service, e.g., 'plumbing'..."
-                className="h-14 w-full rounded-lg pl-12 text-lg"
+                className="h-14 w-full rounded-lg pl-12 text-lg text-foreground"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               <Search className="absolute left-4 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground" />
             </div>
           </div>
-          <div className="mt-4 flex justify-center items-center gap-2 text-sm text-muted-foreground">
+          <div className="mt-4 flex justify-center items-center gap-2 text-sm text-white/80">
             <Sparkles className="h-4 w-4 text-accent" />
             <span>AI-Powered Search Coming Soon</span>
           </div>
