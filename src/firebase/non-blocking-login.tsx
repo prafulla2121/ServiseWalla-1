@@ -82,6 +82,8 @@ export function initiateEmailSignUp(authInstance: Auth, email: string, password:
             description = 'This email is already registered. Please try logging in instead.';
         } else if (error.code === 'auth/weak-password') {
             description = 'The password is too weak. Please choose a stronger password.';
+        } else if (error.code === 'auth/invalid-email') {
+            description = 'The email address is not valid. Please check and try again.';
         }
         
         toast({
@@ -99,6 +101,8 @@ export function initiateEmailSignIn(authInstance: Auth, email: string, password:
         let description = 'An unexpected error occurred. Please try again.';
         if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
             description = 'Invalid email or password. Please check your credentials and try again.';
+        } else if (error.code === 'auth/invalid-email') {
+            description = 'Please enter a valid email address.';
         }
         
         toast({
@@ -162,12 +166,11 @@ export async function confirmOtp(confirmationResult: ConfirmationResult, otp: st
     const user = userCredential.user;
 
     // Check if the user is new. If so, create a corresponding document in Firestore.
+    // This flow creates a 'user' profile by default. A worker can be created
+    // through the dedicated worker registration flow.
     const db = getFirestore();
     const userDocRef = doc(db, 'users', user.uid);
 
-    // This logic assumes a new phone user is always a 'user', not a 'worker'.
-    // A more complex flow would be needed to distinguish this.
-    // For now, we create a user profile if one doesn't exist.
     setDocumentNonBlocking(userDocRef, {
         id: user.uid,
         email: user.email, // Will be null for phone auth
