@@ -17,6 +17,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -158,5 +159,3 @@ export default function RegisterUserPage() {
     </div>
   );
 }
-
-    
