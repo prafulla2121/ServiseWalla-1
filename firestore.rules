@@ -72,11 +72,13 @@ service cloud.firestore {
     /**
      * @description Controls access to user profile data.
      * @path /users/{userId}
-     * @principle Only the user themselves can read or write their own profile.
+     * @principle Any authenticated user can read public profiles.
+     *            Only the user themselves can write their own profile.
      *            Disallows listing all users to protect privacy.
      */
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow get: if request.auth != null;
+      allow write: if isOwner(userId);
       allow list: if false; // Prevent scraping all user profiles.
     }
 
