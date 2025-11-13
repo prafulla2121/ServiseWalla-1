@@ -61,9 +61,12 @@ service cloud.firestore {
          return exists(/databases/$(database)/documents/users/$(uid)/bookings/$(bookingId)) ||
                exists(/databases/$(database)/documents/workers/$(uid)/bookings/$(bookingId));
       }
-      // For write operations, we must get() the parent doc.
-      let chatDoc = get(/databases/$(database)/documents/chats/$(bookingId)).data;
-      return uid == chatDoc.userId || uid == chatDoc.workerId;
+      // For write operations, we must get() the parent doc if it exists.
+      if (exists(/databases/$(database)/documents/chats/$(bookingId))) {
+        let chatDoc = get(/databases/$(database)/documents/chats/$(bookingId)).data;
+      	return uid == chatDoc.userId || uid == chatDoc.workerId;
+      }
+      return false;
     }
 
     /**
@@ -185,7 +188,7 @@ service cloud.firestore {
         // This rule handles two cases:
         // 1. The chat document already exists: isChatParticipant() will use get() and succeed.
         // 2. The chat document is being created in the same batch: isChatParticipant() would fail, so we
-        //    check the incoming chat document's data to verify participation.
+        //    check the incoming chat document's data using getAfter() to verify participation.
         allow create: if (isChatParticipant(bookingId) || 
                           (request.auth.uid == getAfter(/databases/$(database)/documents/chats/$(bookingId)).data.userId ||
                            request.auth.uid == getAfter(/databases/$(database)/documents/chats/$(bookingId)).data.workerId))
