@@ -122,7 +122,8 @@ export function setupRecaptcha(auth: Auth, containerId: string, toast: ToastFunc
   try {
     // Check if verifier already exists to avoid re-rendering
     if ((window as any).recaptchaVerifier) {
-      (window as any).recaptchaVerifier.clear();
+      (window as any).recaptchaVerifier.render(); // Re-render instead of clearing
+      return;
     }
     (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
       'size': 'invisible',
@@ -137,6 +138,8 @@ export function setupRecaptcha(auth: Auth, containerId: string, toast: ToastFunc
         });
       }
     });
+    // Render the reCAPTCHA explicitly
+    (window as any).recaptchaVerifier.render();
   } catch (error) {
     console.error("Recaptcha setup error:", error);
     toast({
@@ -171,7 +174,8 @@ export async function confirmOtp(confirmationResult: ConfirmationResult, otp: st
     const db = getFirestore();
     const userDocRef = doc(db, 'users', user.uid);
 
-    setDocumentNonBlocking(userDocRef, {
+    // This operation MUST be awaited to ensure the document is created before proceeding.
+    await setDocumentNonBlocking(userDocRef, {
         id: user.uid,
         email: user.email, // Will be null for phone auth
         phone: user.phoneNumber,
