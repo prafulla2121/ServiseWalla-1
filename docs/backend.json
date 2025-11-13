@@ -180,6 +180,10 @@
         "status": {
           "type": "string",
           "description": "Status of the booking (e.g., pending, confirmed, completed, cancelled)."
+        },
+        "completionCode": {
+          "type": "string",
+          "description": "A 4-digit code generated upon booking confirmation, provided by the customer to the worker to mark the job as complete."
         }
       },
       "required": [
@@ -353,3 +357,4 @@
     "reasoning": "The Firestore data structure is designed to support the ServiceWalla application, focusing on clear separation of concerns and Authorization Independence.  The structure leverages path-based ownership for user and worker data, enabling secure and efficient data access.  \n\n**Authorization Independence:** This design avoids `get()` calls in security rules by denormalizing authorization data where needed.  Specifically, the `Booking` collection includes both `userId` and `workerId`, allowing security rules to validate access based on the authenticated user and the involved worker without needing to fetch parent documents. This ensures atomic operations for booking creation and modification.\n\n**QAPs (Rules are not Filters):** The structure supports secure list operations by segregating data based on ownership and role.  User and worker profiles are stored in dedicated collections with path-based ownership, enabling secure listing of user-owned or worker-owned resources. The FAQs collection is globally accessible for reading, fulfilling the requirement for listing FAQ items without complex filtering rules.\n\n**Structure Overview:**\n*   `/users/{userId}`: Stores user profiles.  Authorization: Only the user with the matching `userId` can read/write their profile data.\n*   `/workers/{workerId}`: Stores worker profiles. Authorization: Only the worker with the matching `workerId` can read/write their profile data. The `serviceIds` array stores references to the worker's services.\n*   `/services/{serviceId}`: Stores service definitions.  Authorization: Open read access (for browsing). Write access is restricted (e.g., to admins).  The `workerIds` array stores references to the workers providing the service.\n*   `/users/{userId}/bookings/{bookingId}`: Stores bookings made by a specific user.  Authorization: The user with the matching `userId` can read/write bookings under their ID.\n*   `/workers/{workerId}/bookings/{bookingId}`: Stores bookings associated with a specific worker. Authorization: The worker with the matching `workerId` can read bookings associated with them.\n* `/faqs/{faqId}`: Stores frequently asked questions. Authorization: Open read access.  Write access restricted to admins (role-based, implemented via existence check in `/roles_admin/{uid}`).\n* `/roles_admin/{uid}`: Documents the UIDs which have admin roles. Authorization: Only accessible by backend functions.\n"
   }
 }
+    

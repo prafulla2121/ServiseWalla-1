@@ -5,6 +5,7 @@ export interface Booking {
   serviceId: string;
   bookingDate: string; // Stored as ISO string
   status: 'pending' | 'confirmed' | 'en-route' | 'in-progress' | 'completed' | 'cancelled';
+  completionCode?: string; // 4-digit code to confirm completion
   // Customer info
   name: string;
   email: string;
@@ -34,3 +35,5 @@ export interface Worker {
   avatarUrl?: string;
   coverImageUrl?: string;
 }
+
+    

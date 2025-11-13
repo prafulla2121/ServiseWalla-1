@@ -11,7 +11,7 @@ import { Button } from '../ui/button';
 import { useState } from 'react';
 import { cancelBookingAsUser } from '@/lib/bookings';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, KeyRound } from 'lucide-react';
 
 
 interface UserProfileProps {
@@ -96,7 +96,7 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
               <div className="space-y-4">
                 {bookings.sort((a,b) => new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()).map(booking => (
                   <div key={booking.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-4 border rounded-lg gap-4">
-                    <div>
+                    <div className="flex-grow">
                         <div className='flex items-center gap-4'>
                              <h3 className="font-semibold">{getServiceName(booking.serviceId)}</h3>
                              <Badge variant={statusVariant(booking.status)} className="capitalize">{formatStatus(booking.status)}</Badge>
@@ -104,6 +104,15 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
                         <p className="text-sm text-muted-foreground mt-1">
                             {format(new Date(booking.bookingDate), "MMMM d, yyyy 'at' h:mm a")}
                         </p>
+                        {booking.completionCode && ['confirmed', 'en-route', 'in-progress'].includes(booking.status) && (
+                            <div className="mt-2 flex items-center gap-2 rounded-md border border-dashed border-amber-500 bg-amber-50 p-2">
+                                <KeyRound className="h-5 w-5 text-amber-600" />
+                                <div>
+                                    <p className="text-xs text-amber-700">Your job completion code:</p>
+                                    <p className="font-mono text-lg font-bold text-amber-800 tracking-widest">{booking.completionCode}</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     {booking.status === 'pending' && (
                         <Button 
@@ -128,3 +137,5 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
     </div>
   );
 }
+
+    
