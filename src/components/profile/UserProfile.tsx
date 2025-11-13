@@ -11,7 +11,8 @@ import { Button } from '../ui/button';
 import { useState } from 'react';
 import { cancelBookingAsUser } from '@/lib/bookings';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, KeyRound } from 'lucide-react';
+import { Loader2, KeyRound, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 
 
 interface UserProfileProps {
@@ -30,7 +31,8 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
     return services.find(s => s.id === serviceId)?.name || 'Unknown Service';
   }
 
-  const handleCancelBooking = async (booking: Booking) => {
+  const handleCancelBooking = async (booking: Booking, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent link navigation when cancelling
     if (!user) return;
     setCancellingId(booking.id);
     try {
@@ -89,43 +91,48 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
         <Card>
           <CardHeader>
             <CardTitle className="font-headline">My Bookings</CardTitle>
-            <CardDescription>Here is a list of your past and upcoming services.</CardDescription>
+            <CardDescription>Here is a list of your past and upcoming services. Click on a booking to see more details.</CardDescription>
           </CardHeader>
           <CardContent>
             {bookings.length > 0 ? (
               <div className="space-y-4">
                 {bookings.sort((a,b) => new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()).map(booking => (
-                  <div key={booking.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-4 border rounded-lg gap-4">
-                    <div className="flex-grow">
-                        <div className='flex items-center gap-4'>
-                             <h3 className="font-semibold">{getServiceName(booking.serviceId)}</h3>
-                             <Badge variant={statusVariant(booking.status)} className="capitalize">{formatStatus(booking.status)}</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1">
-                            {format(new Date(booking.bookingDate), "MMMM d, yyyy 'at' h:mm a")}
-                        </p>
-                        {booking.completionCode && ['confirmed', 'en-route', 'in-progress'].includes(booking.status) && (
-                            <div className="mt-2 flex items-center gap-2 rounded-md border border-dashed border-amber-500 bg-amber-50 p-2">
-                                <KeyRound className="h-5 w-5 text-amber-600" />
-                                <div>
-                                    <p className="text-xs text-amber-700">Your job completion code:</p>
-                                    <p className="font-mono text-lg font-bold text-amber-800 tracking-widest">{booking.completionCode}</p>
-                                </div>
-                            </div>
+                  <Link href={`/profile/bookings/${booking.id}`} key={booking.id} className="block transition-all duration-200 ease-in-out hover:bg-muted/50 rounded-lg">
+                    <div className="flex flex-col sm:flex-row justify-between sm:items-center p-4 border rounded-lg gap-4">
+                      <div className="flex-grow">
+                          <div className='flex items-center gap-4 flex-wrap'>
+                              <h3 className="font-semibold">{getServiceName(booking.serviceId)}</h3>
+                              <Badge variant={statusVariant(booking.status)} className="capitalize">{formatStatus(booking.status)}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">
+                              {format(new Date(booking.bookingDate), "MMMM d, yyyy 'at' h:mm a")}
+                          </p>
+                          {booking.completionCode && ['confirmed', 'en-route', 'in-progress'].includes(booking.status) && (
+                              <div className="mt-2 flex items-center gap-2 rounded-md border border-dashed border-amber-500 bg-amber-50 p-2 max-w-max">
+                                  <KeyRound className="h-5 w-5 text-amber-600" />
+                                  <div>
+                                      <p className="text-xs text-amber-700">Your job completion code:</p>
+                                      <p className="font-mono text-lg font-bold text-amber-800 tracking-widest">{booking.completionCode}</p>
+                                  </div>
+                              </div>
+                          )}
+                      </div>
+                      <div className="flex items-center gap-4">
+                        {booking.status === 'pending' && (
+                            <Button 
+                                variant="destructive" 
+                                size="sm"
+                                onClick={(e) => handleCancelBooking(booking, e)}
+                                disabled={cancellingId === booking.id}
+                            >
+                                {cancellingId === booking.id && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Cancel Booking
+                            </Button>
                         )}
+                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                      </div>
                     </div>
-                    {booking.status === 'pending' && (
-                        <Button 
-                            variant="destructive" 
-                            size="sm"
-                            onClick={() => handleCancelBooking(booking)}
-                            disabled={cancellingId === booking.id}
-                        >
-                            {cancellingId === booking.id && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Cancel Booking
-                        </Button>
-                    )}
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
@@ -137,5 +144,3 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
     </div>
   );
 }
-
-    
