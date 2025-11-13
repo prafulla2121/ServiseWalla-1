@@ -1,5 +1,5 @@
 'use client';
-import { Firestore, doc, getDoc, writeBatch, updateDoc } from "firebase/firestore";
+import { Firestore, doc, getDoc, writeBatch } from "firebase/firestore";
 import { Booking } from "./types";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { errorEmitter } from "@/firebase/error-emitter";
@@ -129,15 +129,13 @@ export async function cancelBookingAsUser(
 
         } else {
              // Should not happen, but as a fallback
-             return updateDoc(userBookingRef, { status: 'cancelled' }).catch(error => {
-                 const permissionError = new FirestorePermissionError({
-                    path: userBookingRef.path,
-                    operation: 'update',
-                    requestResourceData: { status: 'cancelled' }
-                });
-                errorEmitter.emit('permission-error', permissionError);
-                throw new Error('Failed to cancel booking. You may not have permission.');
-             });
+             const permissionError = new FirestorePermissionError({
+                path: userBookingRef.path,
+                operation: 'update',
+                requestResourceData: { status: 'cancelled' }
+            });
+             errorEmitter.emit('permission-error', permissionError);
+             throw new Error('Failed to cancel booking. You may not have permission.');
         }
     } else {
         throw new Error("Booking not found.");

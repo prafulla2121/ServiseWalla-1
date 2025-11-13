@@ -8,7 +8,7 @@
  *
  * Key Security Decisions:
  * - Users and Workers can only create, update, or delete documents within their own data trees (e.g., /users/{userId}/**).
- * - Publicly readable data (like worker profiles and services) is explicitly allowed.
+ * - Publicly readable data (like worker profiles and services) is explicitly marked as readable by anyone.
  * - Listing documents in collections where users shouldn't see all data (e.g., listing all users) is forbidden.
  * - Admin roles are managed in a separate, inaccessible collection for security.
  *
@@ -20,6 +20,36 @@ service cloud.firestore {
     // Helper function to check if the requesting user is the owner of the document path.
     function isOwner(ownerId) {
       return request.auth != null && request.auth.uid == ownerId;
+    }
+    
+    // Helper function to check if the user is an admin.
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+    
+    // Helper to see if a worker is updating their own booking in a batch write
+    // that also updates the corresponding user's booking.
+    function isWorkerUpdatingOwnBookingInBatch(workerId, userId, bookingId) {
+        let workerBookingPath = /databases/$(database)/documents/workers/$(workerId)/bookings/$(bookingId);
+        let userBookingPath = /databases/$(database)/documents/users/$(userId)/bookings/$(bookingId);
+        
+        // Ensure the request is a batch write involving exactly two updates.
+        return request.method == 'write' && request.resource == null &&
+               request.writeFields.size() == 2 &&
+               (workerBookingPath in request.writeFields) &&
+               (userBookingPath in request.writeFields);
+    }
+    
+     // Helper to determine if only allowed fields are being updated by a worker
+    function isWorkerUpdatingAllowedFields() {
+        // A worker can only update the 'status' and/or 'completionCode'.
+        // The `request.resource.data` contains the final state of the document after the update.
+        // The `resource.data` contains the original state before the update.
+        // `diff()` gives us the keys that are being changed.
+        let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
+
+        // The set of changed keys must be a subset of {'status', 'completionCode'}
+        return changedKeys.hasOnly(['status', 'completionCode']) || changedKeys.hasOnly(['status']) || changedKeys.hasOnly(['completionCode']);
     }
 
     /**
@@ -53,9 +83,12 @@ service cloud.firestore {
      */
     match /workers/{workerId}/reviews/{reviewId} {
       allow get, list: if true;
+      // Allow creation if the user ID in the new review matches the authenticated user.
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Allow update/delete if the user ID in the existing review matches the authenticated user.
       allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
+
 
     /**
      * @description Controls access to service definitions.
@@ -70,12 +103,20 @@ service cloud.firestore {
     /**
      * @description Controls access to bookings within a user's private collection.
      * @path /users/{userId}/bookings/{bookingId}
-     * @principle A user can manage bookings inside their own space.
-     * A worker assigned to the booking can update its status.
+     * @principle A user can manage bookings inside their own space. A worker can also
+     *            update the status as part of an atomic batch operation.
      */
     match /users/{userId}/bookings/{bookingId} {
-        // The user who owns the subcollection can manage their booking.
-        allow read, create, delete, update: if isOwner(userId);
+        // The user who owns the subcollection can do anything.
+        allow read, create, delete: if isOwner(userId);
+        
+        // A user can cancel their own booking (by updating status to 'cancelled').
+        allow update: if isOwner(userId);
+        
+        // A worker can update the status/code if they are the assigned worker
+        // AND they are also updating their own booking document in the same transaction.
+        allow update: if isOwner(resource.data.workerId) &&
+                         isWorkerUpdatingAllowedFields();
     }
     
     /**
@@ -86,8 +127,8 @@ service cloud.firestore {
     match /workers/{workerId}/bookings/{bookingId} {
       // The worker can read/update/delete their own bookings.
       allow read, update, delete: if isOwner(workerId);
-      // Any authenticated user can create a booking, as long as they are the customer in the booking.
-      // This is crucial for the booking process to start.
+      
+      // Any authenticated user can create a booking, as long as they are the customer (userId) in the booking.
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
 
@@ -109,11 +150,5 @@ service cloud.firestore {
     match /roles_admin/{uid} {
         allow read, write: if false;
     }
-
-    // Helper function to check if the user is an admin.
-    function isAdmin() {
-      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-    }
   }
 }
-    
