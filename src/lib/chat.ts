@@ -53,10 +53,9 @@ export function sendMessage(
   }
 
   const chatRef = doc(firestore, 'chats', booking.id);
-  const newMessageRef = doc(collection(firestore, `chats/${booking.id}/messages`));
+  const messagesColRef = collection(firestore, `chats/${booking.id}/messages`);
 
-  const messageData = {
-    id: newMessageRef.id,
+  const messageData: Omit<ChatMessage, 'id'> = {
     text,
     senderId,
     createdAt: new Date().toISOString(),
@@ -72,21 +71,25 @@ export function sendMessage(
     },
   };
   
-  const batch = writeBatch(firestore);
-
-  // 1. Set the new message document
-  batch.set(newMessageRef, messageData);
-  // 2. Create or update the chat metadata document with the last message
-  batch.set(chatRef, chatMetadata, { merge: true });
-
-  // Commit the batch and handle potential permission errors without crashing
-  batch.commit().catch(error => {
-     const permissionError = new FirestorePermissionError({
-        path: newMessageRef.path, // The path for creating a message
+  // First, ensure the chat metadata document exists.
+  // This must be done separately from adding the message so security rules can check it.
+  setDoc(chatRef, chatMetadata, { merge: true }).then(() => {
+    // After the chat doc is created/updated, add the message.
+    addDoc(messagesColRef, messageData).catch(error => {
+      const permissionError = new FirestorePermissionError({
+        path: messagesColRef.path, // Path for creating a message
         operation: 'create',
         requestResourceData: messageData,
-     });
-     errorEmitter.emit('permission-error', permissionError);
-     // Optional: You could also use a toast here to inform the user the message failed to send.
+      });
+      errorEmitter.emit('permission-error', permissionError);
+    });
+  }).catch(error => {
+    // This will catch errors on creating the parent chat document itself.
+    const permissionError = new FirestorePermissionError({
+        path: chatRef.path,
+        operation: 'write',
+        requestResourceData: chatMetadata
+    });
+    errorEmitter.emit('permission-error', permissionError);
   });
 }

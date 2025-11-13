@@ -56,7 +56,7 @@ service cloud.firestore {
     // Checks if the user is a participant of a chat.
     function isChatParticipant(bookingId) {
       let uid = request.auth.uid;
-       // For list/read operations, using exists() is more efficient and allowed.
+      // For list/read operations, using exists() is more efficient and allowed.
       if (request.method == 'get' || request.method == 'list') {
          return exists(/databases/$(database)/documents/users/$(uid)/bookings/$(bookingId)) ||
                exists(/databases/$(database)/documents/workers/$(uid)/bookings/$(bookingId));
@@ -185,13 +185,8 @@ service cloud.firestore {
         allow read, list: if isChatParticipant(bookingId);
         
         // Allow a participant to create a message, ensuring the senderId is their own UID.
-        // This rule handles two cases:
-        // 1. The chat document already exists: isChatParticipant() will use get() and succeed.
-        // 2. The chat document is being created in the same batch: isChatParticipant() would fail, so we
-        //    check the incoming chat document's data using getAfter() to verify participation.
-        allow create: if (isChatParticipant(bookingId) || 
-                          (request.auth.uid == getAfter(/databases/$(database)/documents/chats/$(bookingId)).data.userId ||
-                           request.auth.uid == getAfter(/databases/$(database)/documents/chats/$(bookingId)).data.workerId))
+        // This rule depends on the parent /chats/{bookingId} document existing first.
+        allow create: if isChatParticipant(bookingId)
                       && request.resource.data.senderId == request.auth.uid;
 
         allow update, delete: if false; // Messages are immutable
