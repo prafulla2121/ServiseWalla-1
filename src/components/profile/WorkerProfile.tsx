@@ -18,7 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, CheckCircle, History } from 'lucide-react';
+import { Clock, CheckCircle, History, Phone, User as UserIcon, MapPin } from 'lucide-react';
 import { Badge } from '../ui/badge';
 
 interface WorkerProfileProps {
@@ -36,15 +36,34 @@ function BookingItem({ booking, onUpdateStatus }: BookingItemProps) {
     return services.find(s => s.id === serviceId)?.name || 'Unknown Service';
   };
 
+  const isConfirmed = booking.status === 'confirmed' || booking.status === 'completed';
+
   return (
     <div className="p-4 border rounded-lg">
       <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center'>
-        <div className="mb-4 sm:mb-0">
+        <div className="mb-4 sm:mb-0 flex-grow">
           <h3 className="font-semibold">{getServiceName(booking.serviceId)}</h3>
           <p className="text-sm text-muted-foreground">
             {format(new Date(booking.bookingDate), "MMMM d, yyyy 'at' h:mm a")}
           </p>
-          <p className="text-sm text-muted-foreground">Customer: {booking.name}</p>
+          <div className="mt-2 text-sm space-y-1">
+            <div className="flex items-center text-muted-foreground">
+              <UserIcon className="mr-2 h-4 w-4" />
+              <span>{booking.name}</span>
+            </div>
+            {isConfirmed && (
+              <>
+                <div className="flex items-center text-muted-foreground">
+                  <Phone className="mr-2 h-4 w-4" />
+                  <a href={`tel:${booking.phone}`} className="hover:text-primary">{booking.phone}</a>
+                </div>
+                <div className="flex items-center text-muted-foreground">
+                  <MapPin className="mr-2 h-4 w-4" />
+                  <span>{booking.address}</span>
+                </div>
+              </>
+            )}
+          </div>
            <Badge variant="outline" className="mt-2 capitalize">{booking.status}</Badge>
         </div>
         <div className="flex gap-2 self-start sm:self-center">
@@ -96,7 +115,7 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
   
   const pendingBookings = useMemo(() => bookings.filter(b => b.status === 'pending'), [bookings]);
   const upcomingBookings = useMemo(() => bookings.filter(b => b.status === 'confirmed'), [bookings]);
-  const historicalBookings = useMemo(() => bookings.filter(b => b.status === 'completed' || b.status === 'cancelled'), [bookings]);
+  const historicalBookings = useMemo(() => bookings.filter(b => b.status === 'completed' || b.status === 'cancelled').sort((a, b) => new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()), [bookings]);
 
   return (
     <div className="container mx-auto max-w-6xl py-12 space-y-12">
