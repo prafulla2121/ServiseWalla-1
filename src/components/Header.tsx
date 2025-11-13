@@ -33,8 +33,8 @@ export function Header() {
 
   const generalNavLinks = [
     { href: "/", label: "Home" },
-    { href: "/services", label: "Services" },
-    { href: "/workers", label: "Workers" },
+    { href: "/services", label: "Find Services" },
+    { href: "/workers", label: "For Workers" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
   ];
@@ -61,7 +61,7 @@ export function Header() {
         onClick={() => setIsMenuOpen(false)}
         className={cn(
           "text-sm font-medium transition-colors hover:text-primary",
-          isActive ? "text-primary" : "text-foreground",
+          isActive ? "text-primary font-semibold" : "text-foreground/80",
           className
         )}
       >
@@ -72,8 +72,8 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
-        <div className="mr-4 hidden md:flex">
+      <div className="container flex h-20 items-center">
+        <div className="mr-8 hidden md:flex">
           <Logo />
         </div>
 
@@ -114,10 +114,10 @@ export function Header() {
                  ) : (
                    <>
                     <Button asChild variant="outline">
-                        <Link href="/login">Login</Link>
+                        <Link href="/login">Sign In</Link>
                     </Button>
                     <Button asChild>
-                        <Link href="/register">Sign Up</Link>
+                        <Link href="/register">Get Started</Link>
                     </Button>
                    </>
                  )}
@@ -125,22 +125,20 @@ export function Header() {
           </SheetContent>
         </Sheet>
         
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-            <nav className="hidden items-center space-x-6 md:flex">
+        <div className="flex flex-1 items-center justify-center md:justify-between space-x-2">
+           <nav className="hidden items-center space-x-8 md:flex">
               {navLinks.map((link) => (
                 <NavLink key={link.href} href={link.href} label={link.label} />
               ))}
             </nav>
-          </div>
 
           <div className="flex items-center gap-2">
             <div className="hidden md:flex items-center gap-2">
                  {isUserLoading ? null : user ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                          <Avatar className="h-8 w-8">
+                        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                          <Avatar className="h-10 w-10">
                              <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? 'User'} />
                             <AvatarFallback>{user.displayName?.charAt(0)}</AvatarFallback>
                           </Avatar>
@@ -168,10 +166,10 @@ export function Header() {
                   ) : (
                     <>
                       <Button asChild variant="ghost">
-                          <Link href="/login">Login</Link>
+                          <Link href="/login">Sign In</Link>
                       </Button>
                       <Button asChild>
-                          <Link href="/register">Sign Up</Link>
+                          <Link href="/register">Get Started</Link>
                       </Button>
                     </>
                   )}

@@ -7,10 +7,17 @@ import {
   Smile,
   Star,
   ChevronRight,
+  MapPin,
+  CheckCircle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -23,9 +30,10 @@ import { ServiceCard } from "@/components/ServiceCard";
 import { WorkerCard } from "@/components/WorkerCard";
 import { services, workers, testimonials } from "@/lib/data";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { Input } from "@/components/ui/input";
 
 export default function Home() {
-  const heroImage = PlaceHolderImages.find((img) => img.id === "hero-1");
+  const heroImage = PlaceHolderImages.find((img) => img.id === "hero-workers");
   const ctaImage = PlaceHolderImages.find((img) => img.id === "cta-1");
 
   const howItWorks = [
@@ -49,41 +57,96 @@ export default function Home() {
     },
   ];
 
+  const searchFilters = ["Cleaning", "Plumbing", "Electrical", "Gardening", "Painting"];
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative h-[600px] w-full text-white">
-        {heroImage && (
-          <Image
-            src={heroImage.imageUrl}
-            alt={heroImage.description}
-            fill
-            className="object-cover"
-            priority
-            data-ai-hint={heroImage.imageHint}
-          />
-        )}
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="relative z-10 flex h-full flex-col items-center justify-center space-y-6 text-center">
-          <h1 className="font-headline text-4xl font-bold md:text-6xl">
-            Find Trusted Help, Instantly
-          </h1>
-          <p className="max-w-2xl text-lg md:text-xl">
-            From home repairs to personal wellness, ServiceWalla connects you
-            with skilled professionals you can trust.
-          </p>
-          <div className="w-full max-w-lg">
-            <Link href="/services">
-              <Button size="lg" className="font-bold">
-                Browse Services <ArrowRight className="ml-2" />
-              </Button>
-            </Link>
+      <section className="relative w-full overflow-hidden bg-primary/10">
+        <div className="container mx-auto grid lg:grid-cols-2 gap-12 items-center min-h-[600px] py-16">
+          <div className="z-10 text-center lg:text-left">
+            <h1 className="font-headline text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+              Find Trusted <br/>
+              <span className="text-accent">Local Services</span>
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg text-muted-foreground mx-auto lg:mx-0">
+               Connect with skilled professionals in your area. From home repairs to cleaning services, we've got you covered with verified, trusted experts.
+            </p>
+            
+            <Card className="mt-8 shadow-lg">
+                <CardContent className="p-6 space-y-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                         <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            <Input placeholder="What service do you need?" className="pl-10 h-12"/>
+                         </div>
+                         <div className="relative">
+                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            <Input placeholder="Enter your location" className="pl-10 h-12"/>
+                         </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                        {searchFilters.map(filter => (
+                            <Button key={filter} variant="outline" size="sm" className="rounded-full">
+                                {filter}
+                            </Button>
+                        ))}
+                         <Button variant="link" size="sm">
+                                More <ChevronRight className="ml-1 h-4 w-4"/>
+                        </Button>
+                    </div>
+                     <Button size="lg" className="w-full font-bold text-base">
+                       <Search className="mr-2"/>
+                       Find Services
+                     </Button>
+                </CardContent>
+            </Card>
+
+          </div>
+          <div className="relative h-[400px] lg:h-full w-full">
+            {heroImage && (
+              <Image
+                src={heroImage.imageUrl}
+                alt={heroImage.description}
+                fill
+                className="object-contain"
+                priority
+                data-ai-hint={heroImage.imageHint}
+              />
+            )}
+             <div className="absolute top-8 right-0 transform translate-x-4 md:translate-x-8">
+                <Card className="bg-primary/90 text-primary-foreground shadow-xl animate-glow">
+                    <CardContent className="p-4 flex items-center gap-3">
+                        <div className="bg-accent/20 p-2 rounded-full">
+                            <Star className="text-accent fill-accent size-6"/>
+                        </div>
+                        <div>
+                            <p className="font-bold text-lg">4.8/5 Rating</p>
+                            <p className="text-sm text-primary-foreground/80">50k+ Reviews</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <div className="absolute bottom-8 left-0 transform -translate-x-4 md:-translate-x-8">
+                <Card className="bg-background/90 backdrop-blur-sm shadow-xl animate-glow">
+                    <CardContent className="p-4 flex items-center gap-3">
+                        <div className="bg-green-500/20 p-2 rounded-full">
+                            <CheckCircle className="text-green-600 size-6"/>
+                        </div>
+                        <div>
+                            <p className="font-bold text-lg">Verified Workers</p>
+                            <p className="text-sm text-muted-foreground">Background checked</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
           </div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16 sm:py-24">
+      <section className="py-16 sm:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center">
             <h2 className="font-headline text-3xl font-bold sm:text-4xl">
