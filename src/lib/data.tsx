@@ -22,34 +22,12 @@ import {
   Home,
   type LucideIcon,
 } from "lucide-react";
-import { PlaceHolderImages } from "./placeholder-images";
 
 export interface Service {
   id: string;
   name: string;
   description: string;
   icon: React.ReactElement<LucideIcon>;
-}
-
-export interface Worker {
-  id: string;
-  name: string;
-  service: string;
-  serviceId: string;
-  rating: number;
-  reviews: number;
-  location: string;
-  bio: string;
-  skills: string[];
-  avatarUrl: string;
-  coverImageUrl: string;
-}
-
-export interface Testimonial {
-  id: number;
-  name: string;
-  quote: string;
-  avatarUrl: string;
 }
 
 export const services: Service[] = [
@@ -192,7 +170,3 @@ export const services: Service[] = [
     icon: <Home className="size-6" />,
   },
 ];
-
-export const workers: Worker[] = [];
-
-export const testimonials: Testimonial[] = [];

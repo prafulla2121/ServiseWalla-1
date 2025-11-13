@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowRight,
@@ -14,6 +14,7 @@ import {
   MapPin,
   CheckCircle,
 } from 'lucide-react';
+import Autoplay from "embla-carousel-autoplay"
 
 import { Button } from '@/components/ui/button';
 import {
@@ -31,7 +32,7 @@ import {
 } from '@/components/ui/carousel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ServiceCard } from '@/components/ServiceCard';
-import { testimonials, services } from '@/lib/data';
+import { services } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Input } from '@/components/ui/input';
 import {
@@ -43,8 +44,9 @@ import {
 } from '@/components/ui/select';
 
 export default function Home() {
-  const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-workers');
   const ctaImage = PlaceHolderImages.find((img) => img.id === 'cta-1');
+
+  const heroImages = PlaceHolderImages.filter(img => img.id.startsWith('hero-'));
 
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
@@ -141,47 +143,28 @@ export default function Home() {
             </Card>
           </div>
           <div className="relative h-[400px] w-full lg:h-full">
-            {heroImage && (
-              <Image
-                src={heroImage.imageUrl}
-                alt={heroImage.description}
-                fill
-                className="object-contain"
-                priority
-                data-ai-hint={heroImage.imageHint}
-              />
-            )}
-            <div className="absolute right-0 top-8 translate-x-4 transform md:translate-x-8">
-              <Card className="animate-glow bg-primary/90 text-primary-foreground shadow-xl">
-                <CardContent className="flex items-center gap-3 p-4">
-                  <div className="rounded-full bg-accent/20 p-2">
-                    <Star className="size-6 fill-accent text-accent" />
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold">4.8/5 Rating</p>
-                    <p className="text-sm text-primary-foreground/80">
-                      50k+ Reviews
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="absolute bottom-8 left-0 -translate-x-4 transform md:-translate-x-8">
-              <Card className="animate-glow bg-background/90 shadow-xl backdrop-blur-sm">
-                <CardContent className="flex items-center gap-3 p-4">
-                  <div className="rounded-full bg-green-500/20 p-2">
-                    <CheckCircle className="size-6 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold">Verified Workers</p>
-                    <p className="text-sm text-muted-foreground">
-                      Background checked
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <Carousel 
+              opts={{ loop: true }} 
+              plugins={[Autoplay({delay: 10000, stopOnInteraction: true})]}
+              className="w-full h-full"
+            >
+              <CarouselContent>
+                {heroImages.map((image) => (
+                  <CarouselItem key={image.id}>
+                     <div className="relative h-[400px] w-full lg:h-[500px]">
+                      <Image
+                        src={image.imageUrl}
+                        alt={image.description}
+                        fill
+                        className="object-contain"
+                        priority={heroImages.indexOf(image) === 0}
+                        data-ai-hint={image.imageHint}
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
           </div>
         </div>
       </section>
@@ -263,11 +246,13 @@ export default function Home() {
           <Carousel
             opts={{
               align: 'start',
+              loop: true,
             }}
+             plugins={[Autoplay({delay: 5000, stopOnInteraction: true})]}
             className="mx-auto mt-12 w-full max-w-4xl"
           >
             <CarouselContent>
-              {testimonials.map((testimonial) => (
+              {PlaceHolderImages.filter(i => i.id.startsWith('testimonial-')).map((testimonial) => (
                 <CarouselItem
                   key={testimonial.id}
                   className="md:basis-1/2 lg:basis-1/3"
@@ -276,20 +261,20 @@ export default function Home() {
                     <Card className="h-full">
                       <CardContent className="flex flex-col items-center justify-center p-6 text-center">
                         <p className="italic text-muted-foreground">
-                          "{testimonial.quote}"
+                          "{testimonial.description}"
                         </p>
                         <div className="mt-6 flex items-center">
                           <Avatar>
                             <AvatarImage
-                              src={testimonial.avatarUrl}
-                              alt={testimonial.name}
+                              src={testimonial.imageUrl}
+                              alt={testimonial.imageHint}
                             />
                             <AvatarFallback>
-                              {testimonial.name.charAt(0)}
+                              {testimonial.imageHint.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
                           <div className="ml-4 text-left">
-                            <p className="font-semibold">{testimonial.name}</p>
+                            <p className="font-semibold capitalize">{testimonial.imageHint.replace('-', ' ')}</p>
                             <div className="flex">
                               {[...Array(5)].map((_, i) => (
                                 <Star

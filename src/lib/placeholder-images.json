@@ -3,14 +3,32 @@
     {
       "id": "hero-1",
       "description": "A bright and welcoming living room, suggesting home services.",
-      "imageUrl": "https://images.unsplash.com/photo-1724582586529-62622e50c0b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtb2Rlcm4lMjBsaXZpbmclMjByb29tfGVufDB8fHx8MTc2Mjk3MjQ4MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1618220179428-22790b461013?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBsaXZpbmclMjByb29tfGVufDB8fHx8MTc2MzU0MjYxOXww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "modern living room"
     },
     {
       "id": "hero-workers",
       "description": "A diverse group of happy and professional service workers.",
-      "imageUrl": "https://images.unsplash.com/photo-1706381068085-29fe6c2afe51?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxzZXJ2aWNlJTIwd29ya2VycyUyMHRlYW18ZW58MHx8fHwxNzYzMDU2MDU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "service workers team"
+      "imageUrl": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzZXJ2aWNlJTIwd29ya2VycyUyMHRlYW18ZW58MHx8fHwxNzYzNTQyNjQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "service workers"
+    },
+    {
+      "id": "hero-plumber",
+      "description": "A smiling plumber holding a wrench.",
+      "imageUrl": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwbHVtYmVyJTIwc21pbGluZ3xlbnwwfHx8fDE3NjM1NDI2NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "plumber smiling"
+    },
+    {
+      "id": "hero-gardener",
+      "description": "A gardener tending to plants in a sunny garden.",
+      "imageUrl": "https://images.unsplash.com/photo-1558221593-490520779d72?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnYXJkZW5lciUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MzU0MjY4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gardener portrait"
+    },
+    {
+      "id": "hero-painter",
+      "description": "A painter carefully painting a wall with a roller.",
+      "imageUrl": "https://images.unsplash.com/photo-1528605248644-14dd04022da1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwYWludGVyJTIwd2FsbHxlbnwwfHx8fDE3NjM1NDI3MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "painter wall"
     },
     {
       "id": "cta-1",
@@ -122,27 +140,27 @@
     },
     {
       "id": "testimonial-1",
-      "description": "Avatar of a happy customer.",
-      "imageUrl": "https://images.unsplash.com/photo-1750535135645-005e250ff210?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGVyc29uJTIwYXZhdGFyfGVufDB8fHx8MTc2Mjk1MTQ2OHww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "person avatar"
+      "description": "A plumber fixed my leak in an hour! So professional and quick.",
+      "imageUrl": "https://images.unsplash.com/photo-1557862921-37829c790f19?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjBzbWlsaW5nJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzYzNTQyODU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "david-lee"
     },
     {
       "id": "testimonial-2",
-      "description": "Avatar of a satisfied customer.",
-      "imageUrl": "https://images.unsplash.com/photo-1750535135451-7c20e24b60c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwZXJzb24lMjBhdmF0YXJ8ZW58MHx8fHwxNzYyOTUxNDY4fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "person avatar"
+      "description": "The cleaning service was incredible. My house has never been so spotless.",
+      "imageUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHNtaWxpbmclMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjM1NDI4ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sarah-jones"
     },
     {
       "id": "testimonial-3",
-      "description": "Avatar of a smiling customer.",
-      "imageUrl": "https://images.unsplash.com/photo-1594616838951-c155f8d978a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwZXJzb24lMjBhdmF0YXJ8ZW58MHx8fHwxNzYyOTUxNDY4fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "person avatar"
+      "description": "Found a great guitar teacher for my son. He's learning so fast!",
+      "imageUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjM1NDI5MDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "michael-chen"
     },
     {
       "id": "testimonial-4",
-      "description": "Avatar of a professional looking customer.",
-      "imageUrl": "https://images.unsplash.com/photo-1724435811349-32d27f4d5806?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwZXJzb24lMjBhdmF0YXJ8ZW58MHx8fHwxNzYyOTUxNDY4fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "person avatar"
+      "description": "The handyman assembled all my new furniture perfectly. A lifesaver!",
+      "imageUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwYW1lcmljYW4lMjB3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MzU0MjkzMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "emily-rodriguez"
     },
     {
       "id": "contact-hero",
