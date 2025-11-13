@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useDoc, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { doc, collection } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import { Loader2, Calendar, Clock, MapPin, User, Tag, KeyRound, Star, Check, Truck, Play, ChevronRight } from 'lucide-react';
 import type { Booking, Worker } from '@/lib/types';
 import { services } from '@/lib/data';

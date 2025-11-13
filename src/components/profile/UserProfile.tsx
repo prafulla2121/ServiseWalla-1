@@ -33,7 +33,7 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
 
   const handleCancelBooking = async (booking: Booking, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent link navigation when cancelling
-    if (!user) return;
+    if (!user || !firestore) return;
     setCancellingId(booking.id);
     try {
       await cancelBookingAsUser(firestore, user.uid, booking.id);
