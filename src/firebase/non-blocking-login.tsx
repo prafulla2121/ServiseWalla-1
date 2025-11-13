@@ -6,6 +6,9 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  ConfirmationResult,
 } from 'firebase/auth';
 import {
   setDocumentNonBlocking
@@ -104,4 +107,74 @@ export function initiateEmailSignIn(authInstance: Auth, email: string, password:
             description,
         });
   });
+}
+
+
+/**
+ * Sets up a RecaptchaVerifier instance for phone authentication.
+ * It's attached to a container element in the DOM.
+ */
+export function setupRecaptcha(auth: Auth, containerId: string, toast: ToastFunction): void {
+  try {
+    // Check if verifier already exists to avoid re-rendering
+    if ((window as any).recaptchaVerifier) {
+      (window as any).recaptchaVerifier.clear();
+    }
+    (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+      'size': 'invisible',
+      'callback': (response: any) => {
+        // reCAPTCHA solved, allow signInWithPhoneNumber.
+      },
+      'expired-callback': () => {
+        toast({
+            variant: 'destructive',
+            title: 'reCAPTCHA Expired',
+            description: 'Please try sending the OTP again.',
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Recaptcha setup error:", error);
+    toast({
+        variant: 'destructive',
+        title: 'reCAPTCHA Error',
+        description: 'Could not initialize reCAPTCHA. Please refresh the page.',
+    });
+  }
+}
+
+/**
+ * Initiates phone number sign-in and returns a confirmation result.
+ */
+export async function signInWithPhone(auth: Auth, phoneNumber: string): Promise<ConfirmationResult> {
+  const appVerifier = (window as any).recaptchaVerifier;
+  if (!appVerifier) {
+    throw new Error("Recaptcha verifier not initialized.");
+  }
+  return signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+}
+
+/**
+ * Confirms the OTP code and signs the user in.
+ */
+export async function confirmOtp(confirmationResult: ConfirmationResult, otp: string) {
+    const userCredential = await confirmationResult.confirm(otp);
+    const user = userCredential.user;
+
+    // Check if the user is new. If so, create a corresponding document in Firestore.
+    const db = getFirestore();
+    const userDocRef = doc(db, 'users', user.uid);
+
+    // This logic assumes a new phone user is always a 'user', not a 'worker'.
+    // A more complex flow would be needed to distinguish this.
+    // For now, we create a user profile if one doesn't exist.
+    setDocumentNonBlocking(userDocRef, {
+        id: user.uid,
+        email: user.email, // Will be null for phone auth
+        phone: user.phoneNumber,
+        firstName: '', // No name provided in this flow yet
+        lastName: '',
+    }, { merge: true }); // Use merge to avoid overwriting existing data if user logs in via another method.
+    
+    return userCredential;
 }
