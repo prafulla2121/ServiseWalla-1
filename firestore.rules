@@ -151,7 +151,7 @@ service cloud.firestore {
       function isWorkerUpdatingAllowedFields() {
         let allowedKeys = ['status', 'completionCode'];
         let incomingKeys = request.resource.data.keys();
-        return isWorkerOnBooking() && incomingKeys.hasAll(allowedKeys) && incomingKeys.size() <= allowedKeys.size();
+        return isWorkerOnBooking() && incomingKeys.hasOnly(allowedKeys);
       }
 
       allow get: if isOwner(userId);
