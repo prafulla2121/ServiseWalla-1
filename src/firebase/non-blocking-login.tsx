@@ -14,16 +14,27 @@ import {
   getFirestore
 } from 'firebase/firestore';
 
+interface ToastFunction {
+    ({
+      title,
+      description,
+      variant,
+    }: {
+      title: string;
+      description: string;
+      variant?: 'default' | 'destructive';
+    }): void;
+}
+
 /** Initiate anonymous sign-in (non-blocking). */
 export function initiateAnonymousSignIn(authInstance: Auth): void {
   signInAnonymously(authInstance).catch((error) => {
     console.error("Anonymous sign-in error", error);
-    alert(`Error: ${error.message}`);
   });
 }
 
 /** Initiate email/password sign-up (non-blocking). */
-export function initiateEmailSignUp(authInstance: Auth, email: string, password: string, fullName: string, role: 'user' | 'worker', serviceId?: string): void {
+export function initiateEmailSignUp(authInstance: Auth, email: string, password: string, fullName: string, role: 'user' | 'worker', toast: ToastFunction, serviceId?: string): void {
   createUserWithEmailAndPassword(authInstance, email, password)
     .then((userCredential) => {
       // After user is created, update their profile and save to Firestore
@@ -60,15 +71,36 @@ export function initiateEmailSignUp(authInstance: Auth, email: string, password:
       }
     })
     .catch((error) => {
-      console.error("Email sign-up error", error);
-      alert(`Error: ${error.message}`);
+        let description = 'An unexpected error occurred. Please try again.';
+        if (error.code === 'auth/email-already-in-use') {
+            description = 'This email is already registered. Please try logging in instead.';
+        } else if (error.code === 'auth/weak-password') {
+            description = 'The password is too weak. Please choose a stronger password.';
+        }
+        
+        toast({
+            variant: "destructive",
+            title: "Registration Failed",
+            description,
+        });
+        console.error("Email sign-up error", error);
     });
 }
 
 /** Initiate email/password sign-in (non-blocking). */
-export function initiateEmailSignIn(authInstance: Auth, email: string, password: string): void {
-  signInWithEmailAndPassword(authInstance, email, password).catch((error) => {
-    console.error("Email sign-in error", error);
-    alert(`Error: ${error.message}`);
+export function initiateEmailSignIn(authInstance: Auth, email: string, password: string, toast: ToastFunction): void {
+  signInWithEmailAndPassword(authInstance, email, password)
+    .catch((error) => {
+        let description = 'An unexpected error occurred. Please try again.';
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+            description = 'Invalid email or password. Please check your credentials and try again.';
+        }
+        
+        toast({
+            variant: "destructive",
+            title: "Sign-in Failed",
+            description,
+        });
+        console.error("Email sign-in error", error);
   });
 }

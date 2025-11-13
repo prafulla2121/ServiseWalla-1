@@ -25,6 +25,7 @@ import { Logo } from "@/components/Logo";
 import { initiateEmailSignUp, useAuth, useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const registerSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters."),
@@ -38,6 +39,7 @@ export default function RegisterUserPage() {
   const auth = useAuth();
   const { user } = useUser();
   const router = useRouter();
+  const { toast } = useToast();
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -55,7 +57,7 @@ export default function RegisterUserPage() {
   }, [user, router]);
 
   const onSubmit: SubmitHandler<RegisterFormValues> = (data) => {
-    initiateEmailSignUp(auth, data.email, data.password, data.fullName, "user");
+    initiateEmailSignUp(auth, data.email, data.password, data.fullName, "user", toast);
   };
 
   return (

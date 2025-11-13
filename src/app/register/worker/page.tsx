@@ -33,6 +33,7 @@ import { services } from "@/lib/data";
 import { initiateEmailSignUp, useAuth, useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const registerSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters."),
@@ -47,6 +48,7 @@ export default function RegisterWorkerPage() {
   const auth = useAuth();
   const { user } = useUser();
   const router = useRouter();
+  const { toast } = useToast();
   
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -64,7 +66,7 @@ export default function RegisterWorkerPage() {
   }, [user, router]);
 
   const onSubmit: SubmitHandler<RegisterFormValues> = (data) => {
-    initiateEmailSignUp(auth, data.email, data.password, data.fullName, "worker", data.serviceId);
+    initiateEmailSignUp(auth, data.email, data.password, data.fullName, "worker", toast, data.serviceId);
   };
 
   return (
