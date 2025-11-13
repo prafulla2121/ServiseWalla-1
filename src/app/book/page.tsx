@@ -182,7 +182,10 @@ export default function BookPage() {
                     <FormItem>
                       <FormLabel>Service</FormLabel>
                       <Select
-                        onValueChange={field.onChange}
+                        onValueChange={(value) => {
+                            field.onChange(value);
+                            form.setValue('workerId', ''); // Reset worker when service changes
+                        }}
                         defaultValue={field.value}
                       >
                         <FormControl>
@@ -210,12 +213,12 @@ export default function BookPage() {
                       <FormLabel>Professional</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                         disabled={!selectedServiceId || isLoadingWorkers}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder={isLoadingWorkers ? "Loading professionals..." : "Select a professional"} />
+                            <SelectValue placeholder={!selectedServiceId ? "Please select a service first" : (isLoadingWorkers ? "Loading professionals..." : "Select a professional")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
