@@ -1,5 +1,9 @@
-import Image from "next/image";
-import Link from "next/link";
+'use client';
+
+import Image from 'next/image';
+import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   ArrowRight,
   Search,
@@ -9,100 +13,134 @@ import {
   ChevronRight,
   MapPin,
   CheckCircle,
-} from "lucide-react";
+} from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ServiceCard } from "@/components/ServiceCard";
-import { testimonials, services } from "@/lib/data";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/carousel';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ServiceCard } from '@/components/ServiceCard';
+import { testimonials, services } from '@/lib/data';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function Home() {
-  const heroImage = PlaceHolderImages.find((img) => img.id === "hero-workers");
-  const ctaImage = PlaceHolderImages.find((img) => img.id === "cta-1");
+  const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-workers');
+  const ctaImage = PlaceHolderImages.find((img) => img.id === 'cta-1');
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [location, setLocation] = useState('');
+  const router = useRouter();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery) return;
+    router.push(
+      `/workers-list/${searchQuery}?location=${encodeURIComponent(location)}`
+    );
+  };
 
   const howItWorks = [
     {
       icon: <Search className="size-8 text-primary" />,
-      title: "Find a Service",
+      title: 'Find a Service',
       description:
-        "Browse our wide range of services and find the perfect professional for your needs.",
+        'Browse our wide range of services and find the perfect professional for your needs.',
     },
     {
       icon: <Book className="size-8 text-primary" />,
-      title: "Book with Confidence",
+      title: 'Book with Confidence',
       description:
-        "Select a date and time that works for you. Our booking process is simple and secure.",
+        'Select a date and time that works for you. Our booking process is simple and secure.',
     },
     {
       icon: <Smile className="size-8 text-primary" />,
-      title: "Get it Done",
+      title: 'Get it Done',
       description:
         "Your chosen professional arrives and completes the job to your satisfaction. It's that easy!",
     },
   ];
 
-  const searchFilters = ["Cleaning", "Plumbing", "Electrical", "Gardening", "Painting"];
-
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative w-full overflow-hidden bg-primary/10">
-        <div className="container mx-auto grid lg:grid-cols-2 gap-12 items-center min-h-[600px] py-16">
+        <div className="container mx-auto grid min-h-[600px] items-center gap-12 py-16 lg:grid-cols-2">
           <div className="z-10 text-center lg:text-left">
             <h1 className="font-headline text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
-              Find Trusted <br/>
+              Find Trusted <br />
               <span className="text-accent">Local Services</span>
             </h1>
-            <p className="mt-6 max-w-2xl text-lg text-muted-foreground mx-auto lg:mx-0">
-               Connect with skilled professionals in your area. From home repairs to cleaning services, we've got you covered with verified, trusted experts.
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground lg:mx-0">
+              Connect with skilled professionals in your area. From home repairs
+              to cleaning services, we've got you covered with verified, trusted
+              experts.
             </p>
-            
-            <Card className="mt-8 shadow-lg">
-                <CardContent className="p-6 space-y-4">
-                    <div className="grid sm:grid-cols-2 gap-4">
-                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                            <Input placeholder="What service do you need?" className="pl-10 h-12"/>
-                         </div>
-                         <div className="relative">
-                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                            <Input placeholder="Enter your location" className="pl-10 h-12"/>
-                         </div>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                        {searchFilters.map(filter => (
-                            <Button key={filter} variant="outline" size="sm" className="rounded-full">
-                                {filter}
-                            </Button>
-                        ))}
-                         <Button variant="link" size="sm">
-                                More <ChevronRight className="ml-1 h-4 w-4"/>
-                        </Button>
-                    </div>
-                     <Button size="lg" className="w-full font-bold text-base">
-                       <Search className="mr-2"/>
-                       Find Services
-                     </Button>
-                </CardContent>
-            </Card>
 
+            <Card className="mt-8 shadow-lg">
+              <CardContent className="p-6">
+                <form onSubmit={handleSearch} className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                      <Select
+                        onValueChange={setSearchQuery}
+                        value={searchQuery}
+                      >
+                        <SelectTrigger className="pl-10 h-12">
+                          <SelectValue placeholder="What service do you need?" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {services.map((service) => (
+                            <SelectItem key={service.id} value={service.id}>
+                              {service.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        placeholder="Enter your location"
+                        className="h-12 pl-10"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="w-full text-base font-bold"
+                    disabled={!searchQuery}
+                  >
+                    <Search className="mr-2" />
+                    Find Services
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
           </div>
-          <div className="relative h-[400px] lg:h-full w-full">
+          <div className="relative h-[400px] w-full lg:h-full">
             {heroImage && (
               <Image
                 src={heroImage.imageUrl}
@@ -113,39 +151,43 @@ export default function Home() {
                 data-ai-hint={heroImage.imageHint}
               />
             )}
-             <div className="absolute top-8 right-0 transform translate-x-4 md:translate-x-8">
-                <Card className="bg-primary/90 text-primary-foreground shadow-xl animate-glow">
-                    <CardContent className="p-4 flex items-center gap-3">
-                        <div className="bg-accent/20 p-2 rounded-full">
-                            <Star className="text-accent fill-accent size-6"/>
-                        </div>
-                        <div>
-                            <p className="font-bold text-lg">4.8/5 Rating</p>
-                            <p className="text-sm text-primary-foreground/80">50k+ Reviews</p>
-                        </div>
-                    </CardContent>
-                </Card>
+            <div className="absolute right-0 top-8 translate-x-4 transform md:translate-x-8">
+              <Card className="animate-glow bg-primary/90 text-primary-foreground shadow-xl">
+                <CardContent className="flex items-center gap-3 p-4">
+                  <div className="rounded-full bg-accent/20 p-2">
+                    <Star className="size-6 fill-accent text-accent" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold">4.8/5 Rating</p>
+                    <p className="text-sm text-primary-foreground/80">
+                      50k+ Reviews
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            <div className="absolute bottom-8 left-0 transform -translate-x-4 md:-translate-x-8">
-                <Card className="bg-background/90 backdrop-blur-sm shadow-xl animate-glow">
-                    <CardContent className="p-4 flex items-center gap-3">
-                        <div className="bg-green-500/20 p-2 rounded-full">
-                            <CheckCircle className="text-green-600 size-6"/>
-                        </div>
-                        <div>
-                            <p className="font-bold text-lg">Verified Workers</p>
-                            <p className="text-sm text-muted-foreground">Background checked</p>
-                        </div>
-                    </CardContent>
-                </Card>
+            <div className="absolute bottom-8 left-0 -translate-x-4 transform md:-translate-x-8">
+              <Card className="animate-glow bg-background/90 shadow-xl backdrop-blur-sm">
+                <CardContent className="flex items-center gap-3 p-4">
+                  <div className="rounded-full bg-green-500/20 p-2">
+                    <CheckCircle className="size-6 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold">Verified Workers</p>
+                    <p className="text-sm text-muted-foreground">
+                      Background checked
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16 sm:py-24 bg-background">
+      <section className="bg-background py-16 sm:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center">
             <h2 className="font-headline text-3xl font-bold sm:text-4xl">
@@ -158,7 +200,10 @@ export default function Home() {
           </div>
           <div className="mt-12 grid gap-8 md:grid-cols-3">
             {howItWorks.map((step, index) => (
-              <Card key={index} className="transform-gpu transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+              <Card
+                key={index}
+                className="transform-gpu transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+              >
                 <CardHeader className="items-center">
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                     {step.icon}
@@ -217,7 +262,7 @@ export default function Home() {
           </div>
           <Carousel
             opts={{
-              align: "start",
+              align: 'start',
             }}
             className="mx-auto mt-12 w-full max-w-4xl"
           >
