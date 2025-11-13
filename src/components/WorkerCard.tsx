@@ -24,8 +24,8 @@ export function WorkerCard({ worker }: WorkerCardProps) {
   const fullName = `${worker.firstName || ''} ${worker.lastName || ''}`.trim();
 
   // Mock data for display until it's added to the data model
-  const rating = worker.rating || 4.8;
-  const reviews = worker.reviews || Math.floor(Math.random() * 100) + 5;
+  const rating = worker.averageRating || 0;
+  const reviews = worker.reviewCount || 0;
   const avatarUrl = worker.avatarUrl || `https://picsum.photos/seed/${worker.id}/200/200`;
   const coverImageUrl = worker.coverImageUrl || `https://picsum.photos/seed/cover-${worker.id}/400/200`;
 
@@ -52,11 +52,17 @@ export function WorkerCard({ worker }: WorkerCardProps) {
         <CardTitle className="font-headline text-xl">{fullName}</CardTitle>
         <CardDescription className="mt-1">{workerService?.name || 'Service Professional'}</CardDescription>
         <div className="mt-4 flex items-center justify-center space-x-4">
-            <div className="flex items-center">
-                <Star className="mr-1 h-4 w-4 text-yellow-500 fill-yellow-400" />
-                <span className="font-medium">{rating.toFixed(1)}</span>
-                <span className="text-sm text-muted-foreground ml-1">({reviews} reviews)</span>
-            </div>
+             {reviews > 0 ? (
+                <div className="flex items-center">
+                    <Star className="mr-1 h-4 w-4 text-yellow-500 fill-yellow-400" />
+                    <span className="font-medium">{rating.toFixed(1)}</span>
+                    <span className="text-sm text-muted-foreground ml-1">({reviews} reviews)</span>
+                </div>
+             ) : (
+                <div className="flex items-center text-sm text-muted-foreground">
+                    No reviews yet
+                </div>
+             )}
         </div>
       </CardContent>
       <CardFooter className="flex justify-center">

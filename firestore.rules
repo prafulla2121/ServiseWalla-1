@@ -84,7 +84,9 @@ service cloud.firestore {
     match /workers/{workerId}/reviews/{reviewId} {
       allow get, list: if true;
       // Allow creation if the user ID in the new review matches the authenticated user.
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null 
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.workerId == workerId;
       // Allow update/delete if the user ID in the existing review matches the authenticated user.
       allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }

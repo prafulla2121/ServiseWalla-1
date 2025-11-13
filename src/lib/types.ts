@@ -14,6 +14,7 @@ export interface Booking {
   city: string;
   state: string;
   zipCode: string;
+  reviewSubmitted?: boolean;
 }
 
 
@@ -29,6 +30,9 @@ export interface Worker {
   zipCode?: string;
   bio?: string;
   serviceIds: string[];
+  // Review aggragate data
+  reviewCount?: number;
+  averageRating?: number;
   // These are not in firestore yet, but needed for card
   rating?: number;
   reviews?: number;
@@ -36,4 +40,14 @@ export interface Worker {
   coverImageUrl?: string;
 }
 
+export interface Review {
+    id: string;
+    workerId: string;
+    userId: string;
+    userName: string;
+    userPhotoURL?: string;
+    rating: number; // 1-5
+    comment: string;
+    createdAt: string; // ISO string
+}
     

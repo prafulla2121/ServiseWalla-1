@@ -3,14 +3,62 @@
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useDoc, useFirestore, useMemoFirebase, useCollection } from '@/firebase';
+import { doc, collection, query, orderBy, limit } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Star, MapPin, CheckCircle, Loader2 } from 'lucide-react';
 import { services } from '@/lib/data';
+import type { Review } from '@/lib/types';
+import { format } from 'date-fns';
+
+
+function ReviewsList({ workerId }: { workerId: string }) {
+  const firestore = useFirestore();
+
+  const reviewsQuery = useMemoFirebase(() => {
+    if (!firestore || !workerId) return null;
+    return query(collection(firestore, `workers/${workerId}/reviews`), orderBy('createdAt', 'desc'), limit(10));
+  }, [firestore, workerId]);
+
+  const { data: reviews, isLoading } = useCollection<Review>(reviewsQuery);
+
+  if (isLoading) {
+    return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
+  }
+  
+  if (!reviews || reviews.length === 0) {
+    return <p className="text-muted-foreground">This professional has no reviews yet.</p>;
+  }
+
+  return (
+    <div className="space-y-6">
+      {reviews.map((review) => (
+        <div key={review.id} className="flex gap-4">
+          <Avatar>
+            <AvatarImage src={review.userPhotoURL} alt={review.userName} />
+            <AvatarFallback>{review.userName?.[0]}</AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="font-semibold">{review.userName}</p>
+              <span className="text-xs text-muted-foreground">{format(new Date(review.createdAt), 'MMM d, yyyy')}</span>
+            </div>
+             <div className="flex items-center gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className={cn("h-4 w-4", review.rating > i ? "text-yellow-400 fill-yellow-400" : "text-gray-300")} />
+              ))}
+            </div>
+            <p className="mt-2 text-muted-foreground">{review.comment}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 
 export default function WorkerProfilePage() {
   const params = useParams();
@@ -45,7 +93,7 @@ export default function WorkerProfilePage() {
       <div className="container mx-auto px-4 py-12 sm:py-16">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
           {/* Left Column: Worker Info */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-8">
             <Card className="overflow-hidden">
               <div className="relative h-64 w-full">
                 <Image
@@ -68,11 +116,13 @@ export default function WorkerProfilePage() {
               </div>
               <CardContent className="px-6 pt-6">
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center">
-                    <Star className="mr-1.5 h-4 w-4 text-yellow-500 fill-yellow-400" />
-                    <span className="font-bold text-foreground">4.9</span>
-                    <span className="ml-1">(100 reviews)</span>
-                  </div>
+                   {worker.reviewCount && worker.reviewCount > 0 && worker.averageRating && (
+                      <div className="flex items-center">
+                        <Star className="mr-1.5 h-4 w-4 text-yellow-500 fill-yellow-400" />
+                        <span className="font-bold text-foreground">{worker.averageRating.toFixed(1)}</span>
+                        <span className="ml-1">({worker.reviewCount} reviews)</span>
+                      </div>
+                    )}
                   <div className="flex items-center">
                     <MapPin className="mr-1.5 h-4 w-4" />
                     <span>{worker.city || 'Location not set'}, {worker.state || ''}</span>
@@ -96,6 +146,16 @@ export default function WorkerProfilePage() {
                 )}
               </CardContent>
             </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline text-xl">Customer Reviews</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ReviewsList workerId={worker.id} />
+                </CardContent>
+            </Card>
+
           </div>
 
           {/* Right Column: Booking */}
@@ -128,5 +188,3 @@ export default function WorkerProfilePage() {
     </div>
   );
 }
-
-    

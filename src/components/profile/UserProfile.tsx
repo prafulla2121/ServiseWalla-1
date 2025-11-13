@@ -11,8 +11,16 @@ import { Button } from '../ui/button';
 import { useState } from 'react';
 import { cancelBookingAsUser } from '@/lib/bookings';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, KeyRound, ChevronRight } from 'lucide-react';
+import { Loader2, KeyRound, ChevronRight, Star } from 'lucide-react';
 import Link from 'next/link';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ReviewForm } from './ReviewForm';
 
 
 interface UserProfileProps {
@@ -54,6 +62,12 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
       setCancellingId(null);
     }
   };
+  
+  const onReviewSubmitted = (bookingId: string) => {
+     setBookings(currentBookings => 
+        currentBookings.map(b => b.id === bookingId ? { ...b, reviewSubmitted: true } : b)
+      );
+  }
 
   const statusVariant = (status: Booking['status']) => {
     switch (status) {
@@ -97,9 +111,8 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
             {bookings.length > 0 ? (
               <div className="space-y-4">
                 {bookings.sort((a,b) => new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()).map(booking => (
-                  <Link href={`/profile/bookings/${booking.id}`} key={booking.id} className="block transition-all duration-200 ease-in-out hover:bg-muted/50 rounded-lg">
-                    <div className="flex flex-col sm:flex-row justify-between sm:items-center p-4 border rounded-lg gap-4">
-                      <div className="flex-grow">
+                   <div key={booking.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-4 border rounded-lg gap-4">
+                      <Link href={`/profile/bookings/${booking.id}`} className="flex-grow">
                           <div className='flex items-center gap-4 flex-wrap'>
                               <h3 className="font-semibold">{getServiceName(booking.serviceId)}</h3>
                               <Badge variant={statusVariant(booking.status)} className="capitalize">{formatStatus(booking.status)}</Badge>
@@ -116,7 +129,7 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
                                   </div>
                               </div>
                           )}
-                      </div>
+                      </Link>
                       <div className="flex items-center gap-4">
                         {booking.status === 'pending' && (
                             <Button 
@@ -129,10 +142,25 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
                                 Cancel Booking
                             </Button>
                         )}
-                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        {booking.status === 'completed' && !booking.reviewSubmitted && user && (
+                           <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm"><Star className="mr-2 h-4 w-4" />Leave a Review</Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Review your service for {getServiceName(booking.serviceId)}</DialogTitle>
+                              </DialogHeader>
+                              <ReviewForm booking={booking} user={user} onReviewSubmitted={() => onReviewSubmitted(booking.id)} />
+                            </DialogContent>
+                          </Dialog>
+                        )}
+                        {booking.status === 'completed' && booking.reviewSubmitted && (
+                             <span className="text-sm text-muted-foreground">Review Submitted</span>
+                        )}
+                        <Link href={`/profile/bookings/${booking.id}`}><ChevronRight className="h-5 w-5 text-muted-foreground" /></Link>
                       </div>
                     </div>
-                  </Link>
                 ))}
               </div>
             ) : (
