@@ -53,11 +53,16 @@ service cloud.firestore {
         return changedKeys.hasOnly(['status', 'completionCode']) || changedKeys.hasOnly(['status']) || changedKeys.hasOnly(['completionCode']);
     }
     
-    // Checks if the user is a participant of a chat by reading the parent chat document.
+    // Checks if the user is a participant of a chat.
     function isChatParticipant(bookingId) {
       let uid = request.auth.uid;
+       // For list/read operations, using exists() is more efficient and allowed.
+      if (request.method == 'get' || request.method == 'list') {
+         return exists(/databases/$(database)/documents/users/$(uid)/bookings/$(bookingId)) ||
+               exists(/databases/$(database)/documents/workers/$(uid)/bookings/$(bookingId));
+      }
+      // For write operations, we must get() the parent doc.
       let chatDoc = get(/databases/$(database)/documents/chats/$(bookingId)).data;
-      // User is a participant if their UID matches either the userId or workerId on the chat document.
       return uid == chatDoc.userId || uid == chatDoc.workerId;
     }
 
@@ -167,17 +172,25 @@ service cloud.firestore {
      * @principle Only participants of a booking can access the associated chat.
      */
     match /chats/{bookingId} {
-      allow get: if isChatParticipant(bookingId);
-      // Allow creation of a chat document only if the creator is one of the participants in the booking
-      // This is usually done when the first message is sent.
+      // Allow read/update if the user is a participant.
+      allow get, update: if isChatParticipant(bookingId);
+      // Allow creation of a chat document if the creator is one of the participants.
+      // This is crucial for the first message.
       allow create: if request.auth.uid == request.resource.data.userId || request.auth.uid == request.resource.data.workerId;
-      // Allow participants to update lastMessage field
-      allow update: if isChatParticipant(bookingId) && request.resource.data.keys().hasOnly(['lastMessage']);
-
+      
       match /messages/{messageId} {
         allow read, list: if isChatParticipant(bookingId);
+        
         // Allow a participant to create a message, ensuring the senderId is their own UID.
-        allow create: if isChatParticipant(bookingId) && request.resource.data.senderId == request.auth.uid;
+        // This rule handles two cases:
+        // 1. The chat document already exists: isChatParticipant() will use get() and succeed.
+        // 2. The chat document is being created in the same batch: isChatParticipant() would fail, so we
+        //    check the incoming chat document's data to verify participation.
+        allow create: if (isChatParticipant(bookingId) || 
+                          (request.auth.uid == getAfter(/databases/$(database)/documents/chats/$(bookingId)).data.userId ||
+                           request.auth.uid == getAfter(/databases/$(database)/documents/chats/$(bookingId)).data.workerId))
+                      && request.resource.data.senderId == request.auth.uid;
+
         allow update, delete: if false; // Messages are immutable
       }
     }
