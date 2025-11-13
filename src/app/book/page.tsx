@@ -79,6 +79,11 @@ export default function BookPage() {
       workerId: workerIdParam ?? '',
       name: user?.displayName ?? '',
       email: user?.email ?? '',
+      phone: '',
+      address: '',
+      city: '',
+      state: '',
+      zipCode: '',
     },
   });
 
@@ -163,138 +168,41 @@ export default function BookPage() {
 
   return (
     <>
-    <div className="container mx-auto max-w-3xl px-4 py-12">
-      <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-        <CardHeader className="text-center">
-          <CardTitle className="font-headline text-3xl">Book a Service</CardTitle>
-          <CardDescription>Fill out the form below to schedule your service.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              {/* Service Details */}
-              <div className="space-y-4">
-                <h3 className="font-headline text-xl font-semibold border-b pb-2">1. Service Details</h3>
-                <FormField
-                  control={form.control}
-                  name="serviceId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Service</FormLabel>
-                      <Select
-                        onValueChange={(value) => {
-                            field.onChange(value);
-                            form.setValue('workerId', ''); // Reset worker when service changes
-                        }}
-                        defaultValue={field.value}
-                        disabled={!!serviceIdParam}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a service you need" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {services.map((service) => (
-                            <SelectItem key={service.id} value={service.id}>
-                              {service.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="workerId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Professional</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={!selectedServiceId || isLoadingWorkers || !!workerIdParam}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={!selectedServiceId ? "Please select a service first" : (isLoadingWorkers ? "Loading professionals..." : "Select a professional")} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {availableWorkers?.map((worker) => (
-                            <SelectItem key={worker.id} value={worker.id}>
-                              {worker.firstName} {worker.lastName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="container mx-auto max-w-3xl px-4 py-12">
+        <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="font-headline text-3xl">Book a Service</CardTitle>
+            <CardDescription>Fill out the form below to schedule your service.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                {/* Service Details */}
+                <div className="space-y-4">
+                  <h3 className="font-headline text-xl font-semibold border-b pb-2">1. Service Details</h3>
                   <FormField
                     control={form.control}
-                    name="date"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Date</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={'outline'}
-                                className={cn(
-                                  'w-full pl-3 text-left font-normal',
-                                  !field.value && 'text-muted-foreground'
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, 'PPP')
-                                ) : (
-                                  <span>Pick a date</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) =>
-                                date < new Date() || date < new Date('1900-01-01')
-                              }
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="time"
+                    name="serviceId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Time</FormLabel>
+                        <FormLabel>Service</FormLabel>
                         <Select
-                          onValueChange={field.onChange}
+                          onValueChange={(value) => {
+                              field.onChange(value);
+                              form.setValue('workerId', ''); // Reset worker when service changes
+                          }}
                           defaultValue={field.value}
+                          disabled={!!serviceIdParam}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select a time slot" />
+                              <SelectValue placeholder="Select a service you need" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {timeSlots.map((time) => (
-                              <SelectItem key={time} value={time}>
-                                {format(new Date(`1970-01-01T${time}:00`), 'h:mm a')}
+                            {services.map((service) => (
+                              <SelectItem key={service.id} value={service.id}>
+                                {service.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -303,153 +211,250 @@ export default function BookPage() {
                       </FormItem>
                     )}
                   />
-                </div>
-              </div>
-
-              {/* Personal Details */}
-              <div className="space-y-4">
-                <h3 className="font-headline text-xl font-semibold border-b pb-2">2. Your Information</h3>
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="email"
+                    name="workerId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="john.doe@example.com"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
-                        <FormControl>
-                            <PhoneInput
-                                international
-                                defaultCountry="US"
-                                placeholder="Enter phone number"
-                                value={field.value}
-                                onChange={field.onChange}
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                            />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                 <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                        <FormLabel>Service Address</FormLabel>
-                        <Button
-                          type="button"
-                          variant="link"
-                          className="text-xs h-auto p-0"
-                          onClick={handleUseCurrentLocation}
+                        <FormLabel>Professional</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          disabled={!selectedServiceId || isLoadingWorkers || !!workerIdParam}
                         >
-                          <MapPin className="mr-1 h-3 w-3" /> Use my location
-                        </Button>
-                      </div>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={!selectedServiceId ? "Please select a service first" : (isLoadingWorkers ? "Loading professionals..." : "Select a professional")} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {availableWorkers?.map((worker) => (
+                              <SelectItem key={worker.id} value={worker.id}>
+                                {worker.firstName} {worker.lastName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Date</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={'outline'}
+                                  className={cn(
+                                    'w-full pl-3 text-left font-normal',
+                                    !field.value && 'text-muted-foreground'
+                                  )}
+                                >
+                                  {field.value ? (
+                                    format(field.value, 'PPP')
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) =>
+                                  date < new Date() || date < new Date('1900-01-01')
+                                }
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="time"
+                      render={({ field }) => (
                         <FormItem>
+                          <FormLabel>Time</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a time slot" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {timeSlots.map((time) => (
+                                <SelectItem key={time} value={time}>
+                                  {format(new Date(`1970-01-01T${time}:00`), 'h:mm a')}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Personal Details */}
+                <div className="space-y-4">
+                  <h3 className="font-headline text-xl font-semibold border-b pb-2">2. Your Information</h3>
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Name</FormLabel>
                         <FormControl>
-                            <Input placeholder="Street Address" {...field} />
+                          <Input placeholder="John Doe" {...field} />
                         </FormControl>
                         <FormMessage />
-                        </FormItem>
+                      </FormItem>
                     )}
+                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email Address</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="john.doe@example.com"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                    <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
-                        <FormField
-                            control={form.control}
-                            name="city"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormControl>
-                                    <Input placeholder="City" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="state"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormControl>
-                                    <Input placeholder="State" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="zipCode"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormControl>
-                                    <Input placeholder="Zip Code" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-                 </div>
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                              <PhoneInput
+                                  international
+                                  defaultCountry="US"
+                                  placeholder="Enter phone number"
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                              />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                          <FormLabel>Service Address</FormLabel>
+                          <Button
+                            type="button"
+                            variant="link"
+                            className="text-xs h-auto p-0"
+                            onClick={handleUseCurrentLocation}
+                          >
+                            <MapPin className="mr-1 h-3 w-3" /> Use my location
+                          </Button>
+                        </div>
+                      <FormField
+                      control={form.control}
+                      name="address"
+                      render={({ field }) => (
+                          <FormItem>
+                          <FormControl>
+                              <Input placeholder="Street Address" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                          </FormItem>
+                      )}
+                      />
+                      <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
+                          <FormField
+                              control={form.control}
+                              name="city"
+                              render={({ field }) => (
+                                  <FormItem>
+                                  <FormControl>
+                                      <Input placeholder="City" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                  </FormItem>
+                              )}
+                          />
+                          <FormField
+                              control={form.control}
+                              name="state"
+                              render={({ field }) => (
+                                  <FormItem>
+                                  <FormControl>
+                                      <Input placeholder="State" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                  </FormItem>
+                              )}
+                          />
+                          <FormField
+                              control={form.control}
+                              name="zipCode"
+                              render={({ field }) => (
+                                  <FormItem>
+                                  <FormControl>
+                                      <Input placeholder="Zip Code" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                  </FormItem>
+                              )}
+                          />
+                      </div>
+                  </div>
+                </div>
+
+                <Button type="submit" className="w-full" size="lg" disabled={!user || isSubmitting}>
+                  {isSubmitting ? 'Submitting...' : user ? 'Submit Booking' : 'Please log in to book'}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+
+      <AlertDialog open={isBookingConfirmed} onOpenChange={setIsBookingConfirmed}>
+          <AlertDialogContent>
+              <AlertDialogHeader>
+              <div className="flex justify-center">
+                  <CheckCircle className="h-16 w-16 text-green-500" />
               </div>
-
-              <Button type="submit" className="w-full" size="lg" disabled={!user || isSubmitting}>
-                {isSubmitting ? 'Submitting...' : user ? 'Submit Booking' : 'Please log in to book'}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
-
-    <AlertDialog open={isBookingConfirmed} onOpenChange={setIsBookingConfirmed}>
-        <AlertDialogContent>
-            <AlertDialogHeader>
-            <div className="flex justify-center">
-                <CheckCircle className="h-16 w-16 text-green-500" />
-            </div>
-            <AlertDialogTitle className="text-center font-headline text-2xl">Congratulations!</AlertDialogTitle>
-            <AlertDialogDescription className="text-center">
-                Your booking request has been sent successfully. The professional will confirm the appointment shortly.
-            </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogAction onClick={() => router.push('/profile')}>View My Bookings</AlertDialogAction>
-            </AlertDialogFooter>
-        </AlertDialogContent>
-    </AlertDialog>
+              <AlertDialogTitle className="text-center font-headline text-2xl">Congratulations!</AlertDialogTitle>
+              <AlertDialogDescription className="text-center">
+                  Your booking request has been sent successfully. The professional will confirm the appointment shortly.
+              </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                  <AlertDialogAction onClick={() => router.push('/profile')}>View My Bookings</AlertDialogAction>
+              </AlertDialogFooter>
+          </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
