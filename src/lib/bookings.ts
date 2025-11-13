@@ -1,6 +1,7 @@
 'use client';
 import { Firestore, doc, getDoc } from "firebase/firestore";
 import { updateDocumentNonBlocking } from "@/firebase";
+import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 
 export function updateBookingStatus(
     firestore: Firestore, 
@@ -12,7 +13,6 @@ export function updateBookingStatus(
     updateDocumentNonBlocking(workerBookingRef, { status });
 
     // Also update the user's copy of the booking document to keep them in sync.
-    // This requires reading the document first to find the associated userId.
     const updateUserBooking = async () => {
         try {
             const bookingSnap = await getDoc(workerBookingRef);
@@ -20,20 +20,7 @@ export function updateBookingStatus(
                 const bookingData = bookingSnap.data();
                 if (bookingData.userId) {
                     const userBookingRef = doc(firestore, `users/${bookingData.userId}/bookings`, bookingId);
-                    // This update is performed by the worker, so we need a rule that allows it.
-                    // For now, we will only update the worker's booking to fix the permission error.
-                    // A better solution might involve a Cloud Function to keep these in sync securely.
-                    
-                    // To fix the current permission error, we comment out the cross-user write.
-                    // updateDocumentNonBlocking(userBookingRef, { status });
-
-                    // A temporary fix to update the user's booking document status by the worker.
-                    // NOTE: This requires security rules to be adjusted to allow workers to update a specific field in a user's booking.
-                    // This is a temporary solution to demonstrate functionality and might need a more secure implementation (e.g., Cloud Functions).
-                    const userBookingDoc = await getDoc(userBookingRef);
-                    if (userBookingDoc.exists()) {
-                         updateDocumentNonBlocking(userBookingRef, { status });
-                    }
+                     updateDocumentNonBlocking(userBookingRef, { status });
                 }
             }
         } catch (error) {
@@ -42,4 +29,34 @@ export function updateBookingStatus(
     };
     
     updateUserBooking();
+}
+
+
+export async function cancelBookingAsUser(
+    firestore: Firestore, 
+    userId: string,
+    bookingId: string
+) {
+    const userBookingRef = doc(firestore, `users/${userId}/bookings`, bookingId);
+    
+    try {
+        const bookingSnap = await getDoc(userBookingRef);
+        if (bookingSnap.exists()) {
+            const bookingData = bookingSnap.data();
+            if (bookingData.status !== 'pending') {
+                throw new Error("Booking cannot be cancelled as it's already been actioned.");
+            }
+            if (bookingData.workerId) {
+                const workerBookingRef = doc(firestore, `workers/${bookingData.workerId}/bookings`, bookingId);
+                // Atomically update both
+                setDocumentNonBlocking(userBookingRef, { status: 'cancelled' }, { merge: true });
+                setDocumentNonBlocking(workerBookingRef, { status: 'cancelled' }, { merge: true });
+            } else {
+                 setDocumentNonBlocking(userBookingRef, { status: 'cancelled' }, { merge: true });
+            }
+        }
+    } catch (error) {
+        console.error("Error cancelling booking:", error);
+        throw error; // re-throw to be caught in the component
+    }
 }

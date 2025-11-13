@@ -3,7 +3,7 @@
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { CalendarIcon, CheckCircle } from 'lucide-react';
+import { CalendarIcon, CheckCircle, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -149,11 +149,19 @@ export default function BookPage() {
 
 
   const timeSlots = ['09:00', '11:00', '13:00', '15:00', '17:00'];
+  
+  const handleUseCurrentLocation = () => {
+    // Placeholder for future implementation with Geolocation API
+    toast({
+      title: "Feature Coming Soon!",
+      description: "Automatic location detection will be available in a future update.",
+    });
+  };
 
   return (
     <>
     <div className="container mx-auto max-w-3xl px-4 py-12">
-      <Card className="shadow-lg">
+      <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
         <CardHeader className="text-center">
           <CardTitle className="font-headline text-3xl">Book a Service</CardTitle>
           <CardDescription>Fill out the form below to schedule your service.</CardDescription>
@@ -345,12 +353,22 @@ export default function BookPage() {
                     )}
                   />
                 </div>
-                <FormField
+                 <FormField
                   control={form.control}
                   name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Service Address</FormLabel>
+                      <div className="flex justify-between items-center">
+                        <FormLabel>Service Address</FormLabel>
+                        <Button
+                          type="button"
+                          variant="link"
+                          className="text-xs h-auto p-0"
+                          onClick={handleUseCurrentLocation}
+                        >
+                          <MapPin className="mr-1 h-3 w-3" /> Use my location
+                        </Button>
+                      </div>
                       <FormControl>
                         <Input placeholder="123 Main St, Anytown, USA" {...field} />
                       </FormControl>
@@ -378,4 +396,14 @@ export default function BookPage() {
             <AlertDialogTitle className="text-center font-headline text-2xl">Congratulations!</AlertDialogTitle>
             <AlertDialogDescription className="text-center">
                 Your booking request has been sent successfully. The professional will confirm the appointment shortly.
-            </D
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogAction onClick={() => router.push('/profile')}>View My Bookings</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+
+    </>
+  );
+}

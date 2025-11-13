@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -64,17 +65,17 @@ export default function RegisterUserPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
             <div className="mx-auto flex justify-center">
               <Logo />
             </div>
-            <h2 className="mt-6 text-center font-headline text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-center font-headline text-3xl font-extrabold text-foreground">
                 Create your Customer Account
             </h2>
         </div>
-        <Card>
+        <Card className="bg-card/80 backdrop-blur-sm">
           <CardContent className="p-6">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -125,6 +126,9 @@ export default function RegisterUserPage() {
                           {...field}
                         />
                       </FormControl>
+                       <FormDescription className="text-xs">
+                        Must be at least 8 characters and include a letter, a number, and a special character.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
