@@ -130,14 +130,14 @@ export default function PhoneAuthPage() {
                             placeholder="Enter phone number"
                             value={field.value}
                             onChange={field.onChange}
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                            className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-lg ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full" disabled={isSendingOtp}>
+                  <Button type="submit" className="w-full" size="lg" disabled={isSendingOtp}>
                     {isSendingOtp && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Send OTP
                   </Button>
@@ -163,14 +163,14 @@ export default function PhoneAuthPage() {
                             {...field} 
                             maxLength={6}
                             placeholder="••••••"
-                            className="text-center text-lg tracking-[0.5em]"
+                            className="text-center text-2xl tracking-[0.5em] h-14"
                            />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full" disabled={isVerifyingOtp}>
+                  <Button type="submit" className="w-full" size="lg" disabled={isVerifyingOtp}>
                     {isVerifyingOtp && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Verify OTP
                   </Button>

@@ -146,7 +146,7 @@ export function EditWorkerProfileForm({ worker, onSave }: EditWorkerProfileFormP
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-h-[70vh] overflow-y-auto pr-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
             control={form.control}
             name="firstName"
@@ -203,7 +203,7 @@ export function EditWorkerProfileForm({ worker, onSave }: EditWorkerProfileFormP
           )}
         />
         
-        <div className="space-y-2">
+        <div className="space-y-4">
           <h4 className="font-medium">AI Bio Generator</h4>
           <FormField
             control={form.control}
@@ -238,7 +238,7 @@ export function EditWorkerProfileForm({ worker, onSave }: EditWorkerProfileFormP
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
             control={form.control}
             name="address"
@@ -293,7 +293,7 @@ export function EditWorkerProfileForm({ worker, onSave }: EditWorkerProfileFormP
             />
         </div>
         
-        <Button type="submit" className="w-full" disabled={isSaving}>
+        <Button type="submit" className="w-full" size="lg" disabled={isSaving}>
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save Changes
         </Button>

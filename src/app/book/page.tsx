@@ -178,7 +178,7 @@ export default function BookPage() {
 
   return (
     <>
-      <div className="container mx-auto max-w-3xl px-4 py-12">
+      <div className="container mx-auto max-w-4xl px-4 py-12">
         <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
           <CardHeader className="text-center">
             <CardTitle className="font-headline text-3xl">Book a Service</CardTitle>
@@ -194,7 +194,7 @@ export default function BookPage() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 {/* Step 1: Service Details */}
                 {currentStep === 1 && (
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     <h3 className="font-headline text-xl font-semibold border-b pb-2">1. Service Details</h3>
                     <FormField
                       control={form.control}
@@ -211,7 +211,7 @@ export default function BookPage() {
                             disabled={!!serviceIdParam}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className='h-12 text-base'>
                                 <SelectValue placeholder="Select a service you need" />
                               </SelectTrigger>
                             </FormControl>
@@ -239,7 +239,7 @@ export default function BookPage() {
                             disabled={!selectedServiceId || isLoadingWorkers || !!workerIdParam}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className='h-12 text-base'>
                                 <SelectValue placeholder={!selectedServiceId ? "Please select a service first" : (isLoadingWorkers ? "Loading professionals..." : "Select a professional")} />
                               </SelectTrigger>
                             </FormControl>
@@ -255,7 +255,7 @@ export default function BookPage() {
                         </FormItem>
                       )}
                     />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <FormField
                         control={form.control}
                         name="date"
@@ -268,7 +268,7 @@ export default function BookPage() {
                                   <Button
                                     variant={'outline'}
                                     className={cn(
-                                      'w-full pl-3 text-left font-normal',
+                                      'w-full pl-3 text-left font-normal h-12 text-base',
                                       !field.value && 'text-muted-foreground'
                                     )}
                                   >
@@ -308,7 +308,7 @@ export default function BookPage() {
                               defaultValue={field.value}
                             >
                               <FormControl>
-                                <SelectTrigger>
+                                <SelectTrigger className='h-12 text-base'>
                                   <SelectValue placeholder="Select a time slot" />
                                 </SelectTrigger>
                               </FormControl>
@@ -330,7 +330,7 @@ export default function BookPage() {
                 
                 {/* Step 2: Personal Details */}
                 {currentStep === 2 && (
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     <h3 className="font-headline text-xl font-semibold border-b pb-2">2. Your Information</h3>
                     <FormField
                       control={form.control}
@@ -345,7 +345,7 @@ export default function BookPage() {
                         </FormItem>
                       )}
                     />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <FormField
                         control={form.control}
                         name="email"
@@ -375,7 +375,7 @@ export default function BookPage() {
                                     placeholder="Enter phone number"
                                     value={field.value}
                                     onChange={field.onChange}
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                    className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-lg file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 />
                             </FormControl>
                             <FormMessage />
@@ -383,13 +383,13 @@ export default function BookPage() {
                         )}
                       />
                     </div>
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         <div className="flex justify-between items-center">
                             <FormLabel>Service Address</FormLabel>
                             <Button
                               type="button"
                               variant="link"
-                              className="text-xs h-auto p-0"
+                              className="text-sm h-auto p-0"
                               onClick={handleUseCurrentLocation}
                             >
                               <MapPin className="mr-1 h-3 w-3" /> Use my location
@@ -407,7 +407,7 @@ export default function BookPage() {
                             </FormItem>
                         )}
                         />
-                        <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
+                        <div className='grid grid-cols-1 sm:grid-cols-3 gap-6'>
                             <FormField
                                 control={form.control}
                                 name="city"
@@ -450,9 +450,9 @@ export default function BookPage() {
                 )}
                 
                 {/* Navigation Buttons */}
-                <div className="flex gap-4 justify-end">
+                <div className="flex gap-4 justify-end pt-4">
                     {currentStep === 2 && (
-                        <Button type="button" variant="outline" onClick={() => setCurrentStep(1)}>
+                        <Button type="button" variant="outline" size="lg" onClick={() => setCurrentStep(1)}>
                             <ArrowLeft className="mr-2 h-4 w-4" /> Back
                         </Button>
                     )}
@@ -494,5 +494,3 @@ export default function BookPage() {
     </>
   );
 }
-
-    
