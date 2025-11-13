@@ -7,18 +7,12 @@ import { ServiceCard } from "@/components/ServiceCard";
 import { services, Service } from "@/lib/data";
 import { Input } from "@/components/ui/input";
 import { Search, Sparkles } from "lucide-react";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 
 export default function ServicesPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const heroImages = PlaceHolderImages.filter(img => img.id.startsWith('hero-')).slice(0, 5);
+  const heroImage = PlaceHolderImages.find(img => img.id === 'hero-workers');
 
   const filteredServices = services.filter((service) =>
     service.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -26,33 +20,23 @@ export default function ServicesPage() {
 
   return (
     <div className="bg-background">
-      <section className="relative w-full overflow-hidden">
-        <Carousel
-            opts={{ loop: true }}
-            plugins={[Autoplay({ delay: 10000, stopOnInteraction: false })]}
-            className="absolute inset-0 h-full w-full"
-        >
-            <CarouselContent>
-            {heroImages.map((image) => (
-                <CarouselItem key={image.id}>
-                <div className="relative h-full w-full">
-                    <Image
-                    src={image.imageUrl}
-                    alt={image.description}
+      <section className="relative w-full overflow-hidden h-[450px]">
+        {heroImage && (
+            <div className="absolute inset-0 h-full w-full">
+                <Image
+                    src={heroImage.imageUrl}
+                    alt={heroImage.description}
                     fill
                     className="object-cover"
-                    priority={heroImages.indexOf(image) === 0}
-                    data-ai-hint={image.imageHint}
-                    />
-                </div>
-                </CarouselItem>
-            ))}
-            </CarouselContent>
-        </Carousel>
+                    priority
+                    data-ai-hint={heroImage.imageHint}
+                />
+            </div>
+        )}
 
         <div className="absolute inset-0 bg-black/50" />
 
-        <div className="container relative z-10 mx-auto py-16 text-center text-white md:py-24">
+        <div className="container relative z-10 mx-auto flex h-full flex-col items-center justify-center py-16 text-center text-white">
           <h1 className="font-headline text-4xl font-extrabold tracking-tight sm:text-5xl">
             Explore All Services
           </h1>

@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useDoc, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import { Loader2, Calendar, Clock, MapPin, User, Tag, KeyRound, Star, Check, Truck, Play, ChevronRight } from 'lucide-react';
+import { Loader2, Calendar, Clock, MapPin, User, Tag, KeyRound, Star, Check, Truck, Play, ChevronRight, MessageSquare } from 'lucide-react';
 import type { Booking, Worker } from '@/lib/types';
 import { services } from '@/lib/data';
 import { format } from 'date-fns';
@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 
 export default function BookingDetailsPage() {
@@ -20,6 +21,7 @@ export default function BookingDetailsPage() {
     const bookingId = params.bookingId as string;
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
+    const { toast } = useToast();
 
     const bookingDocRef = useMemoFirebase(() => {
         if (!user || !bookingId) return null;
@@ -36,6 +38,13 @@ export default function BookingDetailsPage() {
     const { data: worker, isLoading: isWorkerLoading } = useDoc<Worker>(workerDocRef);
 
     const isLoading = isUserLoading || isBookingLoading || isWorkerLoading;
+    
+    const handleChatClick = () => {
+        toast({
+            title: "Feature Coming Soon!",
+            description: "In-app chat between customers and professionals will be available in a future update."
+        })
+    }
 
     if (isLoading) {
         return (
@@ -131,17 +140,22 @@ export default function BookingDetailsPage() {
                     {worker && (
                         <div>
                              <h3 className="font-semibold border-b pb-2 mb-4">Your Professional</h3>
-                             <Link href={`/workers/${worker.id}`} className="flex items-center gap-4 p-4 rounded-lg hover:bg-muted/50 transition-colors">
-                                <Avatar className="h-16 w-16">
-                                    <AvatarImage src={workerAvatar} />
-                                    <AvatarFallback>{worker.firstName?.[0]}{worker.lastName?.[0]}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <p className="font-bold text-lg">{worker.firstName} {worker.lastName}</p>
-                                    <p className="text-primary">{service?.name}</p>
-                                </div>
-                                <ChevronRight className="ml-auto h-5 w-5 text-muted-foreground" />
-                             </Link>
+                             <div className="flex items-center justify-between gap-4 p-4 rounded-lg hover:bg-muted/50 transition-colors">
+                                 <Link href={`/workers/${worker.id}`} className="flex items-center gap-4">
+                                    <Avatar className="h-16 w-16">
+                                        <AvatarImage src={workerAvatar} />
+                                        <AvatarFallback>{worker.firstName?.[0]}{worker.lastName?.[0]}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="font-bold text-lg">{worker.firstName} {worker.lastName}</p>
+                                        <p className="text-primary">{service?.name}</p>
+                                    </div>
+                                 </Link>
+                                <Button onClick={handleChatClick} variant="outline">
+                                    <MessageSquare className="mr-2 h-4 w-4" />
+                                    Chat with Professional
+                                </Button>
+                             </div>
                         </div>
                     )}
 
