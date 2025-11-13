@@ -18,7 +18,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 export default function ServicesPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const heroImages = PlaceHolderImages.filter(img => img.id.startsWith('hero-'));
+  const heroImages = PlaceHolderImages.filter(img => img.id.startsWith('hero-')).slice(0, 5);
 
   const filteredServices = services.filter((service) =>
     service.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -29,7 +29,7 @@ export default function ServicesPage() {
       <section className="relative w-full overflow-hidden">
         <Carousel
             opts={{ loop: true }}
-            plugins={[Autoplay({ delay: 5000, stopOnInteraction: false })]}
+            plugins={[Autoplay({ delay: 10000, stopOnInteraction: false })]}
             className="absolute inset-0 h-full w-full"
         >
             <CarouselContent>
