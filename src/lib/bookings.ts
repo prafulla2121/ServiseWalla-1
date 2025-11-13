@@ -2,12 +2,13 @@
 import { Firestore, doc, getDoc } from "firebase/firestore";
 import { updateDocumentNonBlocking } from "@/firebase";
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { Booking } from "./types";
 
 export function updateBookingStatus(
     firestore: Firestore, 
     workerId: string,
     bookingId: string, 
-    status: 'confirmed' | 'completed' | 'cancelled'
+    status: Booking['status']
 ) {
     const workerBookingRef = doc(firestore, `workers/${workerId}/bookings`, bookingId);
     updateDocumentNonBlocking(workerBookingRef, { status });

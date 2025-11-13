@@ -18,7 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, CheckCircle, History, Phone, User as UserIcon, MapPin } from 'lucide-react';
+import { Clock, CheckCircle, History, Phone, User as UserIcon, MapPin, Truck, PlayCircle, Star } from 'lucide-react';
 import { Badge } from '../ui/badge';
 
 interface WorkerProfileProps {
@@ -28,7 +28,7 @@ interface WorkerProfileProps {
 
 interface BookingItemProps {
   booking: Booking;
-  onUpdateStatus: (booking: Booking, status: 'confirmed' | 'completed' | 'cancelled') => void;
+  onUpdateStatus: (booking: Booking, status: Booking['status']) => void;
 }
 
 function BookingItem({ booking, onUpdateStatus }: BookingItemProps) {
@@ -36,13 +36,20 @@ function BookingItem({ booking, onUpdateStatus }: BookingItemProps) {
     return services.find(s => s.id === serviceId)?.name || 'Unknown Service';
   };
 
-  const isConfirmed = booking.status === 'confirmed' || booking.status === 'completed';
+  const isConfirmed = ['confirmed', 'en-route', 'in-progress', 'completed'].includes(booking.status);
+  
+  const formatStatus = (status: string) => {
+    return status.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
 
   return (
     <div className="p-4 border rounded-lg">
       <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center'>
         <div className="mb-4 sm:mb-0 flex-grow">
-          <h3 className="font-semibold">{getServiceName(booking.serviceId)}</h3>
+          <div className="flex items-center gap-4">
+             <h3 className="font-semibold">{getServiceName(booking.serviceId)}</h3>
+             <Badge variant="outline" className="capitalize">{formatStatus(booking.status)}</Badge>
+          </div>
           <p className="text-sm text-muted-foreground">
             {format(new Date(booking.bookingDate), "MMMM d, yyyy 'at' h:mm a")}
           </p>
@@ -64,9 +71,8 @@ function BookingItem({ booking, onUpdateStatus }: BookingItemProps) {
               </>
             )}
           </div>
-           <Badge variant="outline" className="mt-2 capitalize">{booking.status}</Badge>
         </div>
-        <div className="flex gap-2 self-start sm:self-center">
+        <div className="flex flex-wrap gap-2 self-start sm:self-center">
           {booking.status === 'pending' && (
             <>
               <Button size="sm" onClick={() => onUpdateStatus(booking, 'confirmed')}>Accept</Button>
@@ -74,7 +80,22 @@ function BookingItem({ booking, onUpdateStatus }: BookingItemProps) {
             </>
           )}
           {booking.status === 'confirmed' && (
-            <Button size="sm" onClick={() => onUpdateStatus(booking, 'completed')}>Mark as Completed</Button>
+            <Button size="sm" onClick={() => onUpdateStatus(booking, 'en-route')}>
+                <Truck className="mr-2 h-4 w-4" />
+                On the Way
+            </Button>
+          )}
+          {booking.status === 'en-route' && (
+            <Button size="sm" onClick={() => onUpdateStatus(booking, 'in-progress')}>
+                <PlayCircle className="mr-2 h-4 w-4" />
+                Start Service
+            </Button>
+          )}
+          {booking.status === 'in-progress' && (
+            <Button size="sm" onClick={() => onUpdateStatus(booking, 'completed')}>
+                <Star className="mr-2 h-4 w-4" />
+                Mark as Completed
+            </Button>
           )}
         </div>
       </div>
@@ -92,11 +113,10 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
     setBookings(initialBookings);
   }, [initialBookings]);
 
-  const handleUpdateStatus = (bookingToUpdate: Booking, status: 'confirmed' | 'completed' | 'cancelled') => {
+  const handleUpdateStatus = (bookingToUpdate: Booking, status: Booking['status']) => {
     if (!user || !firestore) return;
     updateBookingStatus(firestore, user.uid, bookingToUpdate.id, status);
     
-    // Optimistically update the UI
     setBookings(currentBookings => 
       currentBookings.map(b => 
         b.id === bookingToUpdate.id ? { ...b, status: status } : b
@@ -108,13 +128,13 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
 
   const stats = useMemo(() => {
     const pending = bookings.filter(b => b.status === 'pending').length;
-    const confirmed = bookings.filter(b => b.status === 'confirmed').length;
+    const upcoming = bookings.filter(b => ['confirmed', 'en-route', 'in-progress'].includes(b.status)).length;
     const completed = bookings.filter(b => b.status === 'completed').length;
-    return { pending, confirmed, completed };
+    return { pending, upcoming, completed };
   }, [bookings]);
   
-  const pendingBookings = useMemo(() => bookings.filter(b => b.status === 'pending'), [bookings]);
-  const upcomingBookings = useMemo(() => bookings.filter(b => b.status === 'confirmed'), [bookings]);
+  const pendingBookings = useMemo(() => bookings.filter(b => b.status === 'pending').sort((a, b) => new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime()), [bookings]);
+  const upcomingBookings = useMemo(() => bookings.filter(b => ['confirmed', 'en-route', 'in-progress'].includes(b.status)).sort((a, b) => new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime()), [bookings]);
   const historicalBookings = useMemo(() => bookings.filter(b => b.status === 'completed' || b.status === 'cancelled').sort((a, b) => new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()), [bookings]);
 
   return (
@@ -161,7 +181,7 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.confirmed}</div>
+              <div className="text-2xl font-bold">{stats.upcoming}</div>
               <p className="text-xs text-muted-foreground">Confirmed and scheduled</p>
             </CardContent>
           </Card>
@@ -204,7 +224,7 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
               <Card>
                 <CardHeader>
                     <CardTitle>Upcoming Jobs</CardTitle>
-                    <CardDescription>Your schedule of confirmed appointments.</CardDescription>
+                    <CardDescription>Your schedule of confirmed appointments and jobs in progress.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {upcomingBookings.length > 0 ? (

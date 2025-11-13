@@ -56,6 +56,8 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
   const statusVariant = (status: Booking['status']) => {
     switch (status) {
       case 'confirmed':
+      case 'en-route':
+      case 'in-progress':
         return 'default';
       case 'completed':
         return 'secondary';
@@ -64,6 +66,10 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
       default:
         return 'outline';
     }
+  }
+
+  const formatStatus = (status: string) => {
+    return status.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   }
 
   return (
@@ -93,7 +99,7 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
                     <div>
                         <div className='flex items-center gap-4'>
                              <h3 className="font-semibold">{getServiceName(booking.serviceId)}</h3>
-                             <Badge variant={statusVariant(booking.status)} className="capitalize">{booking.status}</Badge>
+                             <Badge variant={statusVariant(booking.status)} className="capitalize">{formatStatus(booking.status)}</Badge>
                         </div>
                         <p className="text-sm text-muted-foreground mt-1">
                             {format(new Date(booking.bookingDate), "MMMM d, yyyy 'at' h:mm a")}

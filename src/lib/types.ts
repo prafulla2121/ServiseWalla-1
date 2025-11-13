@@ -4,7 +4,7 @@ export interface Booking {
   workerId: string;
   serviceId: string;
   bookingDate: string; // Stored as ISO string
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'en-route' | 'in-progress' | 'completed' | 'cancelled';
   // Customer info
   name: string;
   email: string;
