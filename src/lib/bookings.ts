@@ -1,6 +1,8 @@
 'use client';
-import { Firestore, doc, getDoc, writeBatch } from "firebase/firestore";
+import { Firestore, doc, getDoc, writeBatch, updateDoc } from "firebase/firestore";
 import { Booking } from "./types";
+import { FirestorePermissionError } from "@/firebase/errors";
+import { errorEmitter } from "@/firebase/error-emitter";
 
 /**
  * Generates a random 4-character alphanumeric code.
@@ -23,37 +25,42 @@ export async function updateBookingStatus(
 ) {
     const workerBookingRef = doc(firestore, `workers/${workerId}/bookings`, bookingId);
     
-    try {
-        const bookingSnap = await getDoc(workerBookingRef);
-        if (!bookingSnap.exists()) {
-            throw new Error("Booking not found for this worker.");
-        }
-
-        const bookingData = bookingSnap.data() as Booking;
-        const userId = bookingData.userId;
-        if (!userId) {
-            throw new Error("Customer ID not found on booking.");
-        }
-
-        const userBookingRef = doc(firestore, `users/${userId}/bookings`, bookingId);
-
-        let updateData: Partial<Booking> = { status };
-
-        if (status === 'confirmed' && !bookingData.completionCode) {
-            updateData.completionCode = generateCompletionCode();
-        }
-
-        // Use a batch to update both documents atomically
-        const batch = writeBatch(firestore);
-        batch.update(workerBookingRef, updateData);
-        batch.update(userBookingRef, updateData);
-
-        await batch.commit();
-
-    } catch (error) {
-        console.error("Error updating booking status:", error);
-        throw error; // Re-throw to be caught in the component
+    const bookingSnap = await getDoc(workerBookingRef);
+    if (!bookingSnap.exists()) {
+        throw new Error("Booking not found for this worker.");
     }
+
+    const bookingData = bookingSnap.data() as Booking;
+    const userId = bookingData.userId;
+    if (!userId) {
+        throw new Error("Customer ID not found on booking.");
+    }
+
+    const userBookingRef = doc(firestore, `users/${userId}/bookings`, bookingId);
+
+    let updateData: Partial<Booking> = { status };
+
+    if (status === 'confirmed' && !bookingData.completionCode) {
+        updateData.completionCode = generateCompletionCode();
+    }
+
+    const batch = writeBatch(firestore);
+    batch.update(workerBookingRef, updateData);
+    batch.update(userBookingRef, updateData);
+
+    // This replaces the generic try/catch
+    return batch.commit().catch(error => {
+        // Create and emit the detailed, contextual error
+        const permissionError = new FirestorePermissionError({
+          path: userBookingRef.path, // The path that is likely failing
+          operation: 'update',
+          requestResourceData: updateData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+
+        // Also throw an error to be caught by the component's UI
+        throw new Error(`Failed to update booking status. You may not have permission.`);
+    });
 }
 
 /**
@@ -80,7 +87,7 @@ export async function completeBookingWithCode(
   }
   
   // If code is valid, update status to 'completed' for both worker and user
-  await updateBookingStatus(firestore, workerId, bookingId, 'completed');
+  return updateBookingStatus(firestore, workerId, bookingId, 'completed');
 }
 
 
@@ -91,29 +98,43 @@ export async function cancelBookingAsUser(
 ) {
     const userBookingRef = doc(firestore, `users/${userId}/bookings`, bookingId);
     
-    try {
-        const bookingSnap = await getDoc(userBookingRef);
-        if (bookingSnap.exists()) {
-            const bookingData = bookingSnap.data() as Booking;
+    const bookingSnap = await getDoc(userBookingRef);
+    if (bookingSnap.exists()) {
+        const bookingData = bookingSnap.data() as Booking;
 
-            if (bookingData.status !== 'pending') {
-                throw new Error("Booking cannot be cancelled as it's already been actioned.");
-            }
-            if (bookingData.workerId) {
-                const workerBookingRef = doc(firestore, `workers/${bookingData.workerId}/bookings`, bookingId);
-                const batch = writeBatch(firestore);
-                batch.update(userBookingRef, { status: 'cancelled' });
-                batch.update(workerBookingRef, { status: 'cancelled' });
-                await batch.commit();
-            } else {
-                 // Should not happen, but as a fallback
-                 await updateDoc(userBookingRef, { status: 'cancelled' });
-            }
-        } else {
-            throw new Error("Booking not found.");
+        if (bookingData.status !== 'pending') {
+            throw new Error("Booking cannot be cancelled as it's already been actioned.");
         }
-    } catch (error) {
-        console.error("Error cancelling booking:", error);
-        throw error; // re-throw to be caught in the component
+        if (bookingData.workerId) {
+            const workerBookingRef = doc(firestore, `workers/${bookingData.workerId}/bookings`, bookingId);
+            const batch = writeBatch(firestore);
+            const updateData = { status: 'cancelled' };
+            batch.update(userBookingRef, updateData);
+            batch.update(workerBookingRef, updateData);
+            
+            return batch.commit().catch(error => {
+                const permissionError = new FirestorePermissionError({
+                    path: workerBookingRef.path, // Path that might fail
+                    operation: 'update',
+                    requestResourceData: updateData
+                });
+                errorEmitter.emit('permission-error', permissionError);
+                throw new Error('Failed to cancel booking. You may not have permission.');
+            });
+
+        } else {
+             // Should not happen, but as a fallback
+             return updateDoc(userBookingRef, { status: 'cancelled' }).catch(error => {
+                 const permissionError = new FirestorePermissionError({
+                    path: userBookingRef.path,
+                    operation: 'update',
+                    requestResourceData: { status: 'cancelled' }
+                });
+                errorEmitter.emit('permission-error', permissionError);
+                throw new Error('Failed to cancel booking. You may not have permission.');
+             });
+        }
+    } else {
+        throw new Error("Booking not found.");
     }
 }
