@@ -43,14 +43,13 @@ service cloud.firestore {
     
      // Helper to determine if only allowed fields are being updated by a worker
     function isWorkerUpdatingAllowedFields() {
-        // A worker can only update the 'status', 'startCode' and/or 'completionCode'.
-        // The `request.resource.data` contains the final state of the document after the update.
-        // The `resource.data` contains the original state before the update.
-        // `diff()` gives us the keys that are being changed.
+        // A worker can only update the 'status', 'startCode', 'completionCode', 'jobStartedAt', and/or 'jobCompletedAt'.
         let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
 
-        // The set of changed keys must be a subset of {'status', 'startCode', 'completionCode'}
-        return changedKeys.hasOnly(['status', 'startCode', 'completionCode']) || changedKeys.hasOnly(['status', 'startCode']) || changedKeys.hasOnly(['status', 'completionCode']) || changedKeys.hasOnly(['startCode', 'completionCode']) || changedKeys.hasOnly(['status']) || changedKeys.hasOnly(['startCode']) || changedKeys.hasOnly(['completionCode']);
+        // The set of changed keys must be a subset of the allowed fields.
+        let allowedKeys = ['status', 'startCode', 'completionCode', 'jobStartedAt', 'jobCompletedAt'];
+        return changedKeys.hasOnly(allowedKeys) || 
+               changedKeys.subsetOf(allowedKeys);
     }
 
     // Helper to check if only the user-cancellable fields are being updated.
@@ -171,6 +170,5 @@ service cloud.firestore {
     }
   }
 }
-
 
     

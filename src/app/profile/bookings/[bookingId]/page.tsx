@@ -3,10 +3,10 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useDoc, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import { Loader2, Calendar, Clock, MapPin, User, Tag, KeyRound, Star, Check, Truck, Play, ChevronRight, MessageSquare, PlayCircle } from 'lucide-react';
+import { Loader2, Calendar, Clock, MapPin, User, Tag, KeyRound, Star, Check, Truck, Play, ChevronRight, MessageSquare, PlayCircle, Timer } from 'lucide-react';
 import type { Booking, Worker } from '@/lib/types';
 import { services } from '@/lib/data';
-import { format } from 'date-fns';
+import { format, formatDistanceStrict } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -77,6 +77,15 @@ export default function BookingDetailsPage() {
     let currentStepIndex = statusSteps.findIndex(step => step.status === booking.status);
     if(booking.status === 'cancelled') currentStepIndex = -1;
 
+    const getJobDuration = () => {
+        if (booking.jobStartedAt && booking.jobCompletedAt) {
+            return formatDistanceStrict(new Date(booking.jobCompletedAt), new Date(booking.jobStartedAt));
+        }
+        return null;
+    }
+
+    const jobDuration = getJobDuration();
+
     return (
         <div className="container mx-auto max-w-4xl py-12">
             <Card>
@@ -119,6 +128,9 @@ export default function BookingDetailsPage() {
                             <div className="flex items-center"><Calendar className="h-5 w-5 mr-3 text-primary" /> <span>{format(new Date(booking.bookingDate), "EEEE, MMMM d, yyyy")}</span></div>
                             <div className="flex items-center"><Clock className="h-5 w-5 mr-3 text-primary" /> <span>{format(new Date(booking.bookingDate), "h:mm a")}</span></div>
                             <div className="flex items-start"><MapPin className="h-5 w-5 mr-3 text-primary flex-shrink-0 mt-1" /> <span>{booking.address}, {booking.city}, {booking.state} {booking.zipCode}</span></div>
+                             {jobDuration && (
+                                <div className="flex items-center pt-2"><Timer className="h-5 w-5 mr-3 text-primary" /> <span>Total job duration: <strong>{jobDuration}</strong></span></div>
+                            )}
                         </div>
 
                          <div className="space-y-4">

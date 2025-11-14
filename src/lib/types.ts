@@ -3,6 +3,7 @@
 
 
 
+
 export interface Booking {
   id: string;
   userId: string;
@@ -21,6 +22,8 @@ export interface Booking {
   state: string;
   zipCode: string;
   reviewSubmitted?: boolean;
+  jobStartedAt?: string; // ISO string for when the job actually starts
+  jobCompletedAt?: string; // ISO string for when the job is completed
 }
 
 

@@ -21,7 +21,8 @@ export async function updateBookingStatus(
     firestore: Firestore, 
     workerId: string,
     bookingId: string, 
-    status: Booking['status']
+    status: Booking['status'],
+    extraData: Partial<Booking> = {}
 ) {
     const workerBookingRef = doc(firestore, `workers/${workerId}/bookings`, bookingId);
     
@@ -38,7 +39,7 @@ export async function updateBookingStatus(
 
     const userBookingRef = doc(firestore, `users/${userId}/bookings`, bookingId);
 
-    let updateData: Partial<Booking> = { status };
+    let updateData: Partial<Booking> = { status, ...extraData };
 
     // Generate completion code only when moving to 'confirmed' status
     if (status === 'confirmed' && !bookingData.completionCode) {
@@ -91,8 +92,9 @@ export async function startBookingWithCode(
     throw new Error("Invalid start code.");
   }
   
-  // If code is valid, update status to 'in-progress'
-  return updateBookingStatus(firestore, workerId, bookingId, 'in-progress');
+  // If code is valid, update status to 'in-progress' and record start time
+  const extraData = { jobStartedAt: new Date().toISOString() };
+  return updateBookingStatus(firestore, workerId, bookingId, 'in-progress', extraData);
 }
 
 /**
@@ -118,8 +120,9 @@ export async function completeBookingWithCode(
     throw new Error("Invalid completion code.");
   }
   
-  // If code is valid, update status to 'completed' for both worker and user
-  return updateBookingStatus(firestore, workerId, bookingId, 'completed');
+  // If code is valid, update status to 'completed' for both worker and user and record completion time
+  const extraData = { jobCompletedAt: new Date().toISOString() };
+  return updateBookingStatus(firestore, workerId, bookingId, 'completed', extraData);
 }
 
 
