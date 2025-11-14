@@ -296,34 +296,6 @@ export default function Home() {
           </Carousel>
         </div>
       </section>
-
-      {/* CTA Section */}
-      <section className="relative w-full py-20 text-white">
-        {ctaImage && (
-          <Image
-            src={ctaImage.imageUrl}
-            alt={ctaImage.description}
-            fill
-            className="object-cover"
-            data-ai-hint={ctaImage.imageHint}
-          />
-        )}
-        <div className="absolute inset-0 bg-primary/80" />
-        <div className="relative z-10 flex flex-col items-center justify-center space-y-6 text-center">
-          <h2 className="font-headline text-3xl font-bold md:text-4xl">
-            Ready to Get Started?
-          </h2>
-          <p className="max-w-2xl text-lg md:text-xl">
-            Join thousands of satisfied customers and simplify your life with
-            ServiceWalla.
-          </p>
-          <Button size="lg" variant="secondary" asChild className="font-bold">
-            <Link href="/register">
-              Sign Up For Free <ArrowRight className="ml-2" />
-            </Link>
-          </Button>
-        </div>
-      </section>
     </div>
   );
 }
