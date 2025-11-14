@@ -78,11 +78,14 @@ service cloud.firestore {
      * @path /workers/{workerId}
      * @principle Worker profiles are public for anyone to read (to browse professionals).
      *            Only the worker themselves can update their own profile.
+     *            Allows a user to update worker's review average if done in a transaction when creating a review.
      */
     match /workers/{workerId} {
       allow get: if true;
       allow list: if true; // Allow listing workers for a service.
       allow write: if isOwner(workerId);
+      allow update: if request.auth != null && 
+                     request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reviewCount', 'averageRating']);
     }
     
     /**
@@ -170,5 +173,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
