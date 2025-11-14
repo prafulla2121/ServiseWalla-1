@@ -1,202 +1,200 @@
-{
-  "placeholderImages": [
-    {
-      "id": "hero-1",
-      "description": "A bright and welcoming living room, suggesting home services.",
-      "imageUrl": "https://images.unsplash.com/photo-1618220179428-22790b461013?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBsaXZpbmclMjByb29tfGVufDB8fHx8MTc2MzU0MjYxOXww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "modern living room"
-    },
-    {
-      "id": "hero-workers",
-      "description": "A diverse group of happy and professional service workers.",
-      "imageUrl": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzZXJ2aWNlJTIwd29ya2VycyUyMHRlYW18ZW58MHx8fHwxNzYzNTQyNjQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "service workers"
-    },
-    {
-      "id": "hero-plumber",
-      "description": "A smiling plumber holding a wrench.",
-      "imageUrl": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwbHVtYmVyJTIwc21pbGluZ3xlbnwwfHx8fDE3NjM1NDI2NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "plumber smiling"
-    },
-    {
-      "id": "hero-gardener",
-      "description": "A gardener tending to plants in a sunny garden.",
-      "imageUrl": "https://images.unsplash.com/photo-1558221593-490520779d72?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnYXJkZW5lciUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MzU0MjY4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "gardener portrait"
-    },
-    {
-      "id": "hero-painter",
-      "description": "A painter carefully painting a wall with a roller.",
-      "imageUrl": "https://images.unsplash.com/photo-1528605248644-14dd04022da1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwYWludGVyJTIwd2FsbHxlbnwwfHx8fDE3NjM1NDI3MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "painter wall"
-    },
-    {
-      "id": "hero-barber",
-      "description": "A stylish barber focused on giving a haircut.",
-      "imageUrl": "https://images.unsplash.com/photo-1621605815971-fbc5424f008f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhZXN0aGV0aWMlMjBiYXJiZXJ8ZW58MHx8fHwxNzY5MzExOTcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "aesthetic barber"
-    },
-    {
-      "id": "hero-cleaner",
-      "description": "A professional cleaner tidying up a modern apartment.",
-      "imageUrl": "https://images.unsplash.com/photo-1628102390457-593573a971cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBjbGVhbmVyfGVufDB8fHx8MTc2OTMxMjAxNnww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "professional cleaner"
-    },
-    {
-      "id": "hero-technician",
-      "description": "An electronics technician working on a circuit board with precision.",
-      "imageUrl": "https://images.unsplash.com/photo-1581092921447-4a0b9a3f7833?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0ZWNobmljaWFuJTIwd29ya2luZ3xlbnwwfHx8fDE3NjkzMTIwNDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "technician working"
-    },
-    {
-      "id": "hero-chef",
-      "description": "A chef meticulously plating a gourmet dish in a professional kitchen.",
-      "imageUrl": "https://images.unsplash.com/photo-1556911220-bff31c812dba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBjaGVmfGVufDB8fHx8MTc2OTMxMjA5Nnww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "professional chef"
-    },
-    {
-      "id": "hero-tailor",
-      "description": "A tailor measuring fabric in a well-lit, classic workshop.",
-      "imageUrl": "https://images.unsplash.com/photo-1596131397999-905186de5a1a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0YWlsb3IlMjB3b3Jrc2hvcHxlbnwwfHx8fDE3NjkzMTIxMzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "tailor workshop"
-    },
-    {
-      "id": "cta-1",
-      "description": "A person happily using a laptop, representing easy booking.",
-      "imageUrl": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjBsYXB0b3B8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "person laptop"
-    },
-    {
-      "id": "about-1",
-      "description": "A diverse group of professionals smiling.",
-      "imageUrl": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxkaXZlcnNlJTIwdGVhbXxlbnwwfHx8fDE3NjI4Njk1ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "diverse team"
-    },
-    {
-      "id": "service-cleaning",
-      "description": "A person cleaning a window with a squeegee.",
-      "imageUrl": "https://images.unsplash.com/photo-1512479373983-bd28a541041b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3aW5kb3clMjBjbGVhbmluZ3xlbnwwfHx8fDE3NjI5NzI0ODF8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "window cleaning"
-    },
-    {
-      "id": "service-plumbing",
-      "description": "A plumber fixing a sink.",
-      "imageUrl": "https://images.unsplash.com/photo-1731092367328-1ebb8c358959?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGx1bWJlciUyMHdvcmtpbmd8ZW58MHx8fHwxNzYyOTU1NDU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "plumber working"
-    },
-    {
-      "id": "service-electrical",
-      "description": "An electrician working on a circuit breaker.",
-      "imageUrl": "https://images.unsplash.com/photo-1667922578520-61558e79aa7e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxlbGVjdHJpY2lhbiUyMHdvcmt8ZW58MHx8fHwxNzYyOTQ3MzU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "electrician work"
-    },
-    {
-      "id": "service-painting",
-      "description": "A person painting a wall with a roller.",
-      "imageUrl": "https://images.unsplash.com/photo-1560015534-cee980ba7e13?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3YWxsJTIwcGFpbnRpbmd8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "wall painting"
-    },
-    {
-      "id": "service-gardening",
-      "description": "A gardener trimming hedges in a beautiful garden.",
-      "imageUrl": "https://images.unsplash.com/photo-1706828950029-708474bcf938?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnYXJkZW5lciUyMHdvcmtpbmd8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "gardener working"
-    },
-    {
-      "id": "service-tutoring",
-      "description": "A tutor helping a student with their homework.",
-      "imageUrl": "https://images.unsplash.com/photo-1760774714285-61ff516f86c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8dHV0b3IlMjBzdHVkZW50fGVufDB8fHx8MTc2Mjk3MjQ4MXww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "tutor student"
-    },
-    {
-      "id": "service-fitness",
-      "description": "A personal trainer guiding a client through a workout.",
-      "imageUrl": "https://images.unsplash.com/photo-1519311965067-36d3e5f33d39?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwZXJzb25hbCUyMHRyYWluZXJ8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "personal trainer"
-    },
-    {
-      "id": "service-childcare",
-      "description": "A nanny playing with a young child.",
-      "imageUrl": "https://images.unsplash.com/photo-1606621865521-ee38863a285d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxuYW5ueSUyMGNoaWxkfGVufDB8fHx8MTc2Mjk3MjQ4MXww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "nanny child"
-    },
-    {
-      "id": "worker-1",
-      "description": "Profile picture of a friendly male worker.",
-      "imageUrl": "https://images.unsplash.com/photo-1715412507413-c7416b47cacb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxtYWxlJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzYyOTA1MzMzfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "male portrait"
-    },
-    {
-      "id": "worker-2",
-      "description": "Profile picture of a professional female worker.",
-      "imageUrl": "https://images.unsplash.com/photo-1634149134664-ca3598f29da5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxmZW1hbGUlMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjI4NjQ0NTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "female portrait"
-    },
-    {
-      "id": "worker-3",
-      "description": "Profile picture of a smiling male worker.",
-      "imageUrl": "https://images.unsplash.com/photo-1623184663110-89ba5b565eb6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtYW4lMjBzbWlsaW5nfGVufDB8fHx8MTc2Mjk0MzgxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "man smiling"
-    },
-    {
-      "id": "worker-4",
-      "description": "Profile picture of a confident female worker.",
-      "imageUrl": "https://images.unsplash.com/photo-1627489105008-063e31b2dbcd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8d29tYW4lMjBjb25maWRlbnR8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "woman confident"
-    },
-    {
-      "id": "worker-5",
-      "description": "Profile picture of a male worker in uniform.",
-      "imageUrl": "https://images.unsplash.com/photo-1749469400908-36607e6b8885?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjB1bmlmb3JtfGVufDB8fHx8MTc2Mjk3MjQ4MXww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "man uniform"
-    },
-    {
-      "id": "worker-6",
-      "description": "Profile picture of an experienced female worker.",
-      "imageUrl": "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx3b21hbiUyMHByb2Zlc3Npb25hbHxlbnwwfHx8fDE3NjI5NjYwNTJ8MA&ixlibrb-4.1.0&q=80&w=1080",
-      "imageHint": "woman professional"
-    },
-    {
-      "id": "worker-7",
-      "description": "Profile picture of a young male professional.",
-      "imageUrl": "https://images.unsplash.com/photo-1595956553066-fe24a8c33395?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx5b3VuZyUyMG1hbnxlbnwwfHx8fDE3NjI5MzEyOTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "young man"
-    },
-    {
-      "id": "worker-8",
-      "description": "Profile picture of a friendly female professional.",
-      "imageUrl": "https://images.unsplash.com/photo-1667498235466-2ff4b9c8cb61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8d29tYW4lMjBmcmllbmRseXxlbnwwfHx8fDE3NjI4NTE2Mzd8MA&ixlib-rb-4.1.0&q=80&w=1080",
-      "imageHint": "woman friendly"
-    },
-    {
-      "id": "testimonial-1",
-      "description": "A plumber fixed my leak in an hour! So professional and quick.",
-      "imageUrl": "https://images.unsplash.com/photo-1557862921-37829c790f19?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjBzbWlsaW5nJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzYzNTQyODU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "david-lee"
-    },
-    {
-      "id": "testimonial-2",
-      "description": "The cleaning service was incredible. My house has never been so spotless.",
-      "imageUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHNtaWxpbmclMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjM1NDI4ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "sarah-jones"
-    },
-    {
-      "id": "testimonial-3",
-      "description": "Found a great guitar teacher for my son. He's learning so fast!",
-      "imageUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjM1NDI5MDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "michael-chen"
-    },
-    {
-      "id": "testimonial-4",
-      "description": "The handyman assembled all my new furniture perfectly. A lifesaver!",
-      "imageUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwYW1lcmljYW4lMjB3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MzU0MjkzMHww&ixlibrb-4.1.0&q=80&w=1080",
-      "imageHint": "emily-rodriguez"
-    },
-    {
-      "id": "contact-hero",
-      "description": "An image of an old-fashioned telephone on a desk.",
-      "imageUrl": "https://images.unsplash.com/photo-1587560699334-bea93391dcef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjb250YWN0JTIwdXN8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "contact us"
-    }
-  ]
-}
+[
+  {
+    "id": "hero-1",
+    "description": "A bright and welcoming living room, suggesting home services.",
+    "imageUrl": "https://images.unsplash.com/photo-1618220179428-22790b461013?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBsaXZpbmclMjByb29tfGVufDB8fHx8MTc2MzU0MjYxOXww&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "modern living room"
+  },
+  {
+    "id": "hero-workers",
+    "description": "A diverse group of happy and professional service workers.",
+    "imageUrl": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzZXJ2aWNlJTIwd29ya2VycyUyMHRlYW18ZW58MHx8fHwxNzYzNTQyNjQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "service workers"
+  },
+  {
+    "id": "hero-plumber",
+    "description": "A smiling plumber holding a wrench.",
+    "imageUrl": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwbHVtYmVyJTIwc21pbGluZ3xlbnwwfHx8fDE3NjM1NDI2NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "plumber smiling"
+  },
+  {
+    "id": "hero-gardener",
+    "description": "A gardener tending to plants in a sunny garden.",
+    "imageUrl": "https://images.unsplash.com/photo-1558221593-490520779d72?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnYXJkZW5lciUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MzU0MjY4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "gardener portrait"
+  },
+  {
+    "id": "hero-painter",
+    "description": "A painter carefully painting a wall with a roller.",
+    "imageUrl": "https://images.unsplash.com/photo-1528605248644-14dd04022da1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwYWludGVyJTIwd2FsbHxlbnwwfHx8fDE3NjM1NDI3MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "painter wall"
+  },
+  {
+    "id": "hero-barber",
+    "description": "A stylish barber focused on giving a haircut.",
+    "imageUrl": "https://images.unsplash.com/photo-1621605815971-fbc5424f008f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhZXN0aGV0aWMlMjBiYXJiZXJ8ZW58MHx8fHwxNzY5MzExOTcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "aesthetic barber"
+  },
+  {
+    "id": "hero-cleaner",
+    "description": "A professional cleaner tidying up a modern apartment.",
+    "imageUrl": "https://images.unsplash.com/photo-1628102390457-593573a971cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBjbGVhbmVyfGVufDB8fHx8MTc2OTMxMjAxNnww&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "professional cleaner"
+  },
+  {
+    "id": "hero-technician",
+    "description": "An electronics technician working on a circuit board with precision.",
+    "imageUrl": "https://images.unsplash.com/photo-1581092921447-4a0b9a3f7833?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0ZWNobmljaWFuJTIwd29ya2luZ3xlbnwwfHx8fDE3NjkzMTIwNDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "technician working"
+  },
+  {
+    "id": "hero-chef",
+    "description": "A chef meticulously plating a gourmet dish in a professional kitchen.",
+    "imageUrl": "https://images.unsplash.com/photo-1556911220-bff31c812dba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBjaGVmfGVufDB8fHx8MTc2OTMxMjA5Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "professional chef"
+  },
+  {
+    "id": "hero-tailor",
+    "description": "A tailor measuring fabric in a well-lit, classic workshop.",
+    "imageUrl": "https://images.unsplash.com/photo-1596131397999-905186de5a1a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0YWlsb3IlMjB3b3Jrc2hvcHxlbnwwfHx8fDE3NjkzMTIxMzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "tailor workshop"
+  },
+  {
+    "id": "cta-1",
+    "description": "A person happily using a laptop, representing easy booking.",
+    "imageUrl": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjBsYXB0b3B8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "person laptop"
+  },
+  {
+    "id": "about-1",
+    "description": "A diverse group of professionals smiling.",
+    "imageUrl": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxkaXZlcnNlJTIwdGVhbXxlbnwwfHx8fDE3NjI4Njk1ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "diverse team"
+  },
+  {
+    "id": "service-cleaning",
+    "description": "A person cleaning a window with a squeegee.",
+    "imageUrl": "https://images.unsplash.com/photo-1512479373983-bd28a541041b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3aW5kb3clMjBjbGVhbmluZ3xlbnwwfHx8fDE3NjI5NzI0ODF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "window cleaning"
+  },
+  {
+    "id": "service-plumbing",
+    "description": "A plumber fixing a sink.",
+    "imageUrl": "https://images.unsplash.com/photo-1731092367328-1ebb8c358959?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGx1bWJlciUyMHdvcmtpbmd8ZW58MHx8fHwxNzYyOTU1NDU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "plumber working"
+  },
+  {
+    "id": "service-electrical",
+    "description": "An electrician working on a circuit breaker.",
+    "imageUrl": "https://images.unsplash.com/photo-1667922578520-61558e79aa7e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxlbGVjdHJpY2lhbiUyMHdvcmt8ZW58MHx8fHwxNzYyOTQ3MzU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "electrician work"
+  },
+  {
+    "id": "service-painting",
+    "description": "A person painting a wall with a roller.",
+    "imageUrl": "https://images.unsplash.com/photo-1560015534-cee980ba7e13?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3YWxsJTIwcGFpbnRpbmd8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "wall painting"
+  },
+  {
+    "id": "service-gardening",
+    "description": "A gardener trimming hedges in a beautiful garden.",
+    "imageUrl": "https://images.unsplash.com/photo-1706828950029-708474bcf938?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnYXJkZW5lciUyMHdvcmtpbmd8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "gardener working"
+  },
+  {
+    "id": "service-tutoring",
+    "description": "A tutor helping a student with their homework.",
+    "imageUrl": "https://images.unsplash.com/photo-1760774714285-61ff516f86c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8dHV0b3IlMjBzdHVkZW50fGVufDB8fHx8MTc2Mjk3MjQ4MXww&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "tutor student"
+  },
+  {
+    "id": "service-fitness",
+    "description": "A personal trainer guiding a client through a workout.",
+    "imageUrl": "https://images.unsplash.com/photo-1519311965067-36d3e5f33d39?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwZXJzb25hbCUyMHRyYWluZXJ8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "personal trainer"
+  },
+  {
+    "id": "service-childcare",
+    "description": "A nanny playing with a young child.",
+    "imageUrl": "https://images.unsplash.com/photo-1606621865521-ee38863a285d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxuYW5ueSUyMGNoaWxkfGVufDB8fHx8MTc2Mjk3MjQ4MXww&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "nanny child"
+  },
+  {
+    "id": "worker-1",
+    "description": "Profile picture of a friendly male worker.",
+    "imageUrl": "https://images.unsplash.com/photo-1715412507413-c7416b47cacb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxtYWxlJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzYyOTA1MzMzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "male portrait"
+  },
+  {
+    "id": "worker-2",
+    "description": "Profile picture of a professional female worker.",
+    "imageUrl": "https://images.unsplash.com/photo-1634149134664-ca3598f29da5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxmZW1hbGUlMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjI4NjQ0NTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "female portrait"
+  },
+  {
+    "id": "worker-3",
+    "description": "Profile picture of a smiling male worker.",
+    "imageUrl": "https://images.unsplash.com/photo-1623184663110-89ba5b565eb6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtYW4lMjBzbWlsaW5nfGVufDB8fHx8MTc2Mjk0MzgxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "man smiling"
+  },
+  {
+    "id": "worker-4",
+    "description": "Profile picture of a confident female worker.",
+    "imageUrl": "https://images.unsplash.com/photo-1627489105008-063e31b2dbcd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8d29tYW4lMjBjb25maWRlbnR8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "woman confident"
+  },
+  {
+    "id": "worker-5",
+    "description": "Profile picture of a male worker in uniform.",
+    "imageUrl": "https://images.unsplash.com/photo-1749469400908-36607e6b8885?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjB1bmlmb3JtfGVufDB8fHx8MTc2Mjk3MjQ4MXww&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "man uniform"
+  },
+  {
+    "id": "worker-6",
+    "description": "Profile picture of an experienced female worker.",
+    "imageUrl": "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx3b21hbiUyMHByb2Zlc3Npb25hbHxlbnwwfHx8fDE3NjI5NjYwNTJ8MA&ixlibrb-4.1.0&q=80&w=1080",
+    "imageHint": "woman professional"
+  },
+  {
+    "id": "worker-7",
+    "description": "Profile picture of a young male professional.",
+    "imageUrl": "https://images.unsplash.com/photo-1595956553066-fe24a8c33395?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx5b3VuZyUyMG1hbnxlbnwwfHx8fDE3NjI5MzEyOTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "young man"
+  },
+  {
+    "id": "worker-8",
+    "description": "Profile picture of a friendly female professional.",
+    "imageUrl": "https://images.unsplash.com/photo-1667498235466-2ff4b9c8cb61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8d29tYW4lMjBmcmllbmRseXxlbnwwfHx8fDE3NjI4NTE2Mzd8MA&ixlib-rb-4.1.0&q=80&w=1080",
+    "imageHint": "woman friendly"
+  },
+  {
+    "id": "testimonial-1",
+    "description": "A plumber fixed my leak in an hour! So professional and quick.",
+    "imageUrl": "https://images.unsplash.com/photo-1557862921-37829c790f19?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjBzbWlsaW5nJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzYzNTQyODU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "david-lee"
+  },
+  {
+    "id": "testimonial-2",
+    "description": "The cleaning service was incredible. My house has never been so spotless.",
+    "imageUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHNtaWxpbmclMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjM1NDI4ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "sarah-jones"
+  },
+  {
+    "id": "testimonial-3",
+    "description": "Found a great guitar teacher for my son. He's learning so fast!",
+    "imageUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjM1NDI5MDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "michael-chen"
+  },
+  {
+    "id": "testimonial-4",
+    "description": "The handyman assembled all my new furniture perfectly. A lifesaver!",
+    "imageUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwYW1lcmljYW4lMjB3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MzU0MjkzMHww&ixlibrb-4.1.0&q=80&w=1080",
+    "imageHint": "emily-rodriguez"
+  },
+  {
+    "id": "contact-hero",
+    "description": "An image of an old-fashioned telephone on a desk.",
+    "imageUrl": "https://images.unsplash.com/photo-1587560699334-bea93391dcef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjb250YWN0JTIwdXN8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "contact us"
+  }
+]
