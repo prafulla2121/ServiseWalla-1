@@ -279,8 +279,8 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
     return { pending, upcoming, completed };
   }, [bookings]);
   
-  const pendingBookings = useMemo(() => bookings.filter(b => b.status === 'pending').sort((a, b) => new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime()), [bookings]);
-  const upcomingBookings = useMemo(() => bookings.filter(b => ['confirmed', 'en-route', 'in-progress'].includes(b.status)).sort((a, b) => new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime()), [bookings]);
+  const pendingBookings = useMemo(() => bookings.filter(b => b.status === 'pending').sort((a, b) => new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()), [bookings]);
+  const upcomingBookings = useMemo(() => bookings.filter(b => ['confirmed', 'en-route', 'in-progress'].includes(b.status)).sort((a, b) => new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()), [bookings]);
   const historicalBookings = useMemo(() => bookings.filter(b => b.status === 'completed' || b.status === 'cancelled').sort((a, b) => new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()), [bookings]);
 
   return (
