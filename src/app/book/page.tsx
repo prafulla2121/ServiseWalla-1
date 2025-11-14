@@ -33,12 +33,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { services } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useUser, useFirestore, useCollection, useMemoFirebase, FirestorePermissionError, errorEmitter } from '@/firebase';
+import { useUser, useFirestore, useCollection, useDoc, useMemoFirebase, FirestorePermissionError, errorEmitter } from '@/firebase';
 import { collection, doc, setDoc, query, where } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import type { Worker } from '@/lib/types';
 import { Progress } from '@/components/ui/progress';
@@ -94,6 +94,8 @@ export default function BookPage() {
   });
 
   const selectedServiceId = form.watch('serviceId');
+  const selectedWorkerId = form.watch('workerId');
+  const selectedDate = form.watch('date');
   
   const workersQuery = useMemoFirebase(() => {
     if (!firestore || !selectedServiceId) return null;
@@ -101,6 +103,13 @@ export default function BookPage() {
   }, [firestore, selectedServiceId]);
   
   const { data: availableWorkers, isLoading: isLoadingWorkers } = useCollection<Worker>(workersQuery);
+  
+  const selectedWorkerDocRef = useMemoFirebase(() => {
+    if (!firestore || !selectedWorkerId) return null;
+    return doc(firestore, 'workers', selectedWorkerId);
+  }, [firestore, selectedWorkerId]);
+
+  const { data: selectedWorker } = useDoc<Worker>(selectedWorkerDocRef);
 
   const onSubmit: SubmitHandler<BookingFormValues> = async (data) => {
     if (!user || !firestore) {
@@ -167,7 +176,19 @@ export default function BookPage() {
     }
   };
 
-  const timeSlots = ['09:00', '11:00', '13:00', '15:00', '17:00'];
+  const allTimeSlots = ['09:00', '11:00', '13:00', '15:00', '17:00'];
+
+  const availableTimeSlots = useMemo(() => {
+    if (!selectedDate || !selectedWorker?.unavailableSlots) {
+      return allTimeSlots;
+    }
+    const datePrefix = format(selectedDate, 'yyyy-MM-dd');
+    const unavailableSlotsForDate = selectedWorker.unavailableSlots
+      .filter(slot => slot.startsWith(datePrefix))
+      .map(slot => slot.split('T')[1]);
+
+    return allTimeSlots.filter(slot => !unavailableSlotsForDate.includes(slot));
+  }, [selectedDate, selectedWorker]);
   
   const handleUseCurrentLocation = () => {
     toast({
@@ -234,7 +255,10 @@ export default function BookPage() {
                         <FormItem>
                           <FormLabel>Professional</FormLabel>
                           <Select
-                            onValueChange={field.onChange}
+                            onValueChange={(value) => {
+                                field.onChange(value);
+                                form.setValue('time', ''); // Reset time when worker changes
+                            }}
                             value={field.value}
                             disabled={!selectedServiceId || isLoadingWorkers || !!workerIdParam}
                           >
@@ -285,7 +309,10 @@ export default function BookPage() {
                                 <Calendar
                                   mode="single"
                                   selected={field.value}
-                                  onSelect={field.onChange}
+                                  onSelect={(date) => {
+                                      field.onChange(date);
+                                      form.setValue('time', ''); // Reset time on date change
+                                  }}
                                   disabled={(date) =>
                                     date < new Date() || date < new Date('1900-01-01')
                                   }
@@ -305,19 +332,23 @@ export default function BookPage() {
                             <FormLabel>Time</FormLabel>
                             <Select
                               onValueChange={field.onChange}
-                              defaultValue={field.value}
+                              value={field.value}
+                              disabled={!selectedDate || !selectedWorkerId}
                             >
                               <FormControl>
                                 <SelectTrigger className='h-12 text-base'>
-                                  <SelectValue placeholder="Select a time slot" />
+                                  <SelectValue placeholder={!selectedDate || !selectedWorkerId ? "Pick date & professional first" : "Select a time slot"} />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {timeSlots.map((time) => (
+                                {availableTimeSlots.map((time) => (
                                   <SelectItem key={time} value={time}>
                                     {format(new Date(`1970-01-01T${time}:00`), 'h:mm a')}
                                   </SelectItem>
                                 ))}
+                                {availableTimeSlots.length === 0 && selectedDate && (
+                                    <div className="p-4 text-sm text-muted-foreground">No available slots for this day.</div>
+                                )}
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -494,3 +525,4 @@ export default function BookPage() {
     </>
   );
 }
+

@@ -112,6 +112,13 @@
         "averageRating": {
           "type": "number",
           "description": "The worker's average rating, from 1 to 5."
+        },
+        "unavailableSlots": {
+          "type": "array",
+          "description": "A list of date-time strings (e.g., '2024-12-25T09:00') that the worker is not available for.",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [

@@ -4,10 +4,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useUser, useFirestore } from '@/firebase';
-import type { Booking, User } from '@/lib/types';
+import { useUser, useFirestore, useMemoFirebase } from '@/firebase';
+import type { Booking, Worker } from '@/lib/types';
 import { services } from '@/lib/data';
-import { format } from 'date-fns';
+import { format, formatISO } from 'date-fns';
 import { Button } from '../ui/button';
 import { Input } from "@/components/ui/input"
 import { useToast } from '@/hooks/use-toast';
@@ -23,10 +23,13 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, CheckCircle, History, Phone, User as UserIcon, MapPin, Truck, PlayCircle, Star, Loader2, Pencil, Mail } from 'lucide-react';
+import { Clock, CheckCircle, History, Phone, User as UserIcon, MapPin, Truck, PlayCircle, Star, Loader2, Pencil, Mail, Calendar, CalendarDays } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import Link from 'next/link';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { Calendar as ShadCalendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+
 
 interface WorkerProfileProps {
   worker: any;
@@ -38,6 +41,104 @@ interface BookingActionDialogProps {
   actionType: 'start' | 'complete';
   onConfirm: (booking: Booking, code: string) => Promise<void>;
 }
+
+const timeSlots = ['09:00', '11:00', '13:00', '15:00', '17:00'];
+
+function AvailabilityManager({ worker, onUpdate }: { worker: Worker; onUpdate: (updatedWorker: Partial<Worker>) => void }) {
+    const firestore = useFirestore();
+    const { user } = useUser();
+    const { toast } = useToast();
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+    const [isLoading, setIsLoading] = useState(false);
+
+    const unavailableSlots = useMemo(() => new Set(worker.unavailableSlots || []), [worker.unavailableSlots]);
+
+    const handleSlotToggle = async (slot: string) => {
+        if (!selectedDate || !user) return;
+        setIsLoading(true);
+
+        const slotDateTime = new Date(selectedDate);
+        const [hours, minutes] = slot.split(':').map(Number);
+        slotDateTime.setHours(hours, minutes, 0, 0);
+
+        // Format to a simple string like '2024-08-15T09:00'
+        const slotIdentifier = `${format(slotDateTime, "yyyy-MM-dd'T'HH:mm")}`;
+        
+        const workerRef = doc(firestore, 'workers', user.uid);
+        
+        try {
+            let updatedSlots: string[];
+            if (unavailableSlots.has(slotIdentifier)) {
+                // Make available: remove from unavailable list
+                await updateDoc(workerRef, { unavailableSlots: arrayRemove(slotIdentifier) });
+                updatedSlots = [...unavailableSlots].filter(s => s !== slotIdentifier);
+                toast({ title: "Slot Available", description: "This time slot is now open for bookings." });
+            } else {
+                // Make unavailable: add to list
+                await updateDoc(workerRef, { unavailableSlots: arrayUnion(slotIdentifier) });
+                updatedSlots = [...unavailableSlots, slotIdentifier];
+                toast({ title: "Slot Unavailable", description: "This time slot has been blocked." });
+            }
+             onUpdate({ unavailableSlots: updatedSlots });
+        } catch (error) {
+            console.error("Failed to update availability", error);
+            toast({ variant: 'destructive', title: "Update Failed", description: "Could not update availability." });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Manage Availability</CardTitle>
+                <CardDescription>Select a date to view and block off time slots. Click a slot to toggle its availability.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="flex justify-center">
+                    <ShadCalendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={setSelectedDate}
+                        className="rounded-md border"
+                        disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() - 1))}
+                    />
+                </div>
+                <div>
+                    <h3 className="font-semibold mb-4">
+                        Time Slots for {selectedDate ? format(selectedDate, 'PPP') : '...'}
+                    </h3>
+                    {selectedDate ? (
+                        <div className="grid grid-cols-2 gap-2">
+                            {timeSlots.map(slot => {
+                                const slotDateTime = new Date(selectedDate);
+                                const [hours, minutes] = slot.split(':').map(Number);
+                                slotDateTime.setHours(hours, minutes, 0, 0);
+                                const slotIdentifier = `${format(slotDateTime, "yyyy-MM-dd'T'HH:mm")}`;
+                                const isUnavailable = unavailableSlots.has(slotIdentifier);
+
+                                return (
+                                    <Button
+                                        key={slot}
+                                        variant={isUnavailable ? 'destructive' : 'outline'}
+                                        onClick={() => handleSlotToggle(slot)}
+                                        disabled={isLoading}
+                                        className={cn("relative", isUnavailable && "line-through")}
+                                    >
+                                        {format(new Date(`1970-01-01T${slot}:00`), 'h:mm a')}
+                                    </Button>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <p className="text-muted-foreground">Please select a date.</p>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
 
 function BookingActionDialog({ booking, actionType, onConfirm }: BookingActionDialogProps) {
     const [open, setOpen] = useState(false);
@@ -218,17 +319,22 @@ function BookingItem({ booking, onUpdateStatus, onStartBooking, onCompleteBookin
   );
 }
 
-export function WorkerProfile({ worker: profileWorker, bookings: initialBookings }: WorkerProfileProps) {
+export function WorkerProfile({ worker: initialWorker, bookings: initialBookings }: WorkerProfileProps) {
   const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [worker, setWorker] = useState<Worker>(initialWorker);
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
   const [updatingBookingId, setUpdatingBookingId] = useState<string | null>(null);
 
   useEffect(() => {
     setBookings(initialBookings);
   }, [initialBookings]);
+  
+  useEffect(() => {
+    setWorker(initialWorker);
+  }, [initialWorker]);
 
   const handleUpdateStatus = async (bookingToUpdate: Booking, status: Booking['status']) => {
     if (!user || !firestore) return;
@@ -236,7 +342,6 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
     try {
         await updateBookingStatus(firestore, user.uid, bookingToUpdate.id, status);
         
-        // Optimistically update UI
         setBookings(currentBookings => 
           currentBookings.map(b => 
             b.id === bookingToUpdate.id ? { ...b, status: status, completionCode: status === 'confirmed' ? '----' : b.completionCode } : b
@@ -277,7 +382,11 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
     );
   };
   
-  const workerService = services.find(s => profileWorker.serviceIds?.includes(s.id));
+  const handleProfileUpdate = (updatedData: Partial<Worker>) => {
+    setWorker(currentWorker => ({...currentWorker, ...updatedData }));
+  };
+
+  const workerService = services.find(s => worker.serviceIds?.includes(s.id));
 
   const stats = useMemo(() => {
     const pending = bookings.filter(b => b.status === 'pending').length;
@@ -295,11 +404,11 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
       <header className="flex flex-col sm:flex-row items-start justify-between gap-6">
         <div className="flex items-center gap-6">
           <Avatar className="h-24 w-24">
-            <AvatarImage src={profileWorker.photoURL ?? ''} />
-            <AvatarFallback>{profileWorker.firstName?.[0]}{profileWorker.lastName?.[0]}</AvatarFallback>
+            <AvatarImage src={worker.photoURL ?? ''} />
+            <AvatarFallback>{worker.firstName?.[0]}{worker.lastName?.[0]}</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="font-headline text-3xl font-bold">Welcome, {profileWorker.firstName}!</h1>
+            <h1 className="font-headline text-3xl font-bold">Welcome, {worker.firstName}!</h1>
             <p className="text-muted-foreground">Here's your professional dashboard.</p>
           </div>
         </div>
@@ -311,7 +420,7 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
             <DialogHeader>
               <DialogTitle>Edit Your Profile</DialogTitle>
             </DialogHeader>
-            <EditWorkerProfileForm worker={profileWorker} onSave={() => setIsEditDialogOpen(false)}/>
+            <EditWorkerProfileForm worker={worker} onSave={() => setIsEditDialogOpen(false)}/>
           </DialogContent>
         </Dialog>
       </header>
@@ -353,10 +462,11 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
 
       <section>
         <Tabs defaultValue="pending">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="pending">Pending ({pendingBookings.length})</TabsTrigger>
             <TabsTrigger value="upcoming">Upcoming ({upcomingBookings.length})</TabsTrigger>
             <TabsTrigger value="history">History ({historicalBookings.length})</TabsTrigger>
+            <TabsTrigger value="availability">Availability</TabsTrigger>
           </TabsList>
           <TabsContent value="pending" className="mt-6">
              <Card>
@@ -403,8 +513,12 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
                 </CardContent>
              </Card>
           </TabsContent>
+           <TabsContent value="availability" className="mt-6">
+              <AvailabilityManager worker={worker} onUpdate={handleProfileUpdate} />
+          </TabsContent>
         </Tabs>
       </section>
     </div>
   );
 }
+

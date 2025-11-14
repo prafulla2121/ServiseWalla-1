@@ -4,6 +4,7 @@
 
 
 
+
 export interface Booking {
   id: string;
   userId: string;
@@ -48,6 +49,7 @@ export interface Worker {
   avatarUrl?: string; // Legacy
   photoURL?: string; // New from auth
   coverImageUrl?: string;
+  unavailableSlots?: string[];
 }
 
 export interface Review {
