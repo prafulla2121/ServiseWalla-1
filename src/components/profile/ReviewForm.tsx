@@ -48,13 +48,17 @@ export function ReviewForm({ booking, user, onReviewSubmitted }: ReviewFormProps
   const onSubmit: SubmitHandler<ReviewFormValues> = async (data) => {
     setIsSubmitting(true);
     try {
-      await submitReview(firestore, {
-        ...data,
-        workerId: booking.workerId,
-        userId: user.uid,
-        userName: user.displayName || 'Anonymous',
-        userPhotoURL: user.photoURL || '',
-      });
+      await submitReview(
+        firestore,
+        {
+          ...data,
+          workerId: booking.workerId,
+          userId: user.uid,
+          userName: user.displayName || 'Anonymous',
+          userPhotoURL: user.photoURL || '',
+        },
+        booking.id // Pass the booking ID
+      );
       toast({
         title: 'Review Submitted!',
         description: 'Thank you for your feedback.',

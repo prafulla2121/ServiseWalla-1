@@ -52,6 +52,13 @@ service cloud.firestore {
         // The set of changed keys must be a subset of {'status', 'completionCode'}
         return changedKeys.hasOnly(['status', 'completionCode']) || changedKeys.hasOnly(['status']) || changedKeys.hasOnly(['completionCode']);
     }
+
+    // Helper to check if only the user-cancellable fields are being updated.
+    function isUserUpdatingAllowedFields() {
+      let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      // Allow user to change status (for cancellation) or mark that a review was submitted.
+      return changedKeys.hasOnly(['status', 'reviewSubmitted']) || changedKeys.hasOnly(['status']) || changedKeys.hasOnly(['reviewSubmitted']);
+    }
     
     // Checks if the user is a participant of a chat.
     function isChatParticipant(bookingId) {
@@ -61,7 +68,7 @@ service cloud.firestore {
          return exists(/databases/$(database)/documents/users/$(uid)/bookings/$(bookingId)) ||
                exists(/databases/$(database)/documents/workers/$(uid)/bookings/$(bookingId));
       }
-      // For write operations, we must get() the parent doc if it exists.
+      // For write operations on the subcollection, we must get() the parent doc.
       if (exists(/databases/$(database)/documents/chats/$(bookingId))) {
         let chatDoc = get(/databases/$(database)/documents/chats/$(bookingId)).data;
       	return uid == chatDoc.userId || uid == chatDoc.workerId;
@@ -99,6 +106,7 @@ service cloud.firestore {
      * @path /workers/{workerId}/reviews/{reviewId}
      * @principle Anyone can read reviews for a worker. Only authenticated users can
      *            create reviews, and they can only edit or delete their own reviews.
+     *            This rule now also allows a transaction to update a user's booking.
      */
     match /workers/{workerId}/reviews/{reviewId} {
       allow get, list: if true;
@@ -130,8 +138,9 @@ service cloud.firestore {
         // The user who owns the subcollection can do anything.
         allow read, create, delete: if isOwner(userId);
         
-        // A user can cancel their own booking (by updating status to 'cancelled').
-        allow update: if isOwner(userId);
+        // A user can cancel their own booking (by updating status to 'cancelled')
+        // or mark a review as submitted.
+        allow update: if isOwner(userId) && isUserUpdatingAllowedFields();
         
         // A worker can update the status/code if they are the assigned worker
         // AND they are also updating their own booking document in the same transaction.

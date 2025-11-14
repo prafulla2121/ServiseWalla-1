@@ -14,7 +14,8 @@ import { FirestorePermissionError } from '@/firebase/errors';
 
 export async function submitReview(
   firestore: Firestore,
-  reviewData: Omit<Review, 'id' | 'createdAt'>
+  reviewData: Omit<Review, 'id' | 'createdAt'>,
+  bookingId: string // The ID of the booking being reviewed
 ) {
   if (!reviewData.userId || !reviewData.workerId) {
     throw new Error('User ID and Worker ID are required to submit a review.');
@@ -27,6 +28,7 @@ export async function submitReview(
     reviewId
   );
   const workerRef = doc(firestore, 'workers', reviewData.workerId);
+  const userBookingRef = doc(firestore, `users/${reviewData.userId}/bookings`, bookingId);
 
   const newReview: Review = {
     ...reviewData,
@@ -35,7 +37,8 @@ export async function submitReview(
   };
 
   try {
-    // Using a transaction to atomically update the worker's rating and add the review.
+    // Using a transaction to atomically update the worker's rating, add the review,
+    // and mark the booking as reviewed.
     await runTransaction(firestore, async (transaction) => {
       const workerDoc = await transaction.get(workerRef);
       if (!workerDoc.exists()) {
@@ -50,11 +53,17 @@ export async function submitReview(
       const newTotalRating = currentAverageRating * currentReviewCount + reviewData.rating;
       const newAverageRating = newTotalRating / newReviewCount;
 
+      // 1. Create the new review document
       transaction.set(reviewRef, newReview);
+
+      // 2. Update the worker's aggregate rating
       transaction.update(workerRef, {
         reviewCount: newReviewCount,
         averageRating: newAverageRating,
       });
+
+      // 3. Mark the booking as having a review submitted
+      transaction.update(userBookingRef, { reviewSubmitted: true });
     });
   } catch (error) {
      const permissionError = new FirestorePermissionError({
