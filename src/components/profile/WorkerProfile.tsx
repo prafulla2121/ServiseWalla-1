@@ -148,12 +148,12 @@ function BookingItem({ booking }: { booking: Booking; }) {
   }
 
   const statusStyles: {[key: string]: string} = {
-    'pending': 'bg-amber-100 text-amber-800 border-amber-200',
-    'confirmed': 'bg-blue-100 text-blue-800 border-blue-200',
-    'en-route': 'bg-indigo-100 text-indigo-800 border-indigo-200',
-    'in-progress': 'bg-purple-100 text-purple-800 border-purple-200',
-    'completed': 'bg-green-100 text-green-800 border-green-200',
-    'cancelled': 'bg-red-100 text-red-800 border-red-200'
+    'pending': 'bg-amber-500 text-white border-amber-600',
+    'confirmed': 'bg-blue-600 text-white border-blue-700',
+    'en-route': 'bg-indigo-600 text-white border-indigo-700',
+    'in-progress': 'bg-purple-600 text-white border-purple-700',
+    'completed': 'bg-green-600 text-white border-green-700',
+    'cancelled': 'bg-red-600 text-white border-red-700'
   };
   
   return (
@@ -168,14 +168,10 @@ function BookingItem({ booking }: { booking: Booking; }) {
                     Customer: {booking.name}
                 </p>
             </div>
-            <div className="flex flex-col items-center justify-center gap-2">
-                <Badge className={cn("text-sm capitalize px-3 py-1", statusStyles[booking.status] || 'bg-gray-100 text-gray-800')}>
+            <div className="flex flex-col items-end justify-center gap-2">
+                <Badge className={cn("text-base capitalize px-4 py-2", statusStyles[booking.status] || 'bg-gray-500 text-white')}>
                     {formatStatus(booking.status)}
                 </Badge>
-                <div className="flex items-center gap-1 text-primary text-sm font-medium">
-                    <span>View</span>
-                    <ChevronRight className="h-4 w-4" />
-                </div>
             </div>
         </div>
     </Link>
