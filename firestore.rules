@@ -57,12 +57,14 @@ service cloud.firestore {
     function isUserUpdatingAllowedFields() {
       let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
       // Allow user to change status (for cancellation) or mark that a review was submitted.
-      return changedKeys.hasOnly(['status', 'reviewSubmitted']) || changedKeys.hasOnly(['status']) || changedKeys.hasOnly(['reviewSubmitted']);
+      return (changedKeys.hasOnly(['status']) && request.resource.data.status == 'cancelled') || changedKeys.hasOnly(['reviewSubmitted']);
     }
 
     // Helper function for user to cancel booking.
     function isUserCancelling() {
-        return request.resource.data.status == 'cancelled' && resource.data.status != 'cancelled';
+        let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
+        // This is true if the only field being changed is `status`, AND the new status is 'cancelled'.
+        return changedKeys.hasOnly(['status']) && request.resource.data.status == 'cancelled';
     }
     
     // Checks if the user is a participant of a chat.
@@ -215,3 +217,5 @@ service cloud.firestore {
     }
   }
 }
+
+    
