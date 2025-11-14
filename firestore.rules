@@ -59,20 +59,20 @@ service cloud.firestore {
       // Allow user to change status (for cancellation) or mark that a review was submitted.
       return (changedKeys.hasOnly(['status']) && request.resource.data.status == 'cancelled') || changedKeys.hasOnly(['reviewSubmitted']);
     }
-
-    // Helper function for user to cancel booking.
-    function isUserCancelling() {
-        let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
-        // This is true if the only field being changed is `status`, AND the new status is 'cancelled'.
-        return changedKeys.hasOnly(['status']) && request.resource.data.status == 'cancelled';
+    
+    // Helper function to get the parent chat document.
+    function getChatDoc(bookingId) {
+      return get(/databases/$(database)/documents/chats/$(bookingId)).data;
     }
     
-    // Checks if the user is a participant of a chat.
+    // Checks if the user is a participant of a chat by looking at the parent chat document.
     function isChatParticipant(bookingId) {
-      let uid = request.auth.uid;
-      let chatDoc = get(/databases/$(database)/documents/chats/$(bookingId)).data;
-      return uid == chatDoc.userId || uid == chatDoc.workerId;
+        let uid = request.auth.uid;
+        let chatDoc = getChatDoc(bookingId);
+        // This is secure for write/get operations on the chat document itself.
+        return uid == chatDoc.userId || uid == chatDoc.workerId;
     }
+
 
     /**
      * @description Controls access to user profile data.
@@ -158,7 +158,7 @@ service cloud.firestore {
       // A worker can update their booking if they are the owner.
       // A customer can also update the booking *if* they are only cancelling it.
       allow update: if isOwner(workerId) || 
-                     (request.auth.uid == resource.data.userId && isUserCancelling());
+                     (request.auth.uid == resource.data.userId && isUserUpdatingAllowedFields());
 
       // Any authenticated user can create a booking, as long as they are the customer (userId) in the booking.
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
@@ -191,15 +191,22 @@ service cloud.firestore {
     match /chats/{bookingId} {
       // Allow read/update if the user is a participant.
       allow get, update: if isChatParticipant(bookingId);
+      
       // Allow creation of a chat document if the creator is one of the participants.
-      // This is crucial for the first message.
-      allow create: if request.auth.uid == request.resource.data.userId || request.auth.uid == request.resource.data.workerId;
+      // This is crucial for the first message and creating the chat record.
+      allow create: if request.auth != null && (request.auth.uid == request.resource.data.userId || request.auth.uid == request.resource.data.workerId);
       
       match /messages/{messageId} {
-        allow read, list: if isChatParticipant(bookingId);
+        // To read/list messages, the user must have a booking with the corresponding ID.
+        // This avoids a cross-document 'get' call which is disallowed for 'list' operations.
+        allow read, list: if request.auth != null && (
+            exists(/databases/$(database)/documents/users/$(request.auth.uid)/bookings/$(bookingId)) ||
+            exists(/databases/$(database)/documents/workers/$(request.auth.uid)/bookings/$(bookingId))
+        );
         
         // Allow a participant to create a message, ensuring the senderId is their own UID.
-        // This rule depends on the parent /chats/{bookingId} document existing first.
+        // This rule depends on the parent /chats/{bookingId} document existing first,
+        // which is why the 'get' is allowed here.
         allow create: if isChatParticipant(bookingId)
                       && request.resource.data.senderId == request.auth.uid;
 
