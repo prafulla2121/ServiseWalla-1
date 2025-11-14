@@ -42,7 +42,10 @@ interface BookingActionDialogProps {
   onConfirm: (booking: Booking, code: string) => Promise<void>;
 }
 
-const timeSlots = ['09:00', '11:00', '13:00', '15:00', '17:00'];
+const timeSlots = [
+    '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', 
+    '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
+  ];
 
 function AvailabilityManager({ worker, onUpdate }: { worker: Worker; onUpdate: (updatedWorker: Partial<Worker>) => void }) {
     const firestore = useFirestore();
@@ -109,7 +112,7 @@ function AvailabilityManager({ worker, onUpdate }: { worker: Worker; onUpdate: (
                         Time Slots for {selectedDate ? format(selectedDate, 'PPP') : '...'}
                     </h3>
                     {selectedDate ? (
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
                             {timeSlots.map(slot => {
                                 const slotDateTime = new Date(selectedDate);
                                 const [hours, minutes] = slot.split(':').map(Number);
@@ -521,4 +524,3 @@ export function WorkerProfile({ worker: initialWorker, bookings: initialBookings
     </div>
   );
 }
-
