@@ -148,11 +148,11 @@ function BookingItem({ booking }: { booking: Booking; }) {
   }
   
   return (
-    <Link href={`/profile/bookings/${booking.id}`} className="block p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+    <Link href={`/profile/bookings/${booking.id}`} className="block p-6 border rounded-lg hover:bg-muted/50 transition-colors">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-            <div className="flex-grow">
+            <div className="flex-grow space-y-2">
                 <div className="flex items-center gap-4 mb-2 flex-wrap">
-                    <h3 className="font-semibold">{getServiceName(booking.serviceId)}</h3>
+                    <h3 className="font-semibold text-lg">{getServiceName(booking.serviceId)}</h3>
                     <Badge variant={booking.status === 'completed' || booking.status === 'confirmed' ? 'secondary' : booking.status === 'cancelled' ? 'destructive' : 'default'} className="capitalize">{formatStatus(booking.status)}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
@@ -163,8 +163,8 @@ function BookingItem({ booking }: { booking: Booking; }) {
                 </p>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-center">
-                <span className="text-sm text-muted-foreground">View Details</span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-primary">View Details</span>
+                <ChevronRight className="h-4 w-4 text-primary" />
             </div>
         </div>
     </Link>
