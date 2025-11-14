@@ -23,7 +23,7 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, CheckCircle, History, Phone, User as UserIcon, MapPin, Truck, PlayCircle, Star, Loader2, Pencil, MessageSquare } from 'lucide-react';
+import { Clock, CheckCircle, History, Phone, User as UserIcon, MapPin, Truck, PlayCircle, Star, Loader2, Pencil } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import Link from 'next/link';
 import { doc, getDoc } from 'firebase/firestore';
@@ -69,7 +69,6 @@ function BookingItem({ booking, onUpdateStatus, onCompleteBooking, isUpdating }:
   };
 
   const isConfirmed = ['confirmed', 'en-route', 'in-progress', 'completed'].includes(booking.status);
-  const canChat = ['confirmed', 'en-route', 'in-progress'].includes(booking.status);
   
   const formatStatus = (status: string) => {
     return status.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -115,13 +114,6 @@ function BookingItem({ booking, onUpdateStatus, onCompleteBooking, isUpdating }:
                         <div className="flex items-start text-muted-foreground">
                             <MapPin className="mr-2 h-4 w-4 mt-0.5 flex-shrink-0" />
                             <span>{booking.address}, {booking.city}, {booking.state}</span>
-                        </div>
-                         <div className="pt-2">
-                            <Button size="sm" variant="outline" asChild disabled={!canChat}>
-                                <Link href={`/chat/${booking.id}`}>
-                                    <MessageSquare className="mr-2 h-4 w-4" /> Chat with Customer
-                                </Link>
-                            </Button>
                         </div>
                     </CardContent>
                 </Card>

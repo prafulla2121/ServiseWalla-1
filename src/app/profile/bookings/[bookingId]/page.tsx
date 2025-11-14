@@ -76,7 +76,6 @@ export default function BookingDetailsPage() {
     
     let currentStepIndex = statusSteps.findIndex(step => step.status === booking.status);
     if(booking.status === 'cancelled') currentStepIndex = -1;
-    const canChat = ['confirmed', 'en-route', 'in-progress'].includes(booking.status);
 
     return (
         <div className="container mx-auto max-w-4xl py-12">
@@ -147,12 +146,6 @@ export default function BookingDetailsPage() {
                                         <p className="text-primary">{service?.name}</p>
                                     </div>
                                  </Link>
-                                <Button asChild variant="outline" disabled={!canChat}>
-                                    <Link href={`/chat/${booking.id}`}>
-                                        <MessageSquare className="mr-2 h-4 w-4" />
-                                        Chat with Professional
-                                    </Link>
-                                </Button>
                              </div>
                         </div>
                     )}
