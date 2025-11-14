@@ -147,29 +147,38 @@ function BookingItem({ booking }: { booking: Booking; }) {
     return status.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   }
 
-  const statusStyles: {[key: string]: string} = {
-    'pending': 'bg-amber-500 text-white border-amber-600',
-    'confirmed': 'bg-blue-600 text-white border-blue-700',
-    'en-route': 'bg-indigo-600 text-white border-indigo-700',
-    'in-progress': 'bg-purple-600 text-white border-purple-700',
-    'completed': 'bg-green-600 text-white border-green-700',
-    'cancelled': 'bg-red-600 text-white border-red-700'
+  const cardColorStyles: {[key: string]: string} = {
+    'pending': 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100',
+    'confirmed': 'bg-blue-50 border-blue-200 text-blue-900 hover:bg-blue-100',
+    'en-route': 'bg-indigo-50 border-indigo-200 text-indigo-900 hover:bg-indigo-100',
+    'in-progress': 'bg-purple-50 border-purple-200 text-purple-900 hover:bg-purple-100',
+    'completed': 'bg-green-50 border-green-200 text-green-900 hover:bg-green-100',
+    'cancelled': 'bg-red-50 border-red-200 text-red-900 hover:bg-red-100'
+  };
+
+  const badgeColorStyles: {[key: string]: string} = {
+    'pending': 'bg-amber-200 text-amber-900',
+    'confirmed': 'bg-blue-200 text-blue-900',
+    'en-route': 'bg-indigo-200 text-indigo-900',
+    'in-progress': 'bg-purple-200 text-purple-900',
+    'completed': 'bg-green-200 text-green-900',
+    'cancelled': 'bg-red-200 text-red-900'
   };
   
   return (
-    <Link href={`/profile/bookings/${booking.id}`} className="block p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-        <div className="flex flex-row justify-between items-center gap-4">
+    <Link href={`/profile/bookings/${booking.id}`} className={cn("block border rounded-lg transition-colors", cardColorStyles[booking.status] || 'bg-card')}>
+        <div className="flex flex-row justify-between items-center gap-4 p-6">
             <div className="flex-grow space-y-1">
                 <h3 className="font-semibold text-lg">{getServiceName(booking.serviceId)}</h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm opacity-80">
                     {format(new Date(booking.bookingDate), "MMMM d, yyyy 'at' h:mm a")}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm opacity-80">
                     Customer: {booking.name}
                 </p>
             </div>
-            <div className="flex flex-col items-end justify-center gap-2">
-                <Badge className={cn("text-base capitalize px-4 py-2", statusStyles[booking.status] || 'bg-gray-500 text-white')}>
+            <div className="flex-shrink-0">
+                <Badge className={cn("text-base capitalize px-4 py-2", badgeColorStyles[booking.status] || 'bg-muted text-muted-foreground')}>
                     {formatStatus(booking.status)}
                 </Badge>
             </div>
