@@ -146,15 +146,21 @@ function BookingItem({ booking }: { booking: Booking; }) {
   const formatStatus = (status: string) => {
     return status.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   }
+
+  const statusStyles: {[key: string]: string} = {
+    'pending': 'bg-amber-100 text-amber-800 border-amber-200',
+    'confirmed': 'bg-blue-100 text-blue-800 border-blue-200',
+    'en-route': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+    'in-progress': 'bg-purple-100 text-purple-800 border-purple-200',
+    'completed': 'bg-green-100 text-green-800 border-green-200',
+    'cancelled': 'bg-red-100 text-red-800 border-red-200'
+  };
   
   return (
-    <Link href={`/profile/bookings/${booking.id}`} className="block p-6 border rounded-lg hover:bg-muted/50 transition-colors">
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-            <div className="flex-grow space-y-2">
-                <div className="flex items-center gap-4 mb-2 flex-wrap">
-                    <h3 className="font-semibold text-lg">{getServiceName(booking.serviceId)}</h3>
-                    <Badge variant={booking.status === 'completed' || booking.status === 'confirmed' ? 'secondary' : booking.status === 'cancelled' ? 'destructive' : 'default'} className="capitalize">{formatStatus(booking.status)}</Badge>
-                </div>
+    <Link href={`/profile/bookings/${booking.id}`} className="block p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+        <div className="flex flex-row justify-between items-center gap-4">
+            <div className="flex-grow space-y-1">
+                <h3 className="font-semibold text-lg">{getServiceName(booking.serviceId)}</h3>
                 <p className="text-sm text-muted-foreground">
                     {format(new Date(booking.bookingDate), "MMMM d, yyyy 'at' h:mm a")}
                 </p>
@@ -162,9 +168,14 @@ function BookingItem({ booking }: { booking: Booking; }) {
                     Customer: {booking.name}
                 </p>
             </div>
-            <div className="flex items-center gap-2 self-start sm:self-center">
-                <span className="text-sm font-medium text-primary">View Details</span>
-                <ChevronRight className="h-4 w-4 text-primary" />
+            <div className="flex flex-col items-center justify-center gap-2">
+                <Badge className={cn("text-sm capitalize px-3 py-1", statusStyles[booking.status] || 'bg-gray-100 text-gray-800')}>
+                    {formatStatus(booking.status)}
+                </Badge>
+                <div className="flex items-center gap-1 text-primary text-sm font-medium">
+                    <span>View</span>
+                    <ChevronRight className="h-4 w-4" />
+                </div>
             </div>
         </div>
     </Link>
