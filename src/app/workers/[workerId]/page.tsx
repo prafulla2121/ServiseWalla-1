@@ -87,7 +87,7 @@ export default function WorkerProfilePage() {
   
   const workerService = services.find(s => worker.serviceIds.includes(s.id));
   const fullName = `${worker.firstName} ${worker.lastName}`;
-  const avatarUrl = worker.avatarUrl || `https://picsum.photos/seed/${worker.id}/200/200`;
+  const avatarUrl = worker.photoURL || `https://picsum.photos/seed/${worker.id}/200/200`;
   const coverImageUrl = worker.coverImageUrl || `https://picsum.photos/seed/cover-${worker.id}/800/300`;
 
   return (

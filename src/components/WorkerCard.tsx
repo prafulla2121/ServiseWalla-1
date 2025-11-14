@@ -26,7 +26,7 @@ export function WorkerCard({ worker }: WorkerCardProps) {
   // Mock data for display until it's added to the data model
   const rating = worker.averageRating || 0;
   const reviews = worker.reviewCount || 0;
-  const avatarUrl = worker.avatarUrl || `https://picsum.photos/seed/${worker.id}/200/200`;
+  const avatarUrl = worker.photoURL || `https://picsum.photos/seed/${worker.id}/200/200`;
   const coverImageUrl = worker.coverImageUrl || `https://picsum.photos/seed/cover-${worker.id}/400/200`;
 
 
