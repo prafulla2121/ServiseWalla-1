@@ -49,6 +49,18 @@
       "imageHint": "technician working"
     },
     {
+      "id": "hero-chef",
+      "description": "A chef meticulously plating a gourmet dish in a professional kitchen.",
+      "imageUrl": "https://images.unsplash.com/photo-1556911220-bff31c812dba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBjaGVmfGVufDB8fHx8MTc2OTMxMjA5Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "professional chef"
+    },
+    {
+      "id": "hero-tailor",
+      "description": "A tailor measuring fabric in a well-lit, classic workshop.",
+      "imageUrl": "https://images.unsplash.com/photo-1596131397999-905186de5a1a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0YWlsb3IlMjB3b3Jrc2hvcHxlbnwwfHx8fDE3NjkzMTIxMzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "tailor workshop"
+    },
+    {
       "id": "cta-1",
       "description": "A person happily using a laptop, representing easy booking.",
       "imageUrl": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjBsYXB0b3B8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
@@ -153,7 +165,7 @@
     {
       "id": "worker-8",
       "description": "Profile picture of a friendly female professional.",
-      "imageUrl": "https://images.unsplash.com/photo-1667498235466-2ff4b9c8cb61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8d29tYW4lMjBmcmllbmRseXxlbnwwfHx8fDE3NjI4NTE2Mzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1667498235466-2ff4b9c8cb61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8d29tYW4lMjBmcmllbmRseXxlbnwwfHx8fDE3NjI4NTE2Mzd8MA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "woman friendly"
     },
     {
