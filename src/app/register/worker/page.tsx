@@ -36,6 +36,8 @@ import { initiateEmailSignUp, useAuth, useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
+import 'react-phone-number-input/style.css'
 
 const registerSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters."),
@@ -45,6 +47,9 @@ const registerSchema = z.object({
     .regex(/[0-9]/, 'Password must contain at least one number.')
     .regex(/[^a-zA-Z0-9]/, 'Password must contain at least one special character.'),
   serviceId: z.string({ required_error: "Please select your primary service." }),
+  phone: z.string().refine(isValidPhoneNumber, { message: 'A valid phone number is required.' }),
+  city: z.string().min(2, "City is required."),
+  state: z.string().min(2, "State is required."),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -61,6 +66,9 @@ export default function RegisterWorkerPage() {
       fullName: "",
       email: "",
       password: "",
+      phone: "",
+      city: "",
+      state: "",
     },
   });
 
@@ -71,12 +79,17 @@ export default function RegisterWorkerPage() {
   }, [user, router]);
 
   const onSubmit: SubmitHandler<RegisterFormValues> = (data) => {
-    initiateEmailSignUp(auth, data.email, data.password, data.fullName, "worker", toast, data.serviceId);
+    initiateEmailSignUp(auth, data.email, data.password, data.fullName, "worker", toast, {
+        serviceId: data.serviceId,
+        phone: data.phone,
+        city: data.city,
+        state: data.state
+    });
   };
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-lg space-y-8">
         <div className="text-center">
             <div className="mx-auto flex justify-center">
               <Logo />
@@ -84,6 +97,9 @@ export default function RegisterWorkerPage() {
             <h2 className="mt-6 text-center font-headline text-3xl font-extrabold text-foreground">
                 Become a Service Professional
             </h2>
+             <CardDescription className="mt-2">
+                Create an account to list your services and connect with customers.
+            </CardDescription>
         </div>
         <Card className="bg-card/80 backdrop-blur-sm">
           <CardContent className="p-6">
@@ -142,6 +158,26 @@ export default function RegisterWorkerPage() {
                     </FormItem>
                   )}
                 />
+                 <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                            <PhoneInput
+                                international
+                                defaultCountry="US"
+                                placeholder="Enter phone number"
+                                value={field.value}
+                                onChange={field.onChange}
+                                className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-lg file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
                 <FormField
                     control={form.control}
                     name="serviceId"
@@ -164,9 +200,37 @@ export default function RegisterWorkerPage() {
                         </FormItem>
                     )}
                 />
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <FormField
+                        control={form.control}
+                        name="city"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>City</FormLabel>
+                            <FormControl>
+                                <Input placeholder="e.g., San Francisco" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="state"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>State / Province</FormLabel>
+                            <FormControl>
+                                <Input placeholder="e.g., California" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
 
                 <div>
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full" size="lg">
                     Create Professional Account
                   </Button>
                 </div>

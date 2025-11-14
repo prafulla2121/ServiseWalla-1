@@ -31,6 +31,13 @@ interface ToastFunction {
     }): void;
 }
 
+interface WorkerExtraData {
+    serviceId: string;
+    phone: string;
+    city: string;
+    state: string;
+}
+
 /** Initiate anonymous sign-in (non-blocking). */
 export function initiateAnonymousSignIn(authInstance: Auth): void {
   signInAnonymously(authInstance).catch((error) => {
@@ -39,7 +46,7 @@ export function initiateAnonymousSignIn(authInstance: Auth): void {
 }
 
 /** Initiate email/password sign-up (non-blocking). */
-export function initiateEmailSignUp(authInstance: Auth, email: string, password: string, fullName: string, role: 'user' | 'worker', toast: ToastFunction, serviceId?: string): void {
+export function initiateEmailSignUp(authInstance: Auth, email: string, password: string, fullName: string, role: 'user' | 'worker', toast: ToastFunction, extraData?: WorkerExtraData): void {
   createUserWithEmailAndPassword(authInstance, email, password)
     .then((userCredential) => {
       // After user is created, update their profile and save to Firestore
@@ -62,7 +69,7 @@ export function initiateEmailSignUp(authInstance: Auth, email: string, password:
             photoURL: user.photoURL,
           };
           setDocumentNonBlocking(userDocRef, userData, { merge: false });
-        } else if (role === 'worker') {
+        } else if (role === 'worker' && extraData) {
           const workerDocRef = doc(getFirestore(authInstance.app), 'workers', user.uid);
           const workerData = {
             id: user.uid,
@@ -70,8 +77,11 @@ export function initiateEmailSignUp(authInstance: Auth, email: string, password:
             lastName,
             email: user.email,
             photoURL: user.photoURL,
-            serviceIds: serviceId ? [serviceId] : [],
+            serviceIds: extraData.serviceId ? [extraData.serviceId] : [],
             bio: '',
+            phone: extraData.phone,
+            city: extraData.city,
+            state: extraData.state,
           };
           setDocumentNonBlocking(workerDocRef, workerData, { merge: false });
         }
