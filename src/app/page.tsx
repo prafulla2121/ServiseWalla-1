@@ -84,12 +84,12 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative w-full overflow-hidden bg-primary/10">
-        <div className="container mx-auto grid min-h-[600px] items-center gap-12 py-16 lg:grid-cols-2">
+      <section className="relative w-full overflow-hidden bg-white">
+        <div className="container mx-auto grid min-h-[700px] items-center gap-12 py-16 lg:grid-cols-2">
           <div className="z-10 text-center lg:text-left">
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
               Find Trusted <br />
-              <span className="text-accent">Local Services</span>
+              <span className="text-primary">Local Services</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground lg:mx-0">
               Connect with skilled professionals in your area. From home repairs
@@ -97,7 +97,7 @@ export default function Home() {
               experts.
             </p>
 
-            <Card className="mt-8 shadow-lg">
+            <Card className="mt-8 shadow-2xl shadow-primary/10 border-none">
               <CardContent className="p-6">
                 <form onSubmit={handleSearch} className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -107,7 +107,7 @@ export default function Home() {
                         onValueChange={setSearchQuery}
                         value={searchQuery}
                       >
-                        <SelectTrigger className="pl-10 h-12">
+                        <SelectTrigger className="pl-10 h-14 text-base">
                           <SelectValue placeholder="What service do you need?" />
                         </SelectTrigger>
                         <SelectContent>
@@ -123,7 +123,7 @@ export default function Home() {
                       <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                       <Input
                         placeholder="Enter your location"
-                        className="h-12 pl-10"
+                        className="h-14 pl-10 text-base"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                       />
@@ -132,11 +132,11 @@ export default function Home() {
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full text-base font-bold"
+                    className="w-full text-base font-bold h-14"
                     disabled={!searchQuery}
                   >
                     <Search className="mr-2" />
-                    Find Services
+                    Find Professionals
                   </Button>
                 </form>
               </CardContent>
@@ -233,7 +233,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="bg-white py-16 sm:py-24">
+      <section className="bg-background py-16 sm:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center">
             <h2 className="font-headline text-3xl font-bold sm:text-4xl">

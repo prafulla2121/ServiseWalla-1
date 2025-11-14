@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins, PT_Sans } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/Header";
@@ -13,16 +13,16 @@ export const metadata: Metadata = {
     "Find and book trusted local service professionals for all your needs. From home repairs to personal care, ServiceWalla connects you with the best workers in your area.",
 };
 
-const poppins = Poppins({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-headline",
+  display: 'swap',
+  variable: "--font-body",
 });
 
-const ptSans = PT_Sans({
+const manrope = Manrope({
   subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-body",
+  display: 'swap',
+  variable: "--font-headline",
 });
 
 export default function RootLayout({
@@ -35,13 +35,13 @@ export default function RootLayout({
        <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body
         className={cn(
           "min-h-screen bg-background font-body antialiased",
-          poppins.variable,
-          ptSans.variable
+          inter.variable,
+          manrope.variable
         )}
       >
         <FirebaseClientProvider>
