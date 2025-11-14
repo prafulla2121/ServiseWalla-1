@@ -12,7 +12,7 @@ import { Button } from '../ui/button';
 import { useState } from 'react';
 import { cancelBookingAsUser } from '@/lib/bookings';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, KeyRound, ChevronRight, Star, Pencil } from 'lucide-react';
+import { Loader2, KeyRound, ChevronRight, Star, Pencil, PlayCircle } from 'lucide-react';
 import Link from 'next/link';
 import {
   Dialog,
@@ -138,11 +138,22 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
                           <p className="text-sm text-muted-foreground mt-1">
                               {format(new Date(booking.bookingDate), "MMMM d, yyyy 'at' h:mm a")}
                           </p>
-                          {booking.completionCode && ['confirmed', 'en-route', 'in-progress'].includes(booking.status) && (
+
+                          {booking.startCode && ['confirmed', 'en-route'].includes(booking.status) && (
+                            <div className="mt-2 flex items-center gap-2 rounded-md border border-dashed border-sky-500 bg-sky-50 p-2 max-w-max">
+                                <PlayCircle className="h-5 w-5 text-sky-600" />
+                                <div>
+                                    <p className="text-xs text-sky-700">Provide this to worker to start:</p>
+                                    <p className="font-mono text-lg font-bold text-sky-800 tracking-widest">{booking.startCode}</p>
+                                </div>
+                            </div>
+                          )}
+
+                          {booking.completionCode && ['in-progress'].includes(booking.status) && (
                               <div className="mt-2 flex items-center gap-2 rounded-md border border-dashed border-amber-500 bg-amber-50 p-2 max-w-max">
                                   <KeyRound className="h-5 w-5 text-amber-600" />
                                   <div>
-                                      <p className="text-xs text-amber-700">Your job completion code:</p>
+                                      <p className="text-xs text-amber-700">Provide this to worker to complete:</p>
                                       <p className="font-mono text-lg font-bold text-amber-800 tracking-widest">{booking.completionCode}</p>
                                   </div>
                               </div>
@@ -190,3 +201,5 @@ export function UserProfile({ user: profileUser, bookings: initialBookings }: Us
     </div>
   );
 }
+
+    

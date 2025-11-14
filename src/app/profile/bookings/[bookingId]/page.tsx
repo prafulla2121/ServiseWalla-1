@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useDoc, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import { Loader2, Calendar, Clock, MapPin, User, Tag, KeyRound, Star, Check, Truck, Play, ChevronRight, MessageSquare } from 'lucide-react';
+import { Loader2, Calendar, Clock, MapPin, User, Tag, KeyRound, Star, Check, Truck, Play, ChevronRight, MessageSquare, PlayCircle } from 'lucide-react';
 import type { Booking, Worker } from '@/lib/types';
 import { services } from '@/lib/data';
 import { format } from 'date-fns';
@@ -121,14 +121,26 @@ export default function BookingDetailsPage() {
                             <div className="flex items-start"><MapPin className="h-5 w-5 mr-3 text-primary flex-shrink-0 mt-1" /> <span>{booking.address}, {booking.city}, {booking.state} {booking.zipCode}</span></div>
                         </div>
 
-                         {/* Completion Code */}
-                         {booking.completionCode && ['confirmed', 'en-route', 'in-progress'].includes(booking.status) && (
-                            <div className="p-4 rounded-lg bg-amber-50 border border-dashed border-amber-500">
-                                <h3 className="font-semibold flex items-center"><KeyRound className="h-5 w-5 mr-2 text-amber-600" /> Completion Code</h3>
-                                <p className="text-sm text-amber-800 mt-2">Provide this code to your professional to mark the job as complete once you are satisfied.</p>
-                                <p className="font-mono text-4xl font-bold text-amber-900 tracking-widest text-center my-4">{booking.completionCode}</p>
-                            </div>
-                        )}
+                         <div className="space-y-4">
+                             {/* Start Code */}
+                            {booking.startCode && ['confirmed', 'en-route'].includes(booking.status) && (
+                                <div className="p-4 rounded-lg bg-sky-50 border border-dashed border-sky-500">
+                                    <h3 className="font-semibold flex items-center"><PlayCircle className="h-5 w-5 mr-2 text-sky-600" /> Start Code</h3>
+                                    <p className="text-sm text-sky-800 mt-2">Provide this code to your professional to start the job.</p>
+                                    <p className="font-mono text-4xl font-bold text-sky-900 tracking-widest text-center my-4">{booking.startCode}</p>
+                                </div>
+                            )}
+
+                             {/* Completion Code */}
+                            {booking.completionCode && ['in-progress'].includes(booking.status) && (
+                                <div className="p-4 rounded-lg bg-amber-50 border border-dashed border-amber-500">
+                                    <h3 className="font-semibold flex items-center"><KeyRound className="h-5 w-5 mr-2 text-amber-600" /> Completion Code</h3>
+                                    <p className="text-sm text-amber-800 mt-2">Provide this code to your professional to mark the job as complete once you are satisfied.</p>
+                                    <p className="font-mono text-4xl font-bold text-amber-900 tracking-widest text-center my-4">{booking.completionCode}</p>
+                                </div>
+                            )}
+                         </div>
+
                     </div>
 
                     {/* Worker Details */}
@@ -155,3 +167,5 @@ export default function BookingDetailsPage() {
         </div>
     )
 }
+
+    

@@ -189,6 +189,10 @@
           "type": "string",
           "description": "Status of the booking (e.g., pending, confirmed, completed, cancelled)."
         },
+        "startCode": {
+          "type": "string",
+          "description": "A 4-digit code generated upon booking confirmation, provided by the customer to the worker to mark the job as started."
+        },
         "completionCode": {
           "type": "string",
           "description": "A 4-digit code generated upon booking confirmation, provided by the customer to the worker to mark the job as complete."

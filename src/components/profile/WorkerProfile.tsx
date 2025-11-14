@@ -11,7 +11,7 @@ import { format } from 'date-fns';
 import { Button } from '../ui/button';
 import { Input } from "@/components/ui/input"
 import { useToast } from '@/hooks/use-toast';
-import { updateBookingStatus, completeBookingWithCode } from '@/lib/bookings';
+import { updateBookingStatus, startBookingWithCode, completeBookingWithCode } from '@/lib/bookings';
 import { EditWorkerProfileForm } from './EditWorkerProfileForm';
 import {
   Dialog,
@@ -33,36 +33,95 @@ interface WorkerProfileProps {
   bookings: Booking[];
 }
 
-interface BookingItemProps {
+interface BookingActionDialogProps {
   booking: Booking;
-  onUpdateStatus: (booking: Booking, status: Booking['status']) => Promise<void>;
-  onCompleteBooking: (booking: Booking, code: string) => Promise<void>;
-  isUpdating: boolean;
+  actionType: 'start' | 'complete';
+  onConfirm: (booking: Booking, code: string) => Promise<void>;
 }
 
-function BookingItem({ booking, onUpdateStatus, onCompleteBooking, isUpdating }: BookingItemProps) {
-  const [isCompleting, setIsCompleting] = useState(false);
-  const [showCompleteDialog, setShowCompleteDialog] = useState(false);
-  const [completionCode, setCompletionCode] = useState('');
-  const { toast } = useToast();
+function BookingActionDialog({ booking, actionType, onConfirm }: BookingActionDialogProps) {
+    const [open, setOpen] = useState(false);
+    const [code, setCode] = useState('');
+    const [isConfirming, setIsConfirming] = useState(false);
+    const { toast } = useToast();
 
-  const handleComplete = async () => {
-    if (completionCode.length !== 4) {
-      toast({ variant: 'destructive', title: "Invalid Code", description: "Please enter the 4-character code." });
-      return;
-    }
-    setIsCompleting(true);
-    try {
-      await onCompleteBooking(booking, completionCode);
-      setShowCompleteDialog(false);
-      toast({ title: "Job Completed!", description: "The booking has been marked as complete." });
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: "Completion Failed", description: error.message || "Could not complete the booking." });
-    } finally {
-      setIsCompleting(false);
-      setCompletionCode('');
-    }
-  };
+    const title = actionType === 'start' ? 'Start Job' : 'Complete Job';
+    const description = actionType === 'start' 
+        ? 'Enter the 4-character start code from the customer.'
+        : 'Enter the 4-character completion code from the customer.';
+    
+    const handleConfirm = async () => {
+        if (code.length !== 4) {
+            toast({ variant: 'destructive', title: "Invalid Code", description: "Please enter the 4-character code." });
+            return;
+        }
+        setIsConfirming(true);
+        try {
+            await onConfirm(booking, code);
+            setOpen(false);
+            toast({ title: `Job ${actionType === 'start' ? 'Started' : 'Completed'}!`, description: `The booking has been updated.` });
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: `${title} Failed`, description: error.message || `Could not ${actionType} the booking.` });
+        } finally {
+            setIsConfirming(false);
+            setCode('');
+        }
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                {actionType === 'start' ? (
+                     <Button size="sm">
+                        <PlayCircle className="mr-2 h-4 w-4" />
+                        Start Job
+                    </Button>
+                ) : (
+                    <Button size="sm">
+                        <Star className="mr-2 h-4 w-4" />
+                        Mark as Completed
+                    </Button>
+                )}
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{title}</DialogTitle>
+                    <DialogDescription>{description}</DialogDescription>
+                </DialogHeader>
+                <div className="py-4 space-y-2">
+                    <label htmlFor="code-input" className="text-sm font-medium">
+                        {actionType === 'start' ? 'Start Code' : 'Completion Code'}
+                    </label>
+                    <Input
+                        id="code-input"
+                        value={code}
+                        onChange={(e) => setCode(e.target.value.toUpperCase())}
+                        maxLength={4}
+                        className="font-mono text-center text-2xl tracking-[0.5em]"
+                        placeholder="_ _ _ _"
+                    />
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+                    <Button onClick={handleConfirm} disabled={isConfirming}>
+                        {isConfirming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Confirm
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+
+function BookingItem({ booking, onUpdateStatus, onStartBooking, onCompleteBooking, isUpdating }: {
+    booking: Booking;
+    onUpdateStatus: (booking: Booking, status: Booking['status']) => Promise<void>;
+    onStartBooking: (booking: Booking, code: string) => Promise<void>;
+    onCompleteBooking: (booking: Booking, code: string) => Promise<void>;
+    isUpdating: boolean;
+}) {
+  const { toast } = useToast();
   
   const getServiceName = (serviceId: string) => {
     return services.find(s => s.id === serviceId)?.name || 'Unknown Service';
@@ -136,16 +195,10 @@ function BookingItem({ booking, onUpdateStatus, onCompleteBooking, isUpdating }:
                         </Button>
                     )}
                     {booking.status === 'en-route' && (
-                        <Button size="sm" onClick={createUpdateHandler('in-progress')}>
-                            <PlayCircle className="mr-2 h-4 w-4" />
-                            Start Service
-                        </Button>
+                        <BookingActionDialog booking={booking} actionType="start" onConfirm={onStartBooking} />
                     )}
                     {booking.status === 'in-progress' && (
-                        <Button size="sm" onClick={() => setShowCompleteDialog(true)}>
-                            <Star className="mr-2 h-4 w-4" />
-                            Mark as Completed
-                        </Button>
+                        <BookingActionDialog booking={booking} actionType="complete" onConfirm={onCompleteBooking} />
                     )}
                     {(booking.status === 'completed' || booking.status === 'cancelled') && (
                         <span className="text-sm text-muted-foreground h-9 flex items-center px-3">No actions</span>
@@ -154,35 +207,6 @@ function BookingItem({ booking, onUpdateStatus, onCompleteBooking, isUpdating }:
              )}
           </div>
         </div>
-
-      <Dialog open={showCompleteDialog} onOpenChange={setShowCompleteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Complete Job</DialogTitle>
-            <DialogDescription>
-              Enter the 4-character completion code provided by the customer to finalize this job.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4 space-y-2">
-              <label htmlFor="completion-code" className="text-sm font-medium">Completion Code</label>
-              <Input
-                id="completion-code"
-                value={completionCode}
-                onChange={(e) => setCompletionCode(e.target.value.toUpperCase())}
-                maxLength={4}
-                className="font-mono text-center text-2xl tracking-[0.5em]"
-                placeholder="_ _ _ _"
-              />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCompleteDialog(false)}>Cancel</Button>
-            <Button onClick={handleComplete} disabled={isCompleting}>
-              {isCompleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Confirm Completion
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
@@ -226,19 +250,24 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
     }
   };
 
+  const handleStartBooking = async (bookingToUpdate: Booking, code: string) => {
+     if (!user || !firestore) return;
+     await startBookingWithCode(firestore, user.uid, bookingToUpdate.id, code);
+     setBookings(currentBookings => 
+          currentBookings.map(b => 
+            b.id === bookingToUpdate.id ? { ...b, status: 'in-progress' } : b
+          )
+      );
+  };
+
   const handleCompleteBooking = async (bookingToUpdate: Booking, code: string) => {
     if (!user || !firestore) return;
-    setUpdatingBookingId(bookingToUpdate.id);
-    try {
-        await completeBookingWithCode(firestore, user.uid, bookingToUpdate.id, code);
-        setBookings(currentBookings => 
-          currentBookings.map(b => 
-            b.id === bookingToUpdate.id ? { ...b, status: 'completed' } : b
-          )
-        );
-    } finally {
-        setUpdatingBookingId(null);
-    }
+    await completeBookingWithCode(firestore, user.uid, bookingToUpdate.id, code);
+    setBookings(currentBookings => 
+      currentBookings.map(b => 
+        b.id === bookingToUpdate.id ? { ...b, status: 'completed' } : b
+      )
+    );
   };
   
   const workerService = services.find(s => profileWorker.serviceIds?.includes(s.id));
@@ -330,7 +359,7 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {pendingBookings.length > 0 ? (
-                        pendingBookings.map(booking => <BookingItem key={booking.id} booking={booking} onUpdateStatus={handleUpdateStatus} onCompleteBooking={handleCompleteBooking} isUpdating={updatingBookingId === booking.id} />)
+                        pendingBookings.map(booking => <BookingItem key={booking.id} booking={booking} onUpdateStatus={handleUpdateStatus} onStartBooking={handleStartBooking} onCompleteBooking={handleCompleteBooking} isUpdating={updatingBookingId === booking.id} />)
                     ) : (
                         <p className="text-muted-foreground text-center py-8">No pending requests.</p>
                     )}
@@ -345,7 +374,7 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {upcomingBookings.length > 0 ? (
-                        upcomingBookings.map(booking => <BookingItem key={booking.id} booking={booking} onUpdateStatus={handleUpdateStatus} onCompleteBooking={handleCompleteBooking} isUpdating={updatingBookingId === booking.id} />)
+                        upcomingBookings.map(booking => <BookingItem key={booking.id} booking={booking} onUpdateStatus={handleUpdateStatus} onStartBooking={handleStartBooking} onCompleteBooking={handleCompleteBooking} isUpdating={updatingBookingId === booking.id} />)
                     ) : (
                         <p className="text-muted-foreground text-center py-8">No upcoming jobs.</p>
                     )}
@@ -360,7 +389,7 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {historicalBookings.length > 0 ? (
-                        historicalBookings.map(booking => <BookingItem key={booking.id} booking={booking} onUpdateStatus={handleUpdateStatus} onCompleteBooking={handleCompleteBooking} isUpdating={updatingBookingId === booking.id} />)
+                        historicalBookings.map(booking => <BookingItem key={booking.id} booking={booking} onUpdateStatus={handleUpdateStatus} onStartBooking={handleStartBooking} onCompleteBooking={handleCompleteBooking} isUpdating={updatingBookingId === booking.id} />)
                     ) : (
                         <p className="text-muted-foreground text-center py-8">No jobs in your history yet.</p>
                     )}
@@ -372,5 +401,7 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
     </div>
   );
 }
+
+    
 
     

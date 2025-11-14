@@ -7,7 +7,7 @@ import { errorEmitter } from "@/firebase/error-emitter";
 /**
  * Generates a random 4-character alphanumeric code.
  */
-function generateCompletionCode(): string {
+function generateCode(): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
     for (let i = 0; i < 4; i++) {
@@ -42,7 +42,8 @@ export async function updateBookingStatus(
 
     // Generate completion code only when moving to 'confirmed' status
     if (status === 'confirmed' && !bookingData.completionCode) {
-        updateData.completionCode = generateCompletionCode();
+        updateData.startCode = generateCode();
+        updateData.completionCode = generateCode();
     }
 
     const batch = writeBatch(firestore);
@@ -66,6 +67,32 @@ export async function updateBookingStatus(
         // Also throw an error to be caught by the component's UI
         throw new Error(`Failed to update booking status. You may not have permission.`);
     });
+}
+
+/**
+ * Verifies the start code and marks the booking as 'in-progress'.
+ */
+export async function startBookingWithCode(
+  firestore: Firestore,
+  workerId: string,
+  bookingId: string,
+  startCode: string
+) {
+  const workerBookingRef = doc(firestore, `workers/${workerId}/bookings`, bookingId);
+  const bookingSnap = await getDoc(workerBookingRef);
+
+  if (!bookingSnap.exists()) {
+    throw new Error("Booking not found.");
+  }
+
+  const bookingData = bookingSnap.data() as Booking;
+
+  if (bookingData.startCode?.toUpperCase() !== startCode.toUpperCase()) {
+    throw new Error("Invalid start code.");
+  }
+  
+  // If code is valid, update status to 'in-progress'
+  return updateBookingStatus(firestore, workerId, bookingId, 'in-progress');
 }
 
 /**
@@ -141,3 +168,5 @@ export async function cancelBookingAsUser(
         throw new Error("Booking not found.");
     }
 }
+
+    

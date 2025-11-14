@@ -2,6 +2,7 @@
 
 
 
+
 export interface Booking {
   id: string;
   userId: string;
@@ -9,6 +10,7 @@ export interface Booking {
   serviceId: string;
   bookingDate: string; // Stored as ISO string
   status: 'pending' | 'confirmed' | 'en-route' | 'in-progress' | 'completed' | 'cancelled';
+  startCode?: string; // 4-digit code to start job
   completionCode?: string; // 4-digit code to confirm completion
   // Customer info
   name: string;
@@ -68,3 +70,5 @@ export interface User {
   zipCode?: string;
   photoURL?: string;
 }
+
+    
