@@ -4,7 +4,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useDoc, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { Loader2, Calendar, Clock, MapPin, User as UserIcon, Tag, KeyRound, Star, Check, Truck, Play, ChevronRight, MessageSquare, PlayCircle, Timer, Mail, Phone, User } from 'lucide-react';
+import { Loader2, Calendar, Clock, MapPin, User as UserIcon, Tag, KeyRound, Star, Check, Truck, Play, ChevronRight, MessageSquare, PlayCircle, Timer, Mail, Phone, User, ArrowLeft } from 'lucide-react';
 import type { Booking, Worker } from '@/lib/types';
 import { services } from '@/lib/data';
 import { format, formatDistanceStrict } from 'date-fns';
@@ -188,13 +188,13 @@ export default function BookingDetailsPage() {
     const handleStartBooking = async (bookingToUpdate: Booking, code: string) => {
          if (!user || !firestore) return;
          await startBookingWithCode(firestore, user.uid, bookingToUpdate.id, code);
-         setBooking(prev => prev ? { ...prev, status: 'in-progress' } : null);
+         setBooking(prev => prev ? { ...prev, status: 'in-progress', jobStartedAt: new Date().toISOString() } : null);
     };
 
     const handleCompleteBooking = async (bookingToUpdate: Booking, code: string) => {
         if (!user || !firestore) return;
         await completeBookingWithCode(firestore, user.uid, bookingToUpdate.id, code);
-        setBooking(prev => prev ? { ...prev, status: 'completed' } : null);
+        setBooking(prev => prev ? { ...prev, status: 'completed', jobCompletedAt: new Date().toISOString() } : null);
     };
 
     const handleCancelBooking = async () => {
@@ -261,6 +261,14 @@ export default function BookingDetailsPage() {
 
     return (
         <div className="container mx-auto max-w-4xl py-12">
+            <div className="mb-6">
+                <Button asChild variant="outline">
+                    <Link href="/profile">
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Dashboard
+                    </Link>
+                </Button>
+            </div>
             <Card>
                 <CardHeader>
                     <div className="flex flex-wrap justify-between items-start gap-4">
@@ -384,11 +392,8 @@ export default function BookingDetailsPage() {
                                     I'm On My Way
                                 </Button>
                             )}
-                             {isWorker && booking.status === 'en-route' && (
-                                <BookingActionDialog booking={booking} actionType="start" onConfirm={handleStartBooking} />
-                            )}
-                             {isWorker && booking.status === 'in-progress' && (
-                                <BookingActionDialog booking={booking} actionType="complete" onConfirm={handleCompleteBooking} />
+                             {isWorker && ['en-route', 'in-progress'].includes(booking.status) && (
+                                <BookingActionDialog booking={booking} actionType={booking.status === 'en-route' ? 'start' : 'complete'} onConfirm={booking.status === 'en-route' ? handleStartBooking : handleCompleteBooking} />
                             )}
                             {!isWorker && booking.status === 'pending' && (
                                 <Button variant="destructive" onClick={handleCancelBooking} disabled={!!updatingStatus}>
@@ -425,3 +430,5 @@ export default function BookingDetailsPage() {
         </div>
     )
 }
+
+    
