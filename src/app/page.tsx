@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -84,20 +85,43 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative w-full overflow-hidden bg-white">
-        <div className="container mx-auto grid min-h-[700px] items-center gap-12 py-16 lg:grid-cols-2">
-          <div className="z-10 text-center lg:text-left">
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
+      <section className="relative w-full overflow-hidden bg-background text-white">
+         <Carousel 
+              opts={{ loop: true }} 
+              plugins={[Autoplay({delay: 5000, stopOnInteraction: true})]}
+              className="absolute inset-0 w-full h-full"
+            >
+              <CarouselContent className='h-full'>
+                {heroImages.map((image, index) => (
+                  <CarouselItem key={image.id} className='h-full'>
+                     <div className="relative h-full w-full">
+                      <Image
+                        src={image.imageUrl}
+                        alt={image.description}
+                        fill
+                        className="object-cover"
+                        priority={index === 0}
+                        data-ai-hint={image.imageHint}
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+        </Carousel>
+        <div className="absolute inset-0 bg-black/60" />
+
+        <div className="relative z-10 container mx-auto flex flex-col items-center justify-center min-h-[700px] text-center py-16">
+            <h1 className="font-headline text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
               Find Trusted <br />
               <span className="text-primary">Local Services</span>
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground lg:mx-0">
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-white/90">
               Connect with skilled professionals in your area. From home repairs
               to cleaning services, we've got you covered with verified, trusted
               experts.
             </p>
 
-            <Card className="mt-8 shadow-2xl shadow-primary/10 border-none">
+            <Card className="mt-8 shadow-2xl w-full max-w-2xl bg-background/20 backdrop-blur-md border-white/20 text-foreground">
               <CardContent className="p-6">
                 <form onSubmit={handleSearch} className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -107,7 +131,7 @@ export default function Home() {
                         onValueChange={setSearchQuery}
                         value={searchQuery}
                       >
-                        <SelectTrigger className="pl-10 h-14 text-base">
+                        <SelectTrigger className="pl-10 h-14 text-base bg-background/80 text-foreground border-white/30">
                           <SelectValue placeholder="What service do you need?" />
                         </SelectTrigger>
                         <SelectContent>
@@ -123,7 +147,7 @@ export default function Home() {
                       <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                       <Input
                         placeholder="Enter your location"
-                        className="h-14 pl-10 text-base"
+                        className="h-14 pl-10 text-base bg-background/80 text-foreground border-white/30 placeholder:text-muted-foreground"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                       />
@@ -142,31 +166,6 @@ export default function Home() {
               </CardContent>
             </Card>
           </div>
-          <div className="relative h-[400px] w-full lg:h-full">
-            <Carousel 
-              opts={{ loop: true }} 
-              plugins={[Autoplay({delay: 10000, stopOnInteraction: true})]}
-              className="w-full h-full"
-            >
-              <CarouselContent>
-                {heroImages.map((image) => (
-                  <CarouselItem key={image.id}>
-                     <div className="relative h-[400px] w-full lg:h-[500px]">
-                      <Image
-                        src={image.imageUrl}
-                        alt={image.description}
-                        fill
-                        className="object-contain"
-                        priority={heroImages.indexOf(image) === 0}
-                        data-ai-hint={image.imageHint}
-                      />
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-            </Carousel>
-          </div>
-        </div>
       </section>
 
       {/* How It Works Section */}
