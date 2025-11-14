@@ -31,6 +31,24 @@
       "imageHint": "painter wall"
     },
     {
+      "id": "hero-barber",
+      "description": "A stylish barber focused on giving a haircut.",
+      "imageUrl": "https://images.unsplash.com/photo-1621605815971-fbc5424f008f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhZXN0aGV0aWMlMjBiYXJiZXJ8ZW58MHx8fHwxNzY5MzExOTcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "aesthetic barber"
+    },
+    {
+      "id": "hero-cleaner",
+      "description": "A professional cleaner tidying up a modern apartment.",
+      "imageUrl": "https://images.unsplash.com/photo-1628102390457-593573a971cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBjbGVhbmVyfGVufDB8fHx8MTc2OTMxMjAxNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "professional cleaner"
+    },
+    {
+      "id": "hero-technician",
+      "description": "An electronics technician working on a circuit board with precision.",
+      "imageUrl": "https://images.unsplash.com/photo-1581092921447-4a0b9a3f7833?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0ZWNobmljaWFuJTIwd29ya2luZ3xlbnwwfHx8fDE3NjkzMTIwNDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "technician working"
+    },
+    {
       "id": "cta-1",
       "description": "A person happily using a laptop, representing easy booking.",
       "imageUrl": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjBsYXB0b3B8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
@@ -123,7 +141,7 @@
     {
       "id": "worker-6",
       "description": "Profile picture of an experienced female worker.",
-      "imageUrl": "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx3b21hbiUyMHByb2Zlc3Npb25hbHxlbnwwfHx8fDE3NjI5NjYwNTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx3b21hbiUyMHByb2Zlc3Npb25hbHxlbnwwfHx8fDE3NjI5NjYwNTJ8MA&ixlibrb-4.1.0&q=80&w=1080",
       "imageHint": "woman professional"
     },
     {
@@ -159,13 +177,13 @@
     {
       "id": "testimonial-4",
       "description": "The handyman assembled all my new furniture perfectly. A lifesaver!",
-      "imageUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwYW1lcmljYW4lMjB3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MzU0MjkzMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwYW1lcmljYW4lMjB3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MzU0MjkzMHww&ixlibrb-4.1.0&q=80&w=1080",
       "imageHint": "emily-rodriguez"
     },
     {
       "id": "contact-hero",
       "description": "An image of an old-fashioned telephone on a desk.",
-      "imageUrl": "https://images.unsplash.com/photo-1587560699334-bea93391dcef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjb250YWN0JTIwdXN8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1587560699334-bea93391dcef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjb250YWN0JTIwdXN8ZW58MHx8fHwxNzYyOTcyNDgxfDA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "contact us"
     }
   ]
