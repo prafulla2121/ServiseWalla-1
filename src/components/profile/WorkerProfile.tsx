@@ -23,7 +23,7 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, CheckCircle, History, Phone, User as UserIcon, MapPin, Truck, PlayCircle, Star, Loader2, Pencil } from 'lucide-react';
+import { Clock, CheckCircle, History, Phone, User as UserIcon, MapPin, Truck, PlayCircle, Star, Loader2, Pencil, Mail } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import Link from 'next/link';
 import { doc, getDoc } from 'firebase/firestore';
@@ -159,7 +159,10 @@ function BookingItem({ booking, onUpdateStatus, onStartBooking, onCompleteBookin
             </p>
             {isConfirmed && (
                 <Card className="mt-3 bg-muted/50">
-                    <CardContent className="p-3 text-sm space-y-2">
+                    <CardHeader className='p-3'>
+                        <CardTitle className='text-base font-medium'>Customer Details</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 pt-0 text-sm space-y-2">
                          <div className="flex items-center text-muted-foreground">
                             <UserIcon className="mr-2 h-4 w-4" />
                              <Link href={`/users/${booking.userId}`} className="text-primary hover:underline font-medium">
@@ -167,12 +170,16 @@ function BookingItem({ booking, onUpdateStatus, onStartBooking, onCompleteBookin
                             </Link>
                         </div>
                         <div className="flex items-center text-muted-foreground">
+                            <Mail className="mr-2 h-4 w-4" />
+                            <a href={`mailto:${booking.email}`} className="hover:text-primary">{booking.email}</a>
+                        </div>
+                        <div className="flex items-center text-muted-foreground">
                             <Phone className="mr-2 h-4 w-4" />
                             <a href={`tel:${booking.phone}`} className="hover:text-primary">{booking.phone}</a>
                         </div>
                         <div className="flex items-start text-muted-foreground">
                             <MapPin className="mr-2 h-4 w-4 mt-0.5 flex-shrink-0" />
-                            <span>{booking.address}, {booking.city}, {booking.state}</span>
+                            <span>{booking.address}, {booking.city}, {booking.state} {booking.zipCode}</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -401,7 +408,3 @@ export function WorkerProfile({ worker: profileWorker, bookings: initialBookings
     </div>
   );
 }
-
-    
-
-    
