@@ -1,0 +1,16 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Match any file in the 'profile_images' directory
+    match /profile_images/{userId}/{allPaths=**} {
+      // Allow read access to anyone
+      allow read: if true;
+      // Allow write access only if the user is authenticated and the userId in the path matches their own uid.
+      // Also, ensure the uploaded file is an image and is less than 5MB.
+      allow write: if request.auth != null && request.auth.uid == userId
+                    && request.resource.size < 5 * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

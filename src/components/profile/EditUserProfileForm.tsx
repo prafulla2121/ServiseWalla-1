@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -20,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { getAuth, updateProfile } from 'firebase/auth';
+import { ImageUpload } from '@/components/ImageUpload';
 
 const profileSchema = z.object({
   firstName: z.string().min(2, 'First name is required.'),
@@ -99,6 +99,25 @@ export function EditUserProfileForm({ user: profileUser, onSave }: EditUserProfi
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-h-[70vh] overflow-y-auto pr-4">
+        
+        <FormField
+          control={form.control}
+          name="photoURL"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Profile Picture</FormLabel>
+              <FormControl>
+                <ImageUpload 
+                  userId={user?.uid} 
+                  currentImageUrl={field.value} 
+                  onUploadComplete={(url) => field.onChange(url)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
             control={form.control}
@@ -127,20 +146,6 @@ export function EditUserProfileForm({ user: profileUser, onSave }: EditUserProfi
             )}
             />
         </div>
-
-        <FormField
-          control={form.control}
-          name="photoURL"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Profile Picture URL</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="https://example.com/your-image.png" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <FormField
           control={form.control}
