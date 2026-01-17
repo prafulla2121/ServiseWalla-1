@@ -88,7 +88,7 @@ export default function Home() {
       <section className="relative w-full overflow-hidden bg-background text-white">
          <Carousel 
               opts={{ loop: true }} 
-              plugins={[Autoplay({delay: 5000, stopOnInteraction: true})]}
+              plugins={[Autoplay({delay: 3000, stopOnInteraction: true})]}
               className="absolute inset-0 w-full h-full"
             >
               <CarouselContent className='h-full'>
