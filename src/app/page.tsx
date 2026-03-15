@@ -80,7 +80,7 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative w-full overflow-hidden bg-background text-white">
+      <section className="relative w-full overflow-hidden bg-background text-white min-h-[700px]">
          <Carousel 
               opts={{ loop: true }} 
               plugins={[Autoplay({delay: 3000, stopOnInteraction: false})]}
@@ -89,8 +89,8 @@ export default function Home() {
               <CarouselContent className='h-full m-0'>
                 {heroImages.length > 0 ? (
                   heroImages.map((image, index) => (
-                    <CarouselItem key={image.id} className='h-full p-0'>
-                       <div className="relative h-full w-full">
+                    <CarouselItem key={image.id} className='h-full p-0 basis-full'>
+                       <div className="relative h-[700px] w-full">
                         <Image
                           src={image.imageUrl}
                           alt={image.description}
@@ -103,8 +103,8 @@ export default function Home() {
                     </CarouselItem>
                   ))
                 ) : (
-                  <CarouselItem className='h-full p-0'>
-                    <div className="relative h-full w-full bg-muted flex items-center justify-center">
+                  <CarouselItem className='h-full p-0 basis-full'>
+                    <div className="relative h-[700px] w-full bg-muted flex items-center justify-center">
                       <p className="text-muted-foreground">Loading stunning visuals...</p>
                     </div>
                   </CarouselItem>

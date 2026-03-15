@@ -1,45 +1,39 @@
 [
   {
     "id": "hero-1",
-    "description": "A ultra-modern, sun-drenched luxury living room with minimalist furniture.",
+    "description": "Ultra-modern, sun-drenched luxury living room with minimalist furniture.",
     "imageUrl": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=1200",
     "imageHint": "modern interior"
+  },
+  {
+    "id": "hero-2",
+    "description": "Professional high-tech smart home installation.",
+    "imageUrl": "https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&q=80&w=1200",
+    "imageHint": "smart home"
+  },
+  {
+    "id": "hero-3",
+    "description": "Professional cleaning service in a futuristic kitchen.",
+    "imageUrl": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=1200",
+    "imageHint": "professional cleaning"
+  },
+  {
+    "id": "hero-4",
+    "description": "Master plumber working on a high-end luxury installation.",
+    "imageUrl": "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&q=80&w=1200",
+    "imageHint": "modern plumbing"
+  },
+  {
+    "id": "hero-5",
+    "description": "Expert gardener designing a sustainable urban landscape.",
+    "imageUrl": "https://images.unsplash.com/photo-1558905619-1735520140cc?auto=format&fit=crop&q=80&w=1200",
+    "imageHint": "urban garden"
   },
   {
     "id": "hero-team",
     "description": "A diverse, smiling team of professional service workers in clean uniforms.",
     "imageUrl": "https://images.unsplash.com/photo-1521791136064-7986c2923216?auto=format&fit=crop&q=80&w=1200",
     "imageHint": "professional team"
-  },
-  {
-    "id": "hero-plumber",
-    "description": "A professional plumber working with high-tech tools in a modern bathroom.",
-    "imageUrl": "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=1200",
-    "imageHint": "plumber service"
-  },
-  {
-    "id": "hero-cleaning",
-    "description": "A professional cleaner using eco-friendly products in a high-end apartment.",
-    "imageUrl": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=1200",
-    "imageHint": "cleaning professional"
-  },
-  {
-    "id": "hero-electrician",
-    "description": "A skilled electrician installing smart home lighting systems.",
-    "imageUrl": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=1200",
-    "imageHint": "electrician repair"
-  },
-  {
-    "id": "hero-chef",
-    "description": "A professional private chef preparing a gourmet meal in a home kitchen.",
-    "imageUrl": "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=1200",
-    "imageHint": "private chef"
-  },
-  {
-    "id": "hero-gardener",
-    "description": "A professional landscaper designing a beautiful modern garden.",
-    "imageUrl": "https://images.unsplash.com/photo-1558221593-490520779d72?auto=format&fit=crop&q=80&w=1200",
-    "imageHint": "gardening service"
   },
   {
     "id": "hero-workers",
