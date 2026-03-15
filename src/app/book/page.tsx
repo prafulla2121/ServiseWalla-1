@@ -3,7 +3,7 @@
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { CalendarIcon, CheckCircle, MapPin, ArrowLeft } from 'lucide-react';
+import { CalendarIcon, CheckCircle, MapPin, ArrowLeft, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -73,6 +73,7 @@ export default function BookPage() {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   const [isBookingConfirmed, setIsBookingConfirmed] = useState(false);
 
   const serviceIdParam = searchParams.get('serviceId');
@@ -194,10 +195,57 @@ export default function BookPage() {
   }, [selectedDate, selectedWorker]);
   
   const handleUseCurrentLocation = () => {
-    toast({
-      title: "Feature Coming Soon!",
-      description: "Automatic location detection will be available in a future update.",
-    });
+    if (!navigator.geolocation) {
+      toast({
+        variant: 'destructive',
+        title: 'Not Supported',
+        description: 'Your browser does not support geolocation.',
+      });
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const data = await response.json();
+          if (data.address) {
+            const { road, house_number, city, town, village, state, postcode } = data.address;
+            const streetAddress = [house_number, road].filter(Boolean).join(' ');
+            
+            form.setValue('address', streetAddress || '');
+            form.setValue('city', city || town || village || '');
+            form.setValue('state', state || '');
+            form.setValue('zipCode', postcode || '');
+            
+            toast({
+              title: 'Location Detected',
+              description: `Successfully found address in ${city || town || village || 'your area'}.`,
+            });
+          }
+        } catch (error) {
+          toast({
+            variant: 'destructive',
+            title: 'Detection Failed',
+            description: 'Could not fetch address details from coordinates.',
+          });
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (error) => {
+        setIsLocating(false);
+        toast({
+          variant: 'destructive',
+          title: 'Access Denied',
+          description: 'Please allow location access in your browser settings.',
+        });
+      }
+    );
   };
 
   return (
@@ -423,10 +471,12 @@ export default function BookPage() {
                             <Button
                               type="button"
                               variant="link"
-                              className="text-sm h-auto p-0"
+                              className="text-sm h-auto p-0 flex items-center"
                               onClick={handleUseCurrentLocation}
+                              disabled={isLocating}
                             >
-                              <MapPin className="mr-1 h-3 w-3" /> Use my location
+                              {isLocating ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <MapPin className="mr-1 h-3 w-3" />} 
+                              {isLocating ? 'Detecting...' : 'Use my current location'}
                             </Button>
                           </div>
                         <FormField

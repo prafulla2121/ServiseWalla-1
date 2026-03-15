@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -12,6 +11,7 @@ import {
   Star,
   ChevronRight,
   MapPin,
+  Loader2,
 } from 'lucide-react';
 import Autoplay from "embla-carousel-autoplay"
 
@@ -40,12 +40,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Home() {
   const heroImages = PlaceHolderImages.filter(img => img.id.startsWith('hero-'));
+  const { toast } = useToast();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
   const router = useRouter();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -53,6 +56,54 @@ export default function Home() {
     if (!searchQuery) return;
     router.push(
       `/workers-list/${searchQuery}?location=${encodeURIComponent(location)}`
+    );
+  };
+
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        variant: 'destructive',
+        title: 'Not Supported',
+        description: 'Your browser does not support geolocation.',
+      });
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const data = await response.json();
+          if (data.address) {
+            const locName = data.address.city || data.address.town || data.address.village || data.address.state || '';
+            setLocation(locName);
+            toast({
+              title: 'Location Found',
+              description: `Found: ${locName}`,
+            });
+          }
+        } catch (error) {
+          toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not detect your location name.',
+          });
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      () => {
+        setIsLocating(false);
+        toast({
+          variant: 'destructive',
+          title: 'Permission Denied',
+          description: 'Please enable location permissions.',
+        });
+      }
     );
   };
 
@@ -150,10 +201,19 @@ export default function Home() {
                       <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                       <Input
                         placeholder="Enter your location"
-                        className="h-14 pl-10 text-base bg-background/80 text-foreground border-white/30 placeholder:text-muted-foreground"
+                        className="h-14 pl-10 pr-12 text-base bg-background/80 text-foreground border-white/30 placeholder:text-muted-foreground"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                       />
+                      <button
+                        type="button"
+                        onClick={handleDetectLocation}
+                        disabled={isLocating}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
+                        title="Detect my location"
+                      >
+                        {isLocating ? <Loader2 className="h-5 w-5 animate-spin" /> : <MapPin className="h-5 w-5" />}
+                      </button>
                     </div>
                   </div>
                   <Button
