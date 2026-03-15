@@ -131,7 +131,7 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative w-full overflow-hidden bg-background text-white min-h-[700px]">
+      <section className="relative w-full overflow-hidden bg-black min-h-[700px]">
          <Carousel 
               opts={{ loop: true }} 
               plugins={[Autoplay({delay: 3000, stopOnInteraction: false})]}
@@ -140,12 +140,13 @@ export default function Home() {
               <CarouselContent className='h-full m-0'>
                 {heroImages.length > 0 ? (
                   heroImages.map((image, index) => (
-                    <CarouselItem key={image.id} className='h-full p-0 basis-full'>
+                    <CarouselItem key={image.id} className='h-full p-0 basis-full relative'>
                        <div className="relative h-[700px] w-full">
                         <Image
                           src={image.imageUrl}
                           alt={image.description}
                           fill
+                          sizes="100vw"
                           className="object-cover"
                           priority={index === 0}
                           data-ai-hint={image.imageHint}
@@ -162,10 +163,10 @@ export default function Home() {
                 )}
               </CarouselContent>
         </Carousel>
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-black/60 z-10 pointer-events-none" />
 
-        <div className="relative z-10 container mx-auto flex flex-col items-center justify-center min-h-[700px] text-center py-16">
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+        <div className="relative z-20 container mx-auto flex flex-col items-center justify-center min-h-[700px] text-center py-16">
+            <h1 className="font-headline text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-white">
               Find Trusted <br />
               <span className="text-primary">Local Services</span>
             </h1>

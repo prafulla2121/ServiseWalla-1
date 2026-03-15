@@ -38,7 +38,7 @@ import { collection, doc, setDoc, query, where } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import type { Worker } from '@/lib/types';
 import { Progress } from '@/components/ui/progress';
@@ -68,13 +68,24 @@ export default function BookPage() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [isBookingConfirmed, setIsBookingConfirmed] = useState(false);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to book a service.",
+      });
+      router.push('/login');
+    }
+  }, [user, isUserLoading, router, toast]);
 
   const serviceIdParam = searchParams.get('serviceId');
   const workerIdParam = searchParams.get('workerId');
@@ -247,6 +258,14 @@ export default function BookPage() {
       }
     );
   };
+
+  if (isUserLoading) {
+    return (
+      <div className="flex h-[calc(100vh-80px)] items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <>
