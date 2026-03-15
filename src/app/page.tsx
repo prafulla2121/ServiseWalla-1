@@ -1,19 +1,16 @@
-
 'use client';
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  ArrowRight,
   Search,
   Book,
   Smile,
   Star,
   ChevronRight,
   MapPin,
-  CheckCircle,
 } from 'lucide-react';
 import Autoplay from "embla-carousel-autoplay"
 
@@ -22,7 +19,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import {
   Carousel,
@@ -45,8 +41,6 @@ import {
 } from '@/components/ui/select';
 
 export default function Home() {
-  const ctaImage = PlaceHolderImages.find((img) => img.id === 'cta-1');
-
   const heroImages = PlaceHolderImages.filter(img => img.id.startsWith('hero-'));
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -88,12 +82,12 @@ export default function Home() {
       <section className="relative w-full overflow-hidden bg-background text-white">
          <Carousel 
               opts={{ loop: true }} 
-              plugins={[Autoplay({delay: 3000, stopOnInteraction: true})]}
+              plugins={[Autoplay({delay: 3000, stopOnInteraction: false})]}
               className="absolute inset-0 w-full h-full"
             >
-              <CarouselContent className='h-full'>
+              <CarouselContent className='h-full m-0'>
                 {heroImages.map((image, index) => (
-                  <CarouselItem key={image.id} className='h-full'>
+                  <CarouselItem key={image.id} className='h-full p-0'>
                      <div className="relative h-full w-full">
                       <Image
                         src={image.imageUrl}
