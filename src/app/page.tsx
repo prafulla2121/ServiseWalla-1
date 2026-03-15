@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -86,20 +87,28 @@ export default function Home() {
               className="absolute inset-0 w-full h-full"
             >
               <CarouselContent className='h-full m-0'>
-                {heroImages.map((image, index) => (
-                  <CarouselItem key={image.id} className='h-full p-0'>
-                     <div className="relative h-full w-full">
-                      <Image
-                        src={image.imageUrl}
-                        alt={image.description}
-                        fill
-                        className="object-cover"
-                        priority={index === 0}
-                        data-ai-hint={image.imageHint}
-                      />
+                {heroImages.length > 0 ? (
+                  heroImages.map((image, index) => (
+                    <CarouselItem key={image.id} className='h-full p-0'>
+                       <div className="relative h-full w-full">
+                        <Image
+                          src={image.imageUrl}
+                          alt={image.description}
+                          fill
+                          className="object-cover"
+                          priority={index === 0}
+                          data-ai-hint={image.imageHint}
+                        />
+                      </div>
+                    </CarouselItem>
+                  ))
+                ) : (
+                  <CarouselItem className='h-full p-0'>
+                    <div className="relative h-full w-full bg-muted flex items-center justify-center">
+                      <p className="text-muted-foreground">Loading stunning visuals...</p>
                     </div>
                   </CarouselItem>
-                ))}
+                )}
               </CarouselContent>
         </Carousel>
         <div className="absolute inset-0 bg-black/60" />

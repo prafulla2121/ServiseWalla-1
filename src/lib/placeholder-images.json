@@ -1,75 +1,51 @@
 [
   {
     "id": "hero-1",
-    "description": "A bright and welcoming living room, suggesting home services.",
-    "imageUrl": "https://images.unsplash.com/photo-1618220179428-22790b461013?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBsaXZpbmclMjByb29tfGVufDB8fHx8MTc2MzU0MjYxOXww&ixlib=rb-4.1.0&q=80&w=1080",
-    "imageHint": "modern living room"
+    "description": "A ultra-modern, sun-drenched luxury living room with minimalist furniture.",
+    "imageUrl": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=1200",
+    "imageHint": "modern interior"
   },
   {
-    "id": "hero-workers",
-    "description": "A diverse group of happy and professional service workers.",
-    "imageUrl": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzZXJ2aWNlJTIwd29ya2VycyUyMHRlYW18ZW58MHx8fHwxNzYzNTQyNjQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    "imageHint": "service workers"
+    "id": "hero-team",
+    "description": "A diverse, smiling team of professional service workers in clean uniforms.",
+    "imageUrl": "https://images.unsplash.com/photo-1521791136064-7986c2923216?auto=format&fit=crop&q=80&w=1200",
+    "imageHint": "professional team"
   },
   {
     "id": "hero-plumber",
-    "description": "A smiling plumber holding a wrench.",
-    "imageUrl": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwbHVtYmVyJTIwc21pbGluZ3xlbnwwfHx8fDE3NjM1NDI2NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    "imageHint": "plumber smiling"
+    "description": "A professional plumber working with high-tech tools in a modern bathroom.",
+    "imageUrl": "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=1200",
+    "imageHint": "plumber service"
+  },
+  {
+    "id": "hero-cleaning",
+    "description": "A professional cleaner using eco-friendly products in a high-end apartment.",
+    "imageUrl": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=1200",
+    "imageHint": "cleaning professional"
+  },
+  {
+    "id": "hero-electrician",
+    "description": "A skilled electrician installing smart home lighting systems.",
+    "imageUrl": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=1200",
+    "imageHint": "electrician repair"
+  },
+  {
+    "id": "hero-chef",
+    "description": "A professional private chef preparing a gourmet meal in a home kitchen.",
+    "imageUrl": "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=1200",
+    "imageHint": "private chef"
   },
   {
     "id": "hero-gardener",
-    "description": "A gardener tending to plants in a sunny garden.",
-    "imageUrl": "https://images.unsplash.com/photo-1558221593-490520779d72?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnYXJkZW5lciUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MzU0MjY4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
-    "imageHint": "gardener portrait"
+    "description": "A professional landscaper designing a beautiful modern garden.",
+    "imageUrl": "https://images.unsplash.com/photo-1558221593-490520779d72?auto=format&fit=crop&q=80&w=1200",
+    "imageHint": "gardening service"
   },
   {
-    "id": "hero-painter",
-    "description": "A painter carefully painting a wall with a roller.",
-    "imageUrl": "https://images.unsplash.com/photo-1528605248644-14dd04022da1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwYWludGVyJTIwd2FsbHxlbnwwfHx8fDE3NjM1NDI3MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    "imageHint": "painter wall"
-  },
-  {
-    "id": "hero-barber",
-    "description": "A stylish barber focused on giving a haircut.",
-    "imageUrl": "https://images.unsplash.com/photo-1621605815971-fbc5424f008f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhZXN0aGV0aWMlMjBiYXJiZXJ8ZW58MHx8fHwxNzY5MzExOTcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    "imageHint": "aesthetic barber"
-  },
-  {
-    "id": "hero-cleaner",
-    "description": "A professional cleaner tidying up a modern apartment.",
-    "imageUrl": "https://images.unsplash.com/photo-1628102390457-593573a971cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBjbGVhbmVyfGVufDB8fHx8MTc2OTMxMjAxNnww&ixlib=rb-4.1.0&q=80&w=1080",
-    "imageHint": "professional cleaner"
-  },
-  {
-    "id": "hero-it-support",
-    "description": "An IT professional fixing a laptop.",
-    "imageUrl": "https://picsum.photos/seed/it-hero/1200/800",
-    "imageHint": "it support"
-  },
-  {
-    "id": "hero-yoga",
-    "description": "A wellness instructor leading a session.",
-    "imageUrl": "https://picsum.photos/seed/yoga-hero/1200/800",
-    "imageHint": "wellness coach"
-  },
-  {
-    "id": "hero-handyman-2",
-    "description": "A handyman working on home repairs.",
-    "imageUrl": "https://picsum.photos/seed/handyman-hero/1200/800",
-    "imageHint": "handyman repair"
-  },
-  {
-    "id": "hero-childcare",
-    "description": "A caring professional looking after a child.",
-    "imageUrl": "https://picsum.photos/seed/nanny-hero/1200/800",
-    "imageHint": "childcare nanny"
-  },
-  {
-    "id": "hero-chef-hero",
-    "description": "A professional chef preparing a meal.",
-    "imageUrl": "https://picsum.photos/seed/chef-hero/1200/800",
-    "imageHint": "professional chef"
+    "id": "hero-workers",
+    "description": "A group of professional service workers standing together confidently.",
+    "imageUrl": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=1200",
+    "imageHint": "service workers"
   },
   {
     "id": "cta-1",
